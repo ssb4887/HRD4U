@@ -1,0 +1,17 @@
+{
+   "setting_info":{
+      "list_title":"참여가능사업 목록",
+      "input_title":"참여가능사업 등록",
+      "deleteList_title":"참여가능사업 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":10,
+      "dset_input_npname": "IDX_VIEW",
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"prtbizIdx",
+      "idx_column":"PRTBIZ_IDX",
+      "design":"default",
+      "use_file":1,
+      "use_new":1
+   }
+}

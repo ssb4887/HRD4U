@@ -1,0 +1,264 @@
+{
+	"item_info":{
+		"items":{
+		    "corpName":{
+				"column_id":"CORP_NAME"
+				, "item_name":"기업명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"bplNo":{
+				"column_id":"BPL_NO"
+				, "item_name":"사업장관리번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"corpPicName":{
+				"column_id":"CORP_PIC_NAME"
+				, "item_name":"기업 담당자"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"type":{
+				"column_id":"TYPE"
+				, "item_name":"구분"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"bscIssueDate":{
+				"column_id":"BSC_ISSUE_DATE"
+				, "item_name":"HRD기초진단"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"qustnrIssueDate":{
+				"column_id":"QUSTNR_ISSUE_DATE"
+				, "item_name":"설문조사"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"bsiscnslIssueDate":{
+				"column_id":"BSISCNSL_ISSUE_DATE"
+				, "item_name":"기업HRD이음컨설팅"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"qustnrStatus":{
+				"column_id":"QUSTNR_STATUS"
+				, "item_name":"설문조사 진행상태"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"bsiscnslStatus":{
+				"column_id":"BSISCNSL_STATUS"
+				, "item_name":"기업HRD이음컨설팅 진행상태"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"bscIdx":{
+				"column_id":"BSC_IDX"
+				, "item_name":"HRD기초진단 일련번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"rsltIdx":{
+				"column_id":"RSLT_IDX"
+				, "item_name":"설문조사 일련번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"bsiscnslIdx":{
+				"column_id":"BSISCNSL_IDX"
+				, "item_name":"기업HRD이음컨설팅 일련번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"doctorIdx":{
+				"column_id":"DOCTOR_IDX"
+				, "item_name":"기업HRD이음컨설팅 담당주치의"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"corpName"
+			, "bplNo"
+			, "corpPicName"
+			, "bscIssueDate"
+			, "qustnrIssueDate"
+			, "bsiscnslIssueDate"
+			, "qustnrStatus"
+			, "bsiscnslStatus"
+		]
+		, "view_order":[
+			"corpName"
+			, "bplNo"
+			, "corpPicName"
+			, "bscIssueDate"
+			, "qustnrIssueDate"
+			, "bsiscnslIssueDate"
+			, "qustnrStatus"
+			, "bsiscnslStatus"
+		]
+		, "write_order":[
+		    "corpName"
+			, "bplNo"
+			, "corpPicName"
+			, "bscIssueDate"
+			, "qustnrIssueDate"
+			, "bsiscnslIssueDate"
+			, "qustnrStatus"
+			, "bsiscnslStatus"
+		]
+		, "writeproc_order":[
+			"corpName"
+			, "bplNo"
+			, "corpPicName"
+			, "bscIssueDate"
+			, "qustnrIssueDate"
+			, "bsiscnslIssueDate"
+			, "qustnrStatus"
+			, "bsiscnslStatus"
+		]
+		, "modify_order":[
+			"corpName"
+			, "bplNo"
+			, "corpPicName"
+			, "bscIssueDate"
+			, "qustnrIssueDate"
+			, "bsiscnslIssueDate"
+			, "qustnrStatus"
+			, "bsiscnslStatus"
+		]
+		, "modifyproc_order":[
+		    "corpName"
+			, "bplNo"
+			, "corpPicName"
+			, "bscIssueDate"
+			, "qustnrIssueDate"
+			, "bsiscnslIssueDate"
+			, "qustnrStatus"
+			, "bsiscnslStatus"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"corpName": {
+						"item_name":"기업명"
+						,"column_id":"CORP_NAME"
+					},
+					"bplNo": {
+						"item_name":"사업장관리번호"
+						,"column_id":"BPL_NO"
+					},
+					"bscIssueDate": {
+						"item_name":"기초진단일"
+						,"column_id":"BSC_ISSUE_DATE"
+						,"format_type" : 15
+					},
+					"insttIdx": {
+						"item_name": "소속기관"
+						,"column_id": "INSTT_IDX"
+						,"format_type": 0
+						,"object_type": 2
+					},
+					"doctorIdx": {
+						"item_name": "주치의"
+						,"column_id": "DOCTOR_IDX"
+						,"format_type": 0
+						,"object_type": 2
+					}
+				}
+			}, "searchForm_order":[
+				 "corpName",
+				 "bplNo",
+				 "bscIssueDate",
+				 "insttIdx",
+				 "doctorIdx"
+			], "search_order":[
+				 "corpName",
+				 "bplNo",
+				 "bscIssueDate",
+				 "insttIdx",
+				 "doctorIdx"
+			]
+		}
+	}
+}

@@ -1,0 +1,16 @@
+{
+   "setting_info":{
+      "list_title":"관할 전문가 목록",
+      "input_title":"관할 전문가 등록",
+      "deleteList_title":"관할 전문가 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"expertIdx",
+      "idx_column":"EXPERT_IDX",
+      "design":"expert",
+      "use_file":1,
+      "use_new":1
+   }
+}

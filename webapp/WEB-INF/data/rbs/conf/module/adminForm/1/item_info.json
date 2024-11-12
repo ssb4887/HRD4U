@@ -1,0 +1,188 @@
+{
+	"item_info":{
+		"items":{
+		    "admsfmNm":{
+				"item_id": "admsfmNm"
+				, "column_id":"ADMSFM_NM"
+				, "item_name":"서식명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "admsfmVer":{
+				"item_id": "admsfmVer"
+				,"column_id":"ADMSFM_VER"
+				, "item_name":"버전"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "prtbizIdx":{
+				"item_id": "prtbizIdx"
+				,"column_id":"PRTBIZ_IDX"
+				, "item_name":"사업 구분"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "jobType":{
+				"item_id": "jobType"
+				, "column_id":"JOB_TYPE"
+				, "item_name":"업무 구분"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "sgntr":{
+				"item_id": "sgntr"
+				, "column_id":"SGNTR"
+				, "item_name":"서명 대상자"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "regiDate":{
+				"item_id": "regiDate"
+				, "column_id":"REGI_DATE"
+				, "item_name":"등록일"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":5
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "regiName":{
+				"item_id": "regiName"
+				,"column_id":"REGI_NAME"
+				, "item_name":"등록자"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+			}, "useYn":{
+				"item_id": "useYn"
+				, "column_id":"USE_YN"
+				, "item_name":"사용여부"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"admsfmNm"
+			, "admsfmVer"
+			, "prtbizIdx"
+			, "jobType"
+			, "sgntr" 
+			, "regiDate"
+			, "regiName"
+		]
+		, "view_order":[
+			"admsfmNm"
+			, "admsfmVer"
+			, "prtbizIdx"
+			, "jobType"
+			, "sgntr"
+			, "regiDate"
+			, "regiName"
+		]
+		, "write_order":[
+			"admsfmNm"
+			, "admsfmVer"
+			, "prtbizIdx"
+			, "jobType"
+			, "sgntr"
+			, "regiDate"
+			, "regiName"
+		]
+		, "writeproc_order":[
+			"admsfmNm"
+			, "admsfmVer"
+			, "prtbizIdx"
+			, "jobType"
+			, "sgntr"
+			, "regiDate"
+			, "regiName"
+		]
+		, "modify_order":[
+			"admsfmNm"
+			, "admsfmVer"
+			, "prtbizIdx"
+			, "jobType"
+			, "sgntr"
+			, "regiDate"
+			, "regiName"
+		]
+		, "modifyproc_order":[
+			"admsfmNm"
+			, "admsfmVer"
+			, "prtbizIdx"
+			, "jobType"
+			, "sgntr"
+			, "regiDate"
+			, "regiName"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"admsfmNm": {
+						"item_name":"서식명"
+						,"column_id":"ADMSFM_NM"
+					},
+					"prtbizIdx": {
+						"item_name":"사업 구분"
+						,"column_id":"PRTBIZ_IDX"
+						, "format_type":0
+						, "object_type":2
+					},
+					"jobType": {
+						"item_name":"업무 구분"
+						,"column_id":"JOB_TYPE"
+						, "format_type":0
+						, "object_type":2
+					},
+					"sgntr": {
+						"item_name":"서명 대상자"
+						,"column_id":"SGNTR"
+						, "format_type":0
+						, "object_type":2
+					}
+				}
+			},
+			 "searchForm_order":[
+				"admsfmNm"
+				,"prtbizIdx"
+				, "jobType"
+				, "sgntr"
+			], "search_order":[
+				"admsfmNm"
+				,"prtbizIdx"
+				, "jobType"
+				, "sgntr"
+			]
+		}
+	} 
+}

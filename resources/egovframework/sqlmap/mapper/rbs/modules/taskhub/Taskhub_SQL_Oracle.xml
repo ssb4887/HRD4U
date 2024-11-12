@@ -1,0 +1,1362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. [KEY_IDX_COLUMN], [<include refid="TASKHUB_TABLE_NAME"/>], [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.taskhub.taskhubMapper">
+	<!-- 테이블명 -->
+	<sql id="TASKHUB_TABLE_NAME"><trim><include refid="rbs.commonMapper.TABLE_PRE_FLAG"/>TASKHUB_${fnIdx}_INFO</trim></sql>
+
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX([KEY_IDX_COLUMN]), 0)</trim> + 1 MAXID
+		FROM 
+		[<include refid="TASKHUB_TABLE_NAME"/>] A
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.[KEY_IDX_COLUMN]), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		[<include refid="TASKHUB_TABLE_NAME"/>] A 
+		WHERE A.[KEY_IDX_COLUMN] LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.[KEY_IDX_COLUMN], [목록에 사용할 컬럼], A.REGI_DATE 
+			<include refid="editAuthListQuery"/>
+			FROM 
+			[<include refid="TASKHUB_TABLE_NAME"/>] A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<choose>
+				<when test="dsetOrderField == null">
+					<bind name="defaultOrderStr" value="'[기본정렬쿼리]'"/>
+				</when>
+				<otherwise>
+					<bind name="defaultOrderStr" value="_parameter.get('dsetOrderField')"/>
+				</otherwise>
+			</choose>
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			[<include refid="TASKHUB_TABLE_NAME"/>] A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*
+			<include refid="editAuthListQuery"/>
+		FROM 
+		[<include refid="TASKHUB_TABLE_NAME"/>] A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			[<include refid="TASKHUB_TABLE_NAME"/>] A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.${columnItem}_SAVED_NAME, A.${columnItem}_ORIGIN_NAME
+			FROM 
+			[<include refid="TASKHUB_TABLE_NAME"/>] A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE <include refid="TASKHUB_TABLE_NAME"/> SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1 
+		WHERE [KEY_IDX_COLUMN] = #{KEY_IDX}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		[<include refid="TASKHUB_TABLE_NAME"/>] A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		A.* 
+		FROM 
+		[<include refid="TASKHUB_TABLE_NAME"/>] A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO [<include refid="TASKHUB_TABLE_NAME"/>] (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE [<include refid="TASKHUB_TABLE_NAME"/>] SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.[KEY_IDX_COLUMN], [목록에 사용할 컬럼], A.LAST_MODI_NAME, A.LAST_MODI_ID, A.REGI_DATE, A.LAST_MODI_DATE 
+			FROM 
+			[<include refid="TASKHUB_TABLE_NAME"/>] A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			ORDER BY [기본정렬쿼리]
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		[<include refid="TASKHUB_TABLE_NAME"/>] A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE [<include refid="TASKHUB_TABLE_NAME"/>] SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE [<include refid="TASKHUB_TABLE_NAME"/>] SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM [<include refid="TASKHUB_TABLE_NAME"/>]  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	<select id="getBSKcorp" parameterType="String" resultType="map">
+		SELECT
+			a.member_idx, a.bpl_no, b.bpl_nm, d.instt_name
+		FROM
+			view_hrd_doctor a, hrd_bsk b, hrd_com_instt d
+		WHERE 
+			a.bpl_no = b.bpl_no
+			AND b.instt_idx = d.instt_idx
+			AND a.member_idx = #{member_idx}
+	</select>
+	<select id="getProgressBSC" parameterType="String" resultType="map">
+		select 
+		  a.bsc_idx, NVL(b.rslt_idx, 0) rslt_idx, NVL(b.status, 0) rslt_status, NVL(c.bsiscnsl_idx, 0) bsiscnsl_idx, NVL(c.status, 0) bsis_status
+		from 
+		  hrd_dgns_bsc a, hrd_dgns_qustnr_rslt b, hrd_dgns_bsiscnsl c
+		where
+		  a.bsc_idx = b.bsc_idx(+)
+		  and b.rslt_idx = c.rslt_idx(+)
+		  and a.bpl_no = #{bpl_no}
+		order by
+		  a.bsc_idx desc, b.rslt_idx desc, c.bsiscnsl_idx desc
+	</select>
+	<select id="getProgressCNSL" parameterType="String" resultType="map">
+		WITH group_data as (
+		  SELECT a.cnsl_idx, a.cnsl_type, a.confm_status cnsl_status, b.reprt_idx, b.confm_status reprt_status, c.CONFM_STATUS sojt_status
+		      , CASE
+		          WHEN A.CNSL_TYPE in ('1','2','3') THEN '맞춤개발 컨설팅'
+		          WHEN A.CNSL_TYPE in ('4','5','6') THEN '심화 컨설팅'
+		        END AS type_group
+		      , ROW_NUMBER() OVER (PARTITION BY CASE
+		                                WHEN A.CNSL_TYPE in ('1','2','3') THEN '맞춤개발 컨설팅'
+		                                WHEN A.CNSL_TYPE in ('4','5','6') THEN '심화 컨설팅'
+		                              END
+		                            ORDER BY a.CNSL_IDX DESC) as rn
+		  FROM hrd_cnsl a, hrd_cnsl_report_confm b, hrd_dgns_sojt_req c
+		  WHERE
+		    a.cnsl_idx = b.cnsl_idx(+)
+		    and a.bsc_idx = c.bsc_idx(+)
+		    and a.isdelete = '0'
+		    and a.cnsl_type is not null
+		    <if test="type_name == 'corpo'">
+		    and a.bpl_no = #{bpl_no})
+		    </if>
+		    <if test="type_name == 'consultant'">
+    		and a.cnsl_idx in (SELECT a.cnsl_idx FROM hrd_cnsl a, hrd_cnsl_team b WHERE a.cnsl_idx = b.cnsl_idx and b.member_idx = #{member_idx}))
+    		</if>
+		SELECT *
+		FROM group_data
+		WHERE rn = 1
+		ORDER BY cnsl_idx
+	</select>
+	<select id="getCntBPL" parameterType="String" resultType="map">
+		SELECT
+  			(SELECT count(1) FROM hrd_cnsl WHERE isdelete = '0' AND bpl_no = #{bpl_no}) cpg_cnt
+  			, (SELECT count(1) FROM hrd_sptj_agrem WHERE isdelete = '0' AND bpl_no = #{bpl_no}) agrem_cnt
+  			, (SELECT count(1) FROM hrd_cnsl_cost WHERE isdelete = '0' AND CNSL_IDX in (SELECT CNSL_IDX FROM hrd_cnsl where BPL_NO = #{bpl_no})) cost_cnt
+  			, (SELECT count(1) FROM hrd_sptj_req WHERE isdelete='0' AND end_date IS null AND bpl_no = #{bpl_no}) sptj_cnt
+		FROM dual
+	</select>
+	<select id="getCntCenter" parameterType="String" resultType="map">
+		SELECT
+		    (SELECT count(1) FROM hrd_cnsl WHERE isdelete='0' AND bpl_no IN (SELECT bpl_no FROM hrd_sptj_agrem WHERE status=55 AND end_date > sysdate AND member_idx = #{member_idx} )) cpg_cnt
+		    , (SELECT count(1) FROM hrd_sptj_agrem WHERE isdelete='0' AND status = 10 AND member_idx = #{member_idx} ) agrem_cnt
+		    , (SELECT count(1) FROM hrd_cnsl_cost WHERE isdelete='0' AND cnsl_idx in (SELECT cnsl_idx FROM hrd_cnsl WHERE BPL_NO in (SELECT bpl_no FROM hrd_sptj_agrem WHERE status=55 AND end_date > sysdate AND member_idx = #{member_idx} ))) cost_cnt
+		    , 0 diary_cnt
+		from dual
+	</select>
+	<select id="getProgressClinic" parameterType="String" resultType="map">
+		SELECT 
+		  a.cli_idx, a.confm_status req_status
+		  , b.plan_idx, b.confm_status plan_status
+		  , d.RESLT_IDX, d.confm_status RESLT_status
+		  , e.SPORT_IDX, e.confm_status sport_status
+		FROM hrd_cli z, hrd_cli_req a, hrd_cli_plan b, hrd_cli_rslt d, hrd_cli_spt e
+		WHERE
+		  z.cli_idx = b.cli_idx(+)
+		  and a.cli_idx = b.cli_idx(+)
+		  and b.cli_idx = d.cli_idx(+)
+		  and b.plan_idx = d.plan_idx(+)
+		  and z.bpl_no = #{bpl_no}
+	</select>
+	<select id="getAgreement" parameterType="String" resultType="map">
+		SELECT NAME, PERIOD, RN
+		FROM (
+		  SELECT b.bpl_nm name, to_char(a.cncls_date, 'yy.mm') || ' - ' || to_char(a.end_date, 'yy.mm') period, rownum rn
+		  FROM hrd_sptj_agrem a, hrd_bsk b
+		  WHERE
+		    a.bpl_no = b.bpl_no AND a.isdelete='0' AND a.status = 55
+		    AND a.member_idx = #{member_idx} 
+		  ORDER BY agrem_idx desc)
+		WHERE rn <![CDATA[<=]]> 3
+		ORDER BY rn desc
+	</select>
+	<select id="getNextIdSptjReq" parameterType="map" resultType="int">
+		SELECT NVL(MAX(req_idx),0)+1 nextId FROM HRD_SPTJ_REQ
+	</select>
+	<insert id="putSptjReq" parameterType="map">
+		INSERT INTO HRD_SPTJ_REQ(REQ_IDX, BPL_NO, MEMBER_IDX, CN, REQ_DATE, END_DATE, STATUS, REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES(#{nextId}, #{bpl_no}, #{member_idx}, #{cn}, sysdate, sysdate+7, 10, #{regi_idx}, #{regi_id}, #{regi_name}, sysdate, #{regi_ip})
+	</insert>
+	<select id="getSptjReqListDoc" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT 
+				a.CN, a.status, to_char(a.req_date,'YYYY-MM-DD') req_date, to_char(a.end_date,'YYYY-MM-DD') end_date, b.bpl_nm, a.req_idx, a.bpl_no
+				, DECODE(a.approver_idx, #{member_idx}, 'Y', 'N') own
+				, row_number() over(order by a.req_idx desc) as rn 
+				, count(*) over() as total_count 
+				, CEIL((count(*) over())/10) as total_page 
+			FROM 
+				hrd_sptj_req a, hrd_bsk b
+			WHERE
+				1=1
+				AND a.bpl_no = b.bpl_no
+				AND a.end_date <![CDATA[>=]]> sysdate
+				<if test="type_name == 'instt'">
+				and trim(b.bpl_zip) in (SELECT a.zip FROM inf_zip_group a, hrd_com_doctor b WHERE a.instt_idx = b.instt_idx and b.apply_yn = 'Y' and b.member_idx = #{member_idx})
+				</if>
+			)
+		WHERE rn between (#{page}-1)*10 and #{page}*10
+	</select>
+	<select id="getSptjReqListBPL" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT
+				a.cn, a.status, to_char(a.req_date, 'YYYY-MM-DD') req_Date, to_char(a.end_date, 'YYYY-MM-DD') end_date, b.bpl_no, b.bpl_nm, a.req_idx, a.approver_idx
+				, c.member_name doctor_name
+				, row_number() over(order by a.req_idx desc) as rn
+				, count(*) over() as total_count
+				, CEIL((count(*) over())/10) as total_page
+			FROM
+				hrd_sptj_req a, hrd_bsk b, view_hrd_doctor c
+			WHERE
+				a.bpl_no = b.bpl_no
+				AND a.approver_idx = c.member_idx(+)
+				AND a.end_date <![CDATA[>=]]> sysdate
+				AND a.bpl_no = #{bpl_no}
+  			)
+		WHERE rn between (#{page}-1)*10+1 and #{page}*10
+	</select>
+	<update id="updateStpjReq" parameterType="map">
+		UPDATE HRD_SPTJ_REQ
+		SET
+			STATUS = #{status}
+			, APPROVER_IDX = #{member_idx}
+			, LAST_MODI_IDX = #{member_idx}
+			, LAST_MODI_ID = #{member_id}
+			, LAST_MODI_NAME = #{member_name}
+			, LAST_MODI_DATE = sysdate
+			, LAST_MODI_IP = #{member_ip}
+		WHERE
+			REQ_IDX = #{req_idx}
+	</update>
+		<update id="finishStpjReq" parameterType="map">
+		UPDATE HRD_SPTJ_REQ
+		SET
+			STATUS = #{status}
+			, LAST_MODI_IDX = #{member_idx}
+			, LAST_MODI_ID = #{member_id}
+			, LAST_MODI_NAME = #{member_name}
+			, LAST_MODI_DATE = sysdate
+			, LAST_MODI_IP = #{member_ip}
+		WHERE
+			REQ_IDX = #{req_idx}
+	</update>
+	<select id="getMemberIdx" parameterType="String" resultType="String">
+		SELECT member_idx FROM hrd_sptj_req WHERE req_idx = #{req_idx}
+	</select>
+	<select id="getLoginMap" parameterType="String" resultType="rbs.egovframework.LoginVO">
+		SELECT * FROM VIEW_HRD_DOCTOR
+		WHERE member_idx = (SELECT member_idx FROM hrd_sptj_req WHERE req_idx = #{req_idx})
+	</select>
+	<select id="getSptjReqList" parameterType="map" resultType="map">
+		SELECT 
+			*
+		FROM (
+			SELECT
+				a.cn, a.status, to_char(a.req_date, 'YYYY-MM-DD') req_Date, to_char(a.end_date, 'YYYY-MM-DD') end_date, b.bpl_no, b.bpl_nm, a.req_idx, a.approver_idx
+				, c.member_name doctor_name
+				, DECODE(a.approver_idx, #{member_idx}, 'Y', 'N') own
+				, row_number() over (order by a.req_idx desc) as rn
+				, count(*) over() as total_count
+				, CEIL((count(*) over())/10) total_page
+			FROM
+				hrd_sptj_req a, hrd_bsk b, view_hrd_doctor c
+			WHERE
+				a.bpl_no = b.bpl_no 
+				AND a.approver_idx = c.member_idx(+)
+				AND a.end_date <![CDATA[>=]]> sysdate
+				<if test="bplNm != null and bplNm != ''">
+					AND b.bpl_nm like '%' || #{bplNm} || '%'
+				</if>
+				<if test="bplNo != null and bplNo != ''">
+					AND b.bpl_no = #{bplNo}
+				</if>
+				<if test="cn != null and cn != ''">
+					AND a.cn like '%' || #{cn} || '%'
+				</if>
+				<if test="status != null and status != ''">
+					AND a.status = #{status}
+				</if>
+			) a
+		<if test="useExcel == null">	
+		WHERE rn between (#{page}-1)*10+1 and (#{page})*10
+		</if>
+	</select>
+	<select id="getProgramHRDBsis" parameterType="map" resultType="map">
+		WITH BASE as (
+			SELECT 
+				a.bpl_no, a.corp_name, a.instt_name , a.bsc_idx, TO_CHAR(a.issue_date,'YYYY-MM-DD') bsc_issue, 1 bsc_status , b.rslt_idx, TO_CHAR(b.issue_date, 'YYYY-MM-DD') rslt_issue
+				, b.status rslt_status, trunc(sysdate)-trunc(b.regi_date) rslt_passed 
+				, c.bsiscnsl_idx, TO_CHAR(c.issue_date, 'YYYY-MM-DD') bsis_issue, c.status bsis_status, trunc(sysdate)-trunc(c.regi_date) bsis_passed 
+				, count(*) over() as total_count , CEIL((count(*) over())/10) as total_page 
+			FROM 
+				hrd_dgns_bsc a, hrd_dgns_qustnr_rslt b, hrd_dgns_bsiscnsl c 
+			WHERE 
+				a.issue_date is not null 
+				AND a.bsc_idx = b.bsc_idx(+) 
+				AND b.rslt_idx = c.rslt_idx(+) 
+   				<if test="bpl_no != null and bpl_no.trim().length() != 0">
+				AND a.bpl_no = #{bpl_no}
+				</if>
+				<if test="instt_name != null and instt_name.trim().length() != 0">
+				AND a.instt_name like '%' || #{instt_name} || '%'
+				</if>
+				<if test="corp_name != null and corp_name.trim().length() != 0">
+				AND a.corp_name like '%' || #{corp_name} || '%'
+				</if>
+				<if test="passed != null and passed.trim().length() != 0">
+				AND ((c.status = 0 and (trunc(sysdate)-trunc(c.regi_date) >= #{passed})) or (b.status = 0 and (trunc(sysdate)-trunc(b.regi_date) >= #{passed})))
+				</if>
+				<if test="status != null and status == 'bsc'">
+				AND a.bsc_idx is not null
+				</if>
+				<if test="status != null and status == 'rslt'">
+				AND b.rslt_idx is not null and b.status = 0
+				</if>
+				<if test="status != null and status == 'bsis'">
+				AND c.bsiscnsl_idx is not null and c.status = 0
+				</if>
+				<if test="type_name == 'center'">
+				AND a.bpl_no in (SELECT bpl_no FROM hrd_sptj_agrem where member_idx = #{member_idx})
+				</if>
+				<if test="type_name == 'instt'">
+				AND a.bpl_no in (select a.bpl_no from hrd_dgns_bsc a, hrd_bsk b, inf_zip_group c, hrd_com_doctor d where a.bpl_no = b.bpl_no and trim(b.bpl_zip) = c.zip and c.instt_idx = d.instt_idx and d.member_idx = #{member_idx} group by a.bpl_no)
+				</if>
+				<if test="type_name == 'headquarter'">
+				AND 1=1
+				</if>
+		),
+		T_PASSED as (
+			SELECT 
+				a.*, decode(a.bsis_status, 0, bsis_passed, rslt_status, 0, rslt_passed) passed 
+			FROM BASE a
+		),
+		T_LAST as (
+			SELECT a.*, ROW_NUMBER() OVER(ORDER BY NVL(passed,0) desc) as rn
+			FROM T_PASSED a
+		)
+		SELECT
+			bpl_no, corp_name, instt_name
+			, bsc_idx, bsc_issue, bsc_status 
+			, rslt_idx, rslt_issue, rslt_status, rslt_passed 
+			, bsiscnsl_idx, bsis_issue, bsis_status, bsis_passed
+			, passed 
+			, rn, total_count, total_page 
+		FROM T_LAST
+		<if test="useExcel == null">
+		WHERE
+  			rn between (#{page}-1)*10+1 and #{page}*10
+  		</if>
+	</select>
+	<select id="getProgramSojt" parameterType="map" resultType="map">
+		WITH T_CONFM as (
+			SELECT * FROM (
+				SELECT 
+					sojt_idx, confm_status, regi_date
+				FROM hrd_dgns_sojt_req_confm)
+			PIVOT (MAX(regi_date) for confm_status in (10 as apply, 30 as accept, 50 as pre_approval, 55 as final_approval))), 
+		BASE as (
+			SELECT
+				a.sojt_idx, a.bpl_no, a.bsc_idx, c.corp_name, c.instt_name, b.apply, b.accept, b.pre_approval, b.final_approval
+				, CASE 
+					WHEN final_approval is not null THEN final_approval
+					WHEN pre_approval is not null THEN pre_approval
+					WHEN accept is not null THEN accept
+					WHEN apply is not null THEN apply
+				END as last_date
+				, CASE 
+					WHEN final_approval is not null THEN 'final_approval'
+					WHEN pre_approval is not null THEN 'pre_approval'
+					WHEN accept is not null THEN 'accept'
+					WHEN apply is not null THEN 'apply'
+				END as now
+			FROM
+				hrd_dgns_sojt_req a, T_CONFM b, hrd_dgns_bsc c
+			WHERE
+				a.sojt_idx = b.sojt_idx
+				and a.bsc_idx = c.bsc_idx
+				<if test="type_name == 'instt'">
+				and a.bsc_idx in (select a.bsc_idx from hrd_dgns_bsc a, hrd_com_doctor b where a.instt_idx = b.instt_idx and b.member_idx = #{member_idx})
+				</if>
+				
+				
+		),
+		T_PASSED as (
+			SELECT
+				sojt_idx, bpl_no, bsc_idx, corp_name, instt_name
+				, to_char(apply, 'YYYY-MM-dd') apply
+				, to_char(accept, 'YYYY-MM-dd') accept
+				, to_char(pre_approval, 'YYYY-MM-dd') pre_approval
+				, to_char(final_approval, 'YYYY-MM-dd') final_approval
+				, now, last_date, trunc(sysdate) - trunc(last_date) passed
+				, ROW_NUMBER() OVER(ORDER BY sojt_idx desc) as rn
+				, COUNT(*) OVER() as TOTAL_COUNT
+				, CEIL((COUNT(*) OVER())/10) as TOTAL_PAGE
+			FROM BASE
+			WHERE 1=1
+				<if test="bpl_no != null and bpl_no.trim().length() != 0">
+				AND bpl_no = #{bpl_no}
+				</if>
+				<if test="instt_name != null and instt_name.trim().length() != 0">
+				AND instt_name like '%' || #{instt_name} || '%'
+				</if>
+				<if test="corp_name != null and corp_name.trim().length() != 0">
+				AND corp_name like '%' || #{corp_name} || '%'
+				</if>
+				<if test="passed != null and passed.trim().length() != 0">
+				AND (trunc(sysdate) - trunc(last_date) >= #{passed})
+				</if>
+			)
+		SELECT
+			sojt_idx, bpl_no, bsc_idx, corp_name, instt_name, now, passed, apply, accept, pre_approval, final_approval, rn, total_count, total_page
+		FROM T_PASSED
+		<if test="useExcel == null">
+		WHERE rn between (#{page}-1)*10 and #{page}*10
+		</if>
+	</select>
+	<select id="getProgramCnsl" parameterType="map" resultType="map">
+		WITH CNSL as (
+			select * 
+			from (
+				select
+					a.cnsl_idx, b.confm_status, b.regi_date
+					, row_number() over(partition by b.cnsl_idx order by b.confm_idx desc) as rni
+				from hrd_cnsl a, hrd_cnsl_confm b
+				where a.cnsl_idx = b.cnsl_idx)
+			where rni = 1)
+		, REPORT as (
+			SELECT *
+			FROM (
+				SELECT
+					a.cnsl_idx, a.reprt_idx, b.confm_status, b.regi_date
+					, row_number() over(partition by b.reprt_idx order by b.confm_idx desc) as rni
+				FROM hrd_cnsl_report a, hrd_cnsl_report_confm b
+				where a.reprt_idx = b.reprt_idx)
+			WHERE rni = 1)
+		, COST as (
+			SELECT *
+			FROM (
+				SELECT
+					a.cnsl_idx, b.ct_idx, b.confm_status, b.regi_date
+					, row_number() over(partition by b.ct_idx order by b.confm_idx desc) as rni
+				FROM hrd_cnsl_cost a, hrd_cnsl_cost_confm b
+				where a.ct_idx = b.ct_idx)
+			WHERE rni = 1)
+		, T_BASE as (
+			SELECT 
+				a.cnsl_idx, a.bsc_idx, a.bpl_no, e.corp_name, e.instt_name, a.cnsl_type
+				, b.confm_status cnsl_status, to_char(b.regi_date, 'YYYY-mm-dd') cnsl_date, decode(b.confm_status, 55, 0, 70, 0, 72, 0, 75, 0, 80, 0, trunc(sysdate)-trunc(b.regi_date)) cnsl_passed
+				, c.confm_status report_status, to_char(c.regi_date, 'YYYY-mm-dd') report_date, decode(c.confm_status, 55, 0, 70, 0, 72, 0, 75, 0, 80, 0, trunc(sysdate)-trunc(c.regi_date)) report_passed
+				, d.confm_status cost_status, to_char(d.regi_date, 'YYYY-mm-dd') cost_date, decode(d.confm_status, 55, 0, 70, 0, 72, 0, 75, 0, 80, 0, trunc(sysdate)-trunc(d.regi_date)) cost_passed
+				, row_number() over(order by a.cnsl_idx desc) as rn
+				, count(*) over() as TOTAL_COUNT
+				, CEIL((COUNT(*) OVER())/10) as TOTAL_PAGE
+			from
+				hrd_cnsl a, CNSL b, REPORT c, COST d, hrd_dgns_bsc e
+			where a.cnsl_idx = b.cnsl_idx
+				and a.bsc_idx = e.bsc_idx
+				and a.cnsl_idx = c.cnsl_idx(+)
+				and a.cnsl_idx = d.cnsl_idx(+)
+				<if test="cnslType == 'custom'">
+				and a.cnsl_type in (1, 2, 3)
+				</if>
+				<if test="cnslType == 'cnsl'">
+				and a.cnsl_type in (4, 5, 6)
+				</if>
+				<if test="type_name == 'instt'">
+				and a.bpl_no in (SELECT a.bpl_no FROM HRD_DGNS_BSC a, HRD_COM_DOCTOR b WHERE a.instt_idx = b.instt_idx and b.member_idx = #{member_idx})
+				</if>
+				<if test="type_name == 'consultant'">
+				and a.cnsl_idx in (SELECT a.cnsl_idx FROM hrd_cnsl a, hrd_cnsl_team b WHERE a.cnsl_idx = b.cnsl_idx and a.confm_status in ('55', '70', '72', '75') and b.member_idx = #{member_idx})
+				</if>
+				<if test="bpl_no != null and bpl_no.trim().length() != 0">
+				AND a.bpl_no = #{bpl_no}
+				</if>
+				<if test="instt_name != null and instt_name.trim().length() != 0">
+				AND e.instt_name like '%' || #{instt_name} || '%'
+				</if>
+				<if test="corp_name != null and corp_name.trim().length() != 0">
+				AND e.corp_name like '%' || #{corp_name} || '%'
+				</if>
+				<if test="passed != null and passed.trim().length() != 0">
+				AND (
+						(decode(b.confm_status, 55, 0, 72, 0, trunc(sysdate)-trunc(b.regi_date)) <![CDATA[>=]]> #{passed}) 
+						or (decode(c.confm_status, 55, 0, 72, 0, trunc(sysdate)-trunc(c.regi_date)) <![CDATA[>=]]> #{passed}) 
+						or (decode(d.confm_status, 55, 0, 72, 0, trunc(sysdate)-trunc(d.regi_date)) <![CDATA[>=]]> #{passed})
+					)
+				</if>
+				)
+		SELECT
+			a.*
+			, CASE WHEN a.cost_status is not null then cost_passed
+				WHEN a.report_status is not null then report_passed
+				WHEN a.cnsl_status is not null then cnsl_passed
+				ELSE null
+			END as PASSED
+			, CASE WHEN a.cost_status is not null then 'cost'
+				WHEN a.report_status is not null then 'report'
+				WHEN a.cnsl_status is not null then 'cnsl'
+				ELSE null
+			END as NOW
+		FROM T_BASE a
+		<if test="useExcel == null">
+		WHERE rn between (#{page}-1)*10 and #{page}*10
+		</if>
+	</select>
+	<select id="getProgramClinic" parameterType="map" resultType="map">
+		WITH REQ AS (
+			SELECT *
+			FROM (
+				SELECT
+					a.cli_idx, a.req_idx, b.confm_status, b.regi_date
+					, row_number() over(partition by b.req_idx order by b.confm_idx desc) as rni
+				FROM
+					hrd_cli_req a, hrd_cli_req_confm b
+				WHERE
+					a.req_idx = b.req_idx)
+			WHERE rni = 1)
+		, BASE as (
+			SELECT
+				a.cli_idx, a.bpl_no, c.bpl_nm corp_name, d.instt_name
+				, b.confm_status, TO_CHAR(b.regi_date, 'YYYY-MM-DD') regi_date
+				, DECODE(b.confm_status, 55, to_char(sysdate, 'yyyy')-substr(a.valid_start_date,1,4)+1, null) year
+				, DECODE(b.confm_status, 55, null, trunc(sysdate) - trunc(b.regi_date)) passed
+				, ROW_NUMBER() OVER(ORDER BY a.cli_idx desc) as rn
+				, COUNT(*) OVER() as TOTAL_COUNT
+				, CEIL((COUNT(*) OVER())/10) as TOTAL_PAGE
+			FROM
+				hrd_cli a, REQ b, hrd_bsk c, hrd_com_instt d
+			WHERE
+				a.cli_idx = b.cli_idx
+				AND a.bpl_no = c.bpl_no
+				AND a.cli_instt_idx = d.instt_idx
+				<if test="type_name == 'instt'">
+				AND a.cli_instt_idx = (SELECT instt_idx FROM hrd_com_doctor WHERE member_idx = #{member_idx} and apply_yn='Y')
+				</if>
+				<if test="bpl_no != null and bpl_no.trim().length() != 0">
+				AND a.bpl_no = #{bpl_no}
+				</if>
+				<if test="instt_name != null and instt_name.trim().length() != 0">
+				AND d.instt_name like '%' || #{instt_name} || '%'
+				</if>
+				<if test="corp_name != null and corp_name.trim().length() != 0">
+				AND c.bpl_nm like '%' || #{corp_name} || '%'
+				</if>
+				<if test="passed != null and passed.trim().length() != 0">
+				AND (b.confm_status != 55 and (trunc(sysdate)-trunc(b.regi_date) >= #{passed})
+				</if>
+		)
+		SELECT 
+			a.*
+		FROM base a
+		<if test="useExcel == null">
+		WHERE a.rn BETWEEN (#{page}-1)*10 AND #{page}*10
+		</if>
+	</select>
+	<select id="getCorpCenters" resultType="map">
+		SELECT 
+			A.PRVTCNTR_IDX, A.PRVTCNTR_NAME NAME, SUBSTR(a.addr, 1, instr(a.addr, ' ') -1) LOCATION, B.mobile_phone, NVL(C.chrgr_nm, '-') chrgr_nm, NVL(E.cnt, 0) CNT 
+			, ROW_NUMBER() OVER(order by a.prvtcntr_no) as rn 
+		FROM 
+			HRD_COM_PRVTCNTR A, view_hrd_doctor B, hrdportal.thr_corp C
+			, (select a.member_idx, count(a.member_idx) cnt from hrd_sptj_agrem a, hrd_com_prvtcntr b where a.member_idx = b.member_idx and a.status = 55 group by a.member_idx) E 
+		WHERE 
+			A.member_idx = B.member_idx 
+			AND B.corp_num = C.corp_num(+)
+			AND A.SPNT_SE = 1 
+			AND a.member_idx = E.member_idx(+)
+	</select>
+	<select id="getCorpCorps" parameterType="map" resultType="map">
+		WITH HRD_BSIS AS (
+		    SELECT a.bpl_no, a.bsc_idx, b.rslt_idx
+		      , CASE WHEN c.bsiscnsl_idx is not null THEN '기초컨설팅'
+		        WHEN b.rslt_idx is not null THEN '설문조사'
+		        WHEN a.bsc_idx is not null THEN '기초진단'
+		      END as stage
+		      , CASE WHEN c.bsiscnsl_idx is not null THEN c.bsiscnsl_idx
+		        WHEN b.rslt_idx is not null THEN b.rslt_idx
+		        WHEN a.bsc_idx is not null THEN a.bsc_idx
+		      END as idx
+		      , CASE WHEN c.bsiscnsl_idx is not null THEN c.status
+		        WHEN b.rslt_idx is not null THEN b.status
+		        WHEN a.bsc_idx is not null THEN NVL(a.status,1)
+		      END as status
+		      , CASE WHEN c.bsiscnsl_idx is not null and c.status = 0 THEN trunc(sysdate) -trunc(c.regi_date)
+		        WHEN b.rslt_idx is not null and b.status = 0 THEN trunc(sysdate) -trunc(b.regi_date)
+		        WHEN a.bsc_idx is not null THEN null
+		      END as delay
+		      , ROW_NUMBER() OVER(order by a.bsc_idx desc) as rn
+		    FROM HRD_DGNS_BSC a, HRD_DGNS_QUSTNR_RSLT b, HRD_DGNS_BSISCNSL c
+		      , (select bpl_no, max(bsc_idx) bsc_idx from hrd_dgns_bsc group by bpl_no) z
+		    WHERE
+		      z.bsc_idx = a.bsc_idx and a.bsc_idx = b.bsc_idx(+) AND b.rslt_idx = c.rslt_idx(+))
+		, CNSL_ADV AS (
+		    SELECT a.bpl_no
+		      , CASE
+		        WHEN c.ct_idx is not null THEN '비용 처리'
+		        WHEN b.reprt_idx is not null THEN '보고서 작성'
+		        WHEN a.cnsl_idx is not null THEN '컨설팅 신청'
+		      END as stage
+		      , CASE
+		        WHEN c.ct_idx is not null THEN c.ct_idx
+		        WHEN b.reprt_idx is not null THEN b.reprt_idx
+		        WHEN a.cnsl_idx is not null THEN a.cnsl_idx
+		      END as idx
+		      , CASE
+		        WHEN c.ct_idx is not null THEN c.confm_status
+		        WHEN b.reprt_idx is not null THEN b.confm_status
+		        WHEN a.cnsl_idx is not null THEN a.confm_status
+		      END as status
+		      , CASE
+		        WHEN c.ct_idx is not null and c.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date))
+		        WHEN b.reprt_idx is not null and b.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date))
+		        WHEN a.cnsl_idx is not null and a.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(a.last_modi_date, a.regi_date))
+		      END as delay
+		      , ROW_NUMBER() OVER(ORDER BY a.cnsl_idx desc) as rn
+		    FROM hrd_cnsl a, hrd_cnsl_report b, hrd_cnsl_cost c
+		      , (select bpl_no, max(cnsl_idx) cnsl_idx from hrd_cnsl group by bpl_no) z
+		    WHERE
+		      z.cnsl_idx = a.cnsl_idx and a.cnsl_idx = b.cnsl_idx(+) AND a.cnsl_idx = c.cnsl_idx(+) AND a.cnsl_type in (4,5,6))
+		, CNSL_CUSTOM AS (
+		    SELECT a.bpl_no
+		      , CASE
+		        WHEN c.ct_idx is not null THEN '비용 처리'
+		        WHEN b.reprt_idx is not null THEN '보고서 작성'
+		        WHEN a.cnsl_idx is not null THEN '컨설팅 신청'
+		      END as stage
+		      , CASE
+		        WHEN c.ct_idx is not null THEN c.ct_idx
+		        WHEN b.reprt_idx is not null THEN b.reprt_idx
+		        WHEN a.cnsl_idx is not null THEN a.cnsl_idx
+		      END as idx
+		      , CASE
+		        WHEN c.ct_idx is not null THEN c.confm_status
+		        WHEN b.reprt_idx is not null THEN b.confm_status
+		        WHEN a.cnsl_idx is not null THEN a.confm_status
+		      END as status
+		      , CASE
+		        WHEN c.ct_idx is not null and c.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date))
+		        WHEN b.reprt_idx is not null and b.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date))
+		        WHEN a.cnsl_idx is not null and a.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(a.last_modi_date, a.regi_date))
+		      END as delay
+		      , ROW_NUMBER() OVER(ORDER BY a.cnsl_idx desc) as rn
+		    FROM hrd_cnsl a, hrd_cnsl_report b, hrd_cnsl_cost c
+		      , (select bpl_no, max(cnsl_idx) cnsl_idx from hrd_cnsl group by bpl_no) z
+		    WHERE
+		      z.cnsl_idx = a.cnsl_idx and a.cnsl_idx = b.cnsl_idx(+) AND a.cnsl_idx = c.cnsl_idx(+) AND a.cnsl_type in (1,2,3))
+		, CLINIC AS (
+		    SELECT a.bpl_no
+		    , CASE WHEN f.cli_idx is not null THEN '비용 처리'
+		      WHEN e.cli_idx is not null then '활동 결과'
+		      WHEN c.cli_idx is not null then '계획 수립'
+		      WHEN b.cli_idx is not null then '클리닉 신청'
+		    END as stage
+		    , a.cli_idx idx
+		    , CASE WHEN f.cli_idx is not null then f.SPORT_IDX 
+		      WHEN e.cli_idx is not null then e.reslt_idx 
+		      WHEN c.cli_idx is not null then c.plan_idx 
+		      WHEN b.cli_idx is not null then b.req_idx 
+		    END as status_idx
+		    , CASE WHEN f.cli_idx is not null then f.confm_status
+		      WHEN e.cli_idx is not null then e.confm_status
+		      WHEN c.cli_idx is not null then c.confm_status
+		      WHEN b.cli_idx is not null then b.confm_status
+		    END as status
+		    , CASE WHEN f.cli_idx is not null and f.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(f.last_modi_date, f.regi_date))
+		      WHEN e.cli_idx is not null and e.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(e.last_modi_date, e.regi_date))
+		      WHEN c.cli_idx is not null and c.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date))
+		      WHEN b.cli_idx is not null and b.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date))
+		    END as delay
+		    , ROW_NUMBER() OVER(ORDER BY a.cli_idx desc) as rn
+		    FROM
+		      HRD_CLI a, HRD_CLI_REQ b, HRD_CLI_PLAN c, HRD_CLI_RSLT e
+		      , (select * FROM (select b.*, ROW_NUMBER() OVER(PARTITION BY a.bpl_no ORDER BY b.SPORT_IDX desc) rn FROM HRD_CLI a, HRD_CLI_SPT b WHERE a.cli_idx = b.cli_idx) WHERE rn = 1) f
+		      , (select bpl_no, max(cli_idx) cli_idx from hrd_cli group by bpl_no) z
+		    WHERE
+		      z.cli_idx = a.cli_idx
+		      AND a.cli_idx = b.cli_idx(+)
+		      AND a.cli_idx = c.cli_idx(+)
+		      AND a.cli_idx = e.cli_idx(+)
+		      AND a.cli_idx = f.cli_idx(+))
+		, SOJT AS (
+		    SELECT
+		      DECODE(a.confm_status, 10, 'S-OJT 신청', 30, 'S-OJT 접수', 50, '1차 승인', 55, '최종승인', 'S-OJT') sojt_stage
+		      , a.sojt_idx, a.confm_status sojt_status, b.bpl_no, trunc(sysdate)-trunc(nvl(nvl(a.last_modi_date, a.regi_date), sysdate)) sojt_delay
+		      , row_number() over(order by a.sojt_idx desc) as rn
+		    FROM hrd_dgns_sojt_req a, hrd_dgns_bsc b
+		      , (select b.bpl_no, max(a.sojt_idx) sojt_idx from hrd_dgns_sojt_req a, hrd_dgns_bsc b where a.bsc_idx = b.bsc_idx group by b.bpl_no) z
+		    WHERE z.sojt_idx = a.sojt_idx
+		      AND a.bsc_idx = b.bsc_idx
+		      AND a.isdelete = '0')
+		SELECT * FROM (
+		SELECT 
+		  z.bpl_no, z.bpl_nm, y.instt_name, DECODE(l.cnt, null, 'X', 'O') member_yn, a.bsc_idx, a.rslt_idx
+		  , a.stage bsis_stage, a.status bsis_status, a.delay bsis_delay, a.idx bsis_idx
+		  , b.stage adv_stage, b.status adv_status, b.delay adv_delay, b.idx adv_idx
+		  , c.stage custom_stage, c.status custom_status, c.delay custom_delay, c.idx custom_idx
+		  , d.stage clinic_stage, d.status clinic_status, d.delay clinic_delay, d.idx clinic_idx, d.status_idx clinic_status_idx
+		  , e.sojt_stage, e.sojt_status, e.sojt_delay, e.sojt_idx
+		  , ROW_NUMBER() OVER(ORDER BY z.bpl_no desc) as rn
+		  , COUNT(*) OVER() as TOTAL_COUNT
+		  , CEIL((COUNT(*) OVER())/10) as TOTAL_PAGE
+		FROM
+		  hrd_bsk z, HRD_BSIS a, CNSL_ADV b, CNSL_CUSTOM c, CLINIC d, SOJT e, hrd_com_instt y
+		  , (select b.bpl_no from hrd_dgns_sojt_req a, hrd_dgns_bsc b where a.bsc_idx = b.bsc_idx group by b.bpl_no
+		      union
+		      select bpl_no cli_idx from hrd_cli group by bpl_no
+		      union
+		      select bpl_no from hrd_cnsl group by bpl_no
+		      union
+		      select bpl_no from hrd_dgns_bsc group by bpl_no) k
+		  , (select bpl_no, count(member_idx) cnt from view_hrd_doctor group by bpl_no) l
+		WHERE
+		  k.bpl_no = z.bpl_no
+		  and k.bpl_no = a.bpl_no(+)
+		  and k.bpl_no = b.bpl_no(+)
+		  and k.bpl_no = c.bpl_no(+)
+		  and k.bpl_no = d.bpl_no(+)
+		  and k.bpl_no = e.bpl_no(+)
+		  and z.instt_idx = y.instt_idx
+		  and k.bpl_no = l.bpl_no(+)
+		  and (a.bpl_no is not null or b.bpl_no is not null or c.bpl_no is not null or d.bpl_no is not null or e.bpl_no is not null)
+		  <if test="bpl_no != null and bpl_no.trim().length() != 0">
+			AND z.bpl_no = #{bpl_no}
+      	  </if>
+      	  <if test="type_name == 'headquarter' and instt_name != null and instt_name.trim().length() != 0">
+      	  	AND y.instt_name = #{instt_name}
+      	  </if>
+      	  <if test="type_name == 'instt'">
+      	  	AND y.instt_idx = #{instt_idx}
+      	  </if>
+      	  <if test="corp_name != null and corp_name.trim().length() != 0">
+      	  	AND z.bpl_nm like '%' || #{corp_name} || '%'
+      	  </if>
+      	  <if test="passed != null and passed.trim().length() != 0">
+      	  AND ((a.delay >= #{passed}) or (b.delay >= #{passed}) or (c.delay >= #{passed}) or (d.delay >= #{passed}) or (e.sojt_delay >= #{passed}))
+      	  </if>
+      	  <if test="member_yn != null and member_yn == 'Y'.toString()">
+      	  AND l.cnt is not null
+      	  </if>
+      	  <if test="member_yn != null and member_yn == 'N'.toString()">
+      	  AND l.cnt is null
+      	  </if>
+      	  <if test="hashtag != null and hashtag.trim().length() != 0">
+      	  AND k.bpl_no IN (select a.bpl_no from hrd_bsk_hashtag a, hrd_bsk_hashtag_code b where a.hashtag_cd = b.hashtag_cd and b.hashtag_nm = #{hashtag})
+      	  </if>
+		) 
+		<if test="useExcel == null">
+			WHERE rn between (#{page}-1)*10 +1 and #{page}*10
+		</if>
+	</select>
+	<select id="getHashtagsOutOfBplNos" resultType="map">
+		SELECT a.bpl_no, listagg(b.hashtag_nm, '*') within group(order by b.hashtag_cd) hashtags
+		FROM
+			hrd_bsk_hashtag a, hrd_bsk_hashtag_code b
+		WHERE
+			a.hashtag_cd = b.hashtag_cd
+			AND a.bpl_no IN
+			<foreach item="item" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		GROUP BY a.bpl_no
+	</select>
+	<select id="costInquiry" parameterType="map" resultType="map">
+		SELECT * FROM (
+			SELECT 
+				bpl_no, bpl_nm, program, confm_status
+				, ROW_NUMBER() OVER(order by regi_date desc) as rn
+				, COUNT(*) OVER() as TOTAL_COUNT
+				, CEIL((COUNT(*) OVER())/10) as TOTAL_PAGE
+			<if test="type_name == 'corpo'"> 
+			FROM (
+				SELECT a.bpl_no, c.bpl_nm, '클리닉' program, b.confm_status, b.regi_date FROM hrd_cli a, hrd_cli_spt b, hrd_bsk c WHERE a.cli_idx = b.cli_idx and a.bpl_no = c.bpl_no
+				<if test="sign_yn != null and sign_yn.trim().length() != 0 and sign_yn == 'N'.toString()">
+					AND B.CONFM_STATUS != 55
+				</if>
+	  			UNION ALL
+	  			SELECT a.bpl_no, c.bpl_nm, '맞춤개발 컨설팅' program, b.confm_status, b.regi_date FROM hrd_cnsl a, hrd_cnsl_cost b, hrd_bsk c WHERE a.cnsl_idx = b.cnsl_idx and a.bpl_no = c.bpl_no
+				<if test="sign_yn != null and sign_yn.trim().length() != 0 and sign_yn == 'N'.toString()">
+					AND B.CONFM_STATUS != 55
+				</if>
+	  			)
+			WHERE BPL_NO = #{bpl_no}
+			</if>
+			<if test="type_name == 'consultant'">
+			FROM (
+				SELECT c.bpl_no, c.corp_name bpl_nm, '맞춤개발 컨설팅' program, d.confm_status, d.regi_date
+				FROM hrd_cnsl a, hrd_cnsl_team b, hrd_dgns_bsc c, hrd_cnsl_cost d
+				WHERE a.cnsl_idx = b.cnsl_idx
+					AND a.cnsl_idx = d.cnsl_idx
+					AND a.bsc_idx = c.bsc_idx
+					AND b.member_idx = #{member_idx})
+			</if>
+			<if test="type_name == 'center'"> 
+			FROM (
+				SELECT a.bpl_no, c.bpl_nm, '클리닉' program, b.confm_status, b.regi_date FROM hrd_cli a, hrd_cli_spt b, hrd_bsk c 
+					WHERE a.cli_idx = b.cli_idx and a.bpl_no = c.bpl_no
+	  			UNION ALL
+	  			SELECT a.bpl_no, c.bpl_nm, '맞춤개발 컨설팅' program, b.confm_status, b.regi_date FROM hrd_cnsl a, hrd_cnsl_cost b, hrd_bsk c 
+	  			WHERE a.cnsl_idx = b.cnsl_idx and a.bpl_no = c.bpl_no
+	  		)
+			WHERE BPL_NO in (SELECT bpl_no FROM hrd_sptj_agrem where member_idx = #{member_idx} AND isdelete='0' AND to_char(regi_date, 'YYYY') = to_char(sysdate, 'YYYY'))
+			</if>
+			<if test="type_name == 'instt'">
+			FROM (
+				SELECT a.bpl_no, c.bpl_nm, '클리닉' program, b.confm_status, b.regi_date, c.bpl_zip
+					FROM hrd_cli a, hrd_cli_spt b, hrd_bsk c 
+					WHERE a.cli_idx = b.cli_idx and a.bpl_no = c.bpl_no
+	  			UNION ALL
+	  			SELECT a.bpl_no, c.bpl_nm, '맞춤개발 컨설팅' program, b.confm_status, b.regi_date, c.bpl_zip 
+	  				FROM hrd_cnsl a, hrd_cnsl_cost b, hrd_bsk c 
+	  				WHERE a.cnsl_idx = b.cnsl_idx and a.bpl_no = c.bpl_no
+	  		)
+			WHERE BPL_ZIP in (select zip FROM INF_ZIP_GROUP A, HRD_COM_DOCTOR B WHERE A.instt_idx = b.instt_idx and b.member_idx = #{member_idx})
+			</if>
+			<if test="type_name == 'headquarter'">
+			FROM (
+				SELECT a.bpl_no, c.bpl_nm, '클리닉' program, b.confm_status, b.regi_date FROM hrd_cli a, hrd_cli_spt b, hrd_bsk c 
+					WHERE a.cli_idx = b.cli_idx and a.bpl_no = c.bpl_no
+	  			UNION ALL
+	  			SELECT a.bpl_no, c.bpl_nm, '맞춤개발 컨설팅' program, b.confm_status, b.regi_date FROM hrd_cnsl a, hrd_cnsl_cost b, hrd_bsk c 
+	  			WHERE a.cnsl_idx = b.cnsl_idx and a.bpl_no = c.bpl_no
+	  		)
+	  		WHERE 1=1
+			</if>
+			<if test="bpl_nm != null and bpl_nm.trim().length() != 0">
+      	  	AND bpl_nm like '%' || #{bpl_nm} || '%'
+      	  	</if>
+      	  	<if test="bplNo != null and bplNo.trim().length() != 0">
+      	  	AND bpl_no = #{bplNo}
+      	  	</if>
+		) 
+		<if test="useExcel == null">
+		WHERE rn BETWEEN (#{page}-1)*10 and #{page}*10
+		</if>
+	</select>
+	<select id="getDoctorIntel" parameterType="map" resultType="map">
+		SELECT a.INSTT_IDX, b.INSTT_NAME
+		FROM HRD_COM_DOCTOR a, HRD_COM_INSTT b
+		WHERE 
+			a.instt_idx = b.instt_idx
+			and a.isdelete='0'
+			AND a.member_idx = #{member_idx}
+		ORDER BY a.last_modi_date desc
+	</select>
+	<select id="dashboardList" parameterType="map" resultType="map">
+		SELECT 
+			*
+		FROM (
+			select a.bpl_no, NVL(DECODE(c.status, 0, 1), 0) status , 'bsis' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_dgns_qustnr_rslt b, hrd_dgns_bsiscnsl c  where a.bsc_idx = b.bsc_idx and b.rslt_idx = c.rslt_idx and c.status != 1
+			union all
+			select a.bpl_no, NVL(DECODE(b.status, 0, 1), 0) status , 'rslt' program, b.regi_date, TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date)) passed from hrd_dgns_bsc a, hrd_dgns_qustnr_rslt b where a.bsc_idx = b.bsc_idx and b.status != 1
+			union all
+			select a.bpl_no, DECODE(c.confm_status, 55, 0, 1) status, 'cnsl' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b, hrd_cnsl_report c where a.bsc_idx = b.bsc_idx and b.cnsl_idx = c.cnsl_idx(+) and b.cnsl_type in (4,5,6) and (c.confm_status != 55 or c.confm_status is null)
+			union all
+			select a.bpl_no, DECODE(c.confm_status, 55, 0, 1) status, 'custom' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b, hrd_cnsl_report c where a.bsc_idx = b.bsc_idx and b.cnsl_idx = c.cnsl_idx(+) and b.cnsl_type in (1,2,3) and (c.confm_status != 55 or c.confm_status is null)
+			union all
+			select a.bpl_no, DECODE(b.confm_status, 55, 0, 1) status, 'sojt' program, b.regi_date, TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date)) passed from hrd_dgns_bsc a, hrd_dgns_sojt_req b where a.bsc_idx = b.bsc_idx and (b.confm_status != 55 or b.confm_status is null)
+			union all
+			select a.bpl_no, DECODE(b.confm_status, 55, 0, 1) status, 'clinic' program, a.regi_date, TRUNC(sysdate)- TRUNC(NVL(a.last_modi_date, a.regi_date)) passed from hrd_cli a, hrd_cli_spt b where a.cli_idx = b.cli_idx(+) and b.confm_status != 55
+			union all
+			select bpl_no, DECODE(status, 55, 0, 1) status, 'agreement' program, regi_date, TRUNC(sysdate)- TRUNC(NVL(last_modi_date, regi_date)) from hrd_sptj_agrem where isdelete ='0' and status != 55
+			union all
+			select a.bpl_no, DECODE(c.confm_status, 55, 0, 1) status, 'custom_cost' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b, hrd_cnsl_cost c where a.bsc_idx = b.bsc_idx and b.cnsl_idx = c.cnsl_idx and b.cnsl_type in (1,2,3) and (c.confm_status != 55 or c.confm_status is null)
+			union all
+			select a.bpl_no, DECODE(b.confm_status, 55, 0, 1) status, 'clinic_cost' program, a.regi_date, TRUNC(sysdate)- TRUNC(NVL(a.last_modi_date,a.regi_date)) passed from hrd_cli a, hrd_cli_spt b where a.isdelete='0' and b.isdelete='0' and a.cli_idx = b.cli_idx and b.confm_status != 55
+			union all
+			select bpl_no, DECODE(status, 55, 0, 1) status, 'support' program, regi_date, TRUNC(sysdate)- TRUNC(NVL(last_modi_date, regi_date)) passed from hrd_sptj_req where isdelete='0' and status != 55 and end_date >= sysdate
+			)
+		WHERE
+			1=1 
+			<if test="type_name == 'instt'">
+			and bpl_no in (select a.bpl_no from hrd_dgns_bsc a, hrd_bsk b, inf_zip_group c, hrd_com_doctor d where a.bpl_no = b.bpl_no and trim(b.bpl_zip) = c.zip and c.instt_idx = d.instt_idx and d.member_idx = #{member_idx} group by a.bpl_no)
+			and to_char(regi_date, 'yyyy') = to_char(sysdate, 'yyyy')
+			</if>
+			<if test="type_name == 'headquarter'">
+			and to_char(regi_date, 'yyyy') = to_char(sysdate, 'yyyy')
+			</if>
+			<if test="type_name == 'corpo'">
+			and bpl_no = ${bpl_no} and to_char(regi_date, 'yyyy') = to_char(sysdate, 'yyyy')
+			</if>
+			<if test="type_name == 'center'">
+			and bpl_no in (SELECT bpl_no FROM hrd_sptj_agrem where member_idx = #{member_idx})
+			and to_char(regi_date, 'yyyy') = to_char(sysdate, 'yyyy')
+			</if>
+	</select>
+	<select id="dashboardCount" parameterType="map" resultType="map">
+		SELECT 
+			NVL(SUM(case when program in ('rslt', 'bsis', 'cnsl_apply', 'custom_apply', 'cnsl', 'custom', 'sojt', 'clinic') then 1 end), 0) as program_cnt
+			, NVL(SUM(case when program = 'agreement' then 1 end), 0) as agrem_cnt
+			, NVL(SUM(case when program in ('custom_cost', 'clinic_cost') then 1 end), 0) as cost_cnt
+			, NVL(SUM(case when program in ('support') then 1 end), 0) as support_cnt
+			, NVL(SUM(case when 
+				passed >= 5
+				<if test="type_name == 'instt'">
+				AND program in ('rslt', 'bsis', 'cnsl_apply', 'custom_apply', 'cnsl', 'custom', 'sojt', 'clinic', 'custom_cost', 'clinic_cost', 'support')
+				</if> 
+				<if test="type_name == 'headquarter'">
+				AND program in ('rslt', 'bsis', 'cnsl_apply', 'custom_apply', 'cnsl', 'custom', 'sojt', 'clinic', 'custom_cost', 'clinic_cost', 'support')
+				</if>
+				<if test="type_name == 'center'">
+				AND program in ('agreement')
+				</if>
+				<if test="type_name == 'consultant'">
+				AND program in ('cnsl', 'custom')
+				</if>
+				<if test="type_name == 'corpo'">
+				AND program in ('rslt', 'bsis', 'cnsl_apply', 'custom_apply', 'cnsl', 'custom', 'sojt', 'clinic', 'custom_cost', 'clinic_cost', 'support', 'agreement')
+				</if>
+			then 1 end), 0) passed_cnt	
+		FROM (
+			select a.bpl_no, 'bsis' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_dgns_qustnr_rslt b, hrd_dgns_bsiscnsl c  where a.bsc_idx = b.bsc_idx and b.rslt_idx = c.rslt_idx and c.status = 0
+			union all
+			select a.bpl_no, 'rslt' program, b.regi_date, TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date)) passed from hrd_dgns_bsc a, hrd_dgns_qustnr_rslt b where a.bsc_idx = b.bsc_idx and b.status = 0
+			union all
+			select a.bpl_no, 'cnsl_apply' program, b.regi_date, TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b where a.bsc_idx = b.bsc_idx and b.cnsl_type in (4,5,6) and (b.confm_status in ('7', '10', '30', '50', '70', '75'))
+			union all
+			select a.bpl_no, 'custom_apply' program, b.regi_date, TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b where a.bsc_idx = b.bsc_idx and b.cnsl_type in (1,2,3) and (b.confm_status in ('7', '10', '30', '50', '70', '75'))
+			union all
+			select a.bpl_no, 'cnsl' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b, hrd_cnsl_report c where a.bsc_idx = b.bsc_idx and b.cnsl_idx = c.cnsl_idx(+) and b.cnsl_type in (4,5,6) and (c.confm_status in ('7', '10', '30', '50', '70', '75'))
+			union all
+			select a.bpl_no, 'custom' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b, hrd_cnsl_report c where a.bsc_idx = b.bsc_idx and b.cnsl_idx = c.cnsl_idx(+) and b.cnsl_type in (1,2,3) and (c.confm_status in ('7', '10', '30', '50', '70', '75'))
+			union all
+			select a.bpl_no, 'sojt' program, b.regi_date, TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date)) passed from hrd_dgns_bsc a, hrd_dgns_sojt_req b where a.bsc_idx = b.bsc_idx and (b.confm_status != 55 or b.confm_status in ('7', '10', '30', '50', '70', '75'))
+			union all
+			select a.bpl_no, 'clinic' program, b.regi_date, TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date)) passed from hrd_cli a, hrd_cli_req b where a.cli_idx = b.cli_idx and b.confm_status in ('7', '10', '30', '50', '70', '75')
+			union all
+			select bpl_no, 'agreement' program, regi_date, TRUNC(sysdate)- TRUNC(NVL(last_modi_date, regi_date)) passed from hrd_sptj_agrem where isdelete ='0' and status in ('7', '10', '30', '50', '70', '75')
+			union all
+			select a.bpl_no, 'custom_cost' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b, hrd_cnsl_cost c where a.bsc_idx = b.bsc_idx and b.cnsl_idx = c.cnsl_idx and b.cnsl_type in (1,2,3) and (c.confm_status in ('7', '10', '30', '50', '70', '75'))
+			union all
+			select a.bpl_no, 'clinic_cost' program, b.regi_date, TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date,b.regi_date)) passed from hrd_cli a, hrd_cli_spt b where a.isdelete='0' and b.isdelete='0' and a.cli_idx = b.cli_idx and b.confm_status in ('7', '10', '30', '50', '70', '75')
+			union all
+			select bpl_no, 'support' program, regi_date, TRUNC(sysdate)- TRUNC(NVL(last_modi_date, regi_date)) passed from hrd_sptj_req where isdelete='0' and status in ('7', '10', '30', '50', '70', '75') and end_date >= sysdate
+			)
+		WHERE
+			1=1 
+			<if test="type_name == 'instt'">
+			and bpl_no in (select a.bpl_no from hrd_dgns_bsc a, hrd_bsk b, inf_zip_group c, hrd_com_doctor d where a.bpl_no = b.bpl_no and trim(b.bpl_zip) = c.zip and c.instt_idx = d.instt_idx and d.member_idx = #{member_idx} and d.apply_yn = 'Y' group by a.bpl_no)
+			</if>
+			<if test="type_name == 'corpo'">
+			and bpl_no = ${bpl_no}
+			</if>
+			<if test="type_name == 'center'">
+			and bpl_no in (SELECT bpl_no FROM hrd_sptj_agrem where member_idx = #{member_idx})
+			</if>
+</select>
+	<select id="dashboardCountConsultant" parameterType="map" resultType="map">
+		SELECT 
+			NVL(SUM(case when program in ('cnsl', 'custom') then 1 end), 0) as program_cnt
+			, NVL(SUM(case when program in ('custom_cost') then 1 end), 0) as cost_cnt
+			, NVL(SUM(case when passed >= 5 then 1 end), 0) passed_cnt
+		FROM (
+			select a.bpl_no, 'cnsl' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b, hrd_cnsl_report c where a.bsc_idx = b.bsc_idx and b.cnsl_idx = c.cnsl_idx(+) and b.cnsl_type in (4,5,6) and (c.confm_status in ('7', '10', '30', '50', '70', '75'))
+			union all
+			select a.bpl_no, 'custom' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b, hrd_cnsl_report c where a.bsc_idx = b.bsc_idx and b.cnsl_idx = c.cnsl_idx(+) and b.cnsl_type in (1,2,3) and (c.confm_status in ('7', '10', '30', '50', '70', '75'))
+			union all
+			select a.bpl_no, 'custom_cost' program, c.regi_date, TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date)) passed from hrd_dgns_bsc a, hrd_cnsl b, hrd_cnsl_cost c where a.bsc_idx = b.bsc_idx and b.cnsl_idx = c.cnsl_idx and b.cnsl_type in (1,2,3) and (c.confm_status in ('7', '10', '30', '50', '70', '75'))
+			)
+		WHERE
+			bpl_no in (SELECT a.bpl_no from hrd_cnsl a, hrd_cnsl_team b, hrd_cnsl_report c WHERE a.cnsl_idx = b.cnsl_idx AND c.confm_status != 55 AND b.member_idx = #{member_idx} GROUP BY a.bpl_no)
+	</select>
+	<select id="getBoard" parameterType="map" resultType="map">
+		SELECT * 
+		FROM (
+			SELECT a.*
+				, ROW_NUMBER() OVER(PARTITION BY board_name ORDER BY IDX DESC) as rn
+			FROM (
+				select
+					brd_idx idx, subject, unistr('docBoard') board_name, unistr('-') instt_name, to_char(regi_date, 'mm.dd') board_date 
+				from rbs_board_8_info where pnt_idx = brd_idx
+				union all
+				select 
+					a.edc_idx idx, a.edc_name subject, a.edc_cd board_name, b.instt_name, to_char(edc_start_date, 'MM.DD') || '~' || to_char(edc_end_date, 'MM.DD') board_date 
+				FROM hrd_sptj_edc a, hrd_com_instt b WHERE a.instt_idx = b.instt_idx
+				union all
+				SELECT
+					brd_idx idx, a.subject, unistr('notice') board_name, b.option_name instt_name, to_char(a.regi_date, 'mm.dd') board_date
+				FROM rbs_board_1_info a, rbs_option_info_lang b WHERE a.isdelete='0' and b.master_code = 'SIDO2' and b.locale_lang='ko' and a.location = b.option_code
+				union all
+				SELECT
+					brd_idx idx, a.subject, unistr('hrdroom') board_name, unistr('') instt_name, to_char(a.regi_date, 'mm.dd') board_date
+				FROM rbs_board_2_info a WHERE a.isdelete='0'
+				union all
+				select
+					req_idx idx, b.bpl_nm || ' 요청 ' || DECODE(status, 55, '완료', '진행중') as subject, unistr('sptj') board_name, unistr('-') instt_name, to_char(a.regi_date, 'mm.dd')
+				FROM hrd_sptj_req a, hrd_bsk b WHERE a.bpl_no = b.bpl_no
+				union all
+				SELECT
+  					brd_idx idx, a.subject, unistr('consult') board_name, c.instt_name, to_char(a.regi_date, 'mm.dd') board_date
+				FROM rbs_board_9_info a, hrd_com_doctor b, hrd_com_instt c 
+				WHERE a.regi_idx = b.member_idx(+)  AND b.instt_idx = c.instt_idx(+)  AND b.apply_yn = 'Y'
+				<if test="usertype_idx == 10">
+					AND a.memberid = #{memberid}
+				</if>
+    		) a
+    	)
+		WHERE RN <![CDATA[<=]]> 3
+	</select>
+	<select id="getBsisCorpo" parameterType="map" resultType="map">
+		WITH BASE as (
+			SELECT 
+				a.bpl_no, to_char(a.issue_date, 'YYYY-MM-DD') issue_date, a.bsc_idx, b.rslt_idx, c.bsiscnsl_idx
+    			, 1 bsc_status, b.status rslt_status, c.status bsis_status
+    			, ROW_NUMBER() OVER(ORDER BY a.bsc_idx desc) as rn
+  			FROM HRD_DGNS_BSC a, HRD_DGNS_QUSTNR_RSLT b, HRD_DGNS_BSISCNSL c
+  			WHERE
+    			a.bsc_idx = b.bsc_idx(+) AND b.rslt_idx = c.rslt_idx(+)
+    			and a.bpl_no = #{bpl_no}
+		)
+		SELECT
+			bpl_no, issue_date, bsc_idx, rslt_idx, bsiscnsl_idx
+    		, bsc_status, rslt_status, bsis_status
+    		, rn 
+		FROM BASE
+		WHERE rn <![CDATA[<=]]> 3
+	</select>
+	<select id="getCnslCorpo" parameterType="map" resultType="map">
+		WITH BASE as (
+			SELECT 
+				a.bpl_no, to_char(a.issue_date, 'YYYY-MM-DD') issue_date, b.cnsl_type, a.bsc_idx, b.cnsl_idx, c.reprt_idx
+    			, 1 bsc_status, b.confm_status cnsl_status, c.confm_status REPRT_STATUS, d.confm_status cost_status
+    			, DECODE(b.cnsl_type, 1, 'custom', 2, 'custom', 3, 'custom', 'cnsl') cnsl_sp
+  			FROM HRD_DGNS_BSC a, HRD_CNSL b, HRD_CNSL_REPORT c, HRD_CNSL_COST d
+  			WHERE
+    			a.bsc_idx = b.bsc_idx 
+    			AND b.cnsl_idx = c.cnsl_idx(+)
+    			AND c.cnsl_idx = d.cnsl_idx(+)
+    			and a.bpl_no = #{bpl_no}
+		),
+		T_CNSL as (
+			SELECT
+				a.*, ROW_NUMBER() OVER(PARTITION BY cnsl_sp ORDER BY cnsl_idx desc) as rn
+			FROM BASE a
+		)
+		SELECT
+			* 
+		FROM T_CNSL
+		WHERE rn <![CDATA[<=]]> 3
+	</select>
+	<select id="getClinicCorpo" parameterType="map" resultType="map">
+		SELECT * 
+		FROM (    
+			SELECT a.cli_idx, e.req_idx, b.plan_idx, c.reslt_idx, d.sport_idx
+				, e.confm_status req_status, b.confm_status plan_status, c.confm_status result_status, d.confm_status sportt_status
+				, to_char(a.regi_date, 'YYYY-MM-DD') issue_date
+				, ROW_NUMBER() over(order by a.cli_idx desc) as rn
+			FROM hrd_cli a, hrd_cli_plan b, hrd_cli_rslt c, hrd_cli_spt d, hrd_cli_req e
+			WHERE a.cli_idx = b.cli_idx(+)
+				AND a.cli_idx = c.cli_idx(+)
+				AND a.cli_idx = d.cli_idx(+)
+				AND a.cli_idx = e.cli_idx(+)
+				AND a.bpl_no = #{bpl_no}
+			)
+		WHERE rn <![CDATA[<=]]> 3
+	</select>
+	<select id="getSOJTCorpo" parameterType="map" resultType="map">
+		SELECT * 
+		FROM (    
+			SELECT a.bsc_idx, a.sojt_idx, a.confm_status status
+				, to_char(a.regi_date, 'YYYY-MM-DD') issue_date
+				, ROW_NUMBER() over(order by a.sojt_idx desc) as rn
+			FROM hrd_dgns_sojt_req a, hrd_dgns_bsc b
+			WHERE a.bsc_idx = b.bsc_idx
+				AND a.bpl_no = #{bpl_no}
+			)
+		WHERE rn <![CDATA[<=]]> 3
+	</select>
+	<select id="program" parameterType="map" resultType="map">
+		SELECT * FROM (
+			SELECT
+				a.sojt_idx, a.bsc_idx, a.bpl_no, b.corp_name, a.confm_status, trunc(sysdate)-trunc(a.regi_date) passed
+				, row_number() over(order by a.sojt_idx desc) as rn
+				, count(*) over() as total_count
+				, CEIL((count(*) over())/10) as total_page
+			FROM (
+				SELECT sojt_idx, bsc_idx, bpl_no, confm_status, regi_date
+				FROM (
+					select 
+						a.sojt_idx, a.bsc_idx, a.bpl_no, a.confm_status, b.regi_date
+						, row_number() over(partition by a.sojt_idx order by b.confm_idx desc) as rni
+					from
+						hrd_dgns_sojt_req a, hrd_dgns_sojt_req_confm b
+					where
+						a.sojt_idx = b.sojt_idx
+						) a
+				WHERE a.rni= 1) A, hrd_dgns_bsc b
+			WHERE a.bsc_idx = b.bsc_idx)
+		WHERE
+			rn between (#{page}-1)*10 and #{page}*10
+	</select>
+	<select id="delayedJobs" parameterType="map" resultType="map">
+		WITH HRD_BSIS AS (
+		    SELECT a.bpl_no, a.bsc_idx, b.rslt_idx
+		      , CASE WHEN c.bsiscnsl_idx is not null THEN '기초컨설팅'
+		        WHEN b.rslt_idx is not null THEN '설문조사'
+		        WHEN a.bsc_idx is not null THEN '기초진단'
+		      END as stage
+		      , CASE WHEN c.bsiscnsl_idx is not null THEN c.bsiscnsl_idx
+		        WHEN b.rslt_idx is not null THEN b.rslt_idx
+		        WHEN a.bsc_idx is not null THEN a.bsc_idx
+		      END as idx
+		      , CASE WHEN c.bsiscnsl_idx is not null THEN c.status
+		        WHEN b.rslt_idx is not null THEN b.status
+		        WHEN a.bsc_idx is not null THEN NVL(a.status,1)
+		      END as status
+		      , CASE WHEN c.bsiscnsl_idx is not null and c.status = 0 THEN TO_CHAR(NVL(c.last_modi_date, c.regi_date), 'YYYY-mm-dd')
+		        WHEN b.rslt_idx is not null and b.status = 0 THEN TO_CHAR(NVL(b.last_modi_date, b.regi_date), 'YYYY-mm-dd')
+		        WHEN a.bsc_idx is not null THEN null
+		      END as start_date
+		      , CASE WHEN c.bsiscnsl_idx is not null and c.status = 0 THEN trunc(sysdate) -trunc(NVL(c.last_modi_date, c.regi_date))
+		        WHEN b.rslt_idx is not null and b.status = 0 THEN trunc(sysdate) -trunc(NVL(b.last_modi_date, b.regi_date))
+		        WHEN a.bsc_idx is not null THEN null
+		      END as delay
+		      , ROW_NUMBER() OVER(order by a.bsc_idx desc) as rn
+		    FROM HRD_DGNS_BSC a, HRD_DGNS_QUSTNR_RSLT b, HRD_DGNS_BSISCNSL c
+		    WHERE a.bsc_idx = b.bsc_idx(+) AND b.rslt_idx = c.rslt_idx(+))
+		, CNSL_ADV AS (
+		    SELECT a.bpl_no
+		      , CASE
+		        WHEN c.ct_idx is not null THEN '비용 처리'
+		        WHEN b.reprt_idx is not null THEN '보고서 작성'
+		        WHEN a.cnsl_idx is not null THEN '컨설팅 신청'
+		      END as stage
+		      , CASE
+		        WHEN c.ct_idx is not null THEN c.ct_idx
+		        WHEN b.reprt_idx is not null THEN b.reprt_idx
+		        WHEN a.cnsl_idx is not null THEN a.cnsl_idx
+		      END as idx
+		      , CASE
+		        WHEN c.ct_idx is not null THEN c.confm_status
+		        WHEN b.reprt_idx is not null THEN b.confm_status
+		        WHEN a.cnsl_idx is not null THEN a.confm_status
+		      END as status
+		      , CASE
+		        WHEN c.ct_idx is not null and c.confm_status != 55 THEN TO_CHAR(NVL(c.last_modi_date, c.regi_date), 'YYYY-mm-dd')
+		        WHEN b.reprt_idx is not null and b.confm_status != 55 THEN TO_CHAR(NVL(b.last_modi_date, b.regi_date), 'YYYY-mm-dd')
+		        WHEN a.cnsl_idx is not null and a.confm_status != 55 THEN TO_CHAR(NVL(a.last_modi_date, a.regi_date), 'YYYY-mm-dd')
+		      END as start_date
+		      , CASE
+		        WHEN c.ct_idx is not null and c.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date))
+		        WHEN b.reprt_idx is not null and b.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date))
+		        WHEN a.cnsl_idx is not null and a.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(a.last_modi_date, a.regi_date))
+		      END as delay
+          , a.cnsl_type
+		      , ROW_NUMBER() OVER(ORDER BY a.cnsl_idx desc) as rn
+		    FROM hrd_cnsl a, hrd_cnsl_report b, hrd_cnsl_cost c
+		    WHERE
+		      a.cnsl_idx = b.cnsl_idx(+) AND a.cnsl_idx = c.cnsl_idx(+) AND a.cnsl_type in (4,5,6))
+		, CNSL_CUSTOM AS (
+		    SELECT a.bpl_no
+		      , CASE
+		        WHEN c.ct_idx is not null THEN '비용 처리'
+		        WHEN b.reprt_idx is not null THEN '보고서 작성'
+		        WHEN a.cnsl_idx is not null THEN '컨설팅 신청'
+		      END as stage
+		      , CASE
+		        WHEN c.ct_idx is not null THEN c.ct_idx
+		        WHEN b.reprt_idx is not null THEN b.reprt_idx
+		        WHEN a.cnsl_idx is not null THEN a.cnsl_idx
+		      END as idx
+		      , CASE
+		        WHEN c.ct_idx is not null THEN c.confm_status
+		        WHEN b.reprt_idx is not null THEN b.confm_status
+		        WHEN a.cnsl_idx is not null THEN a.confm_status
+		      END as status
+		      , CASE
+		        WHEN c.ct_idx is not null and c.confm_status != 55 THEN TO_CHAR(NVL(c.last_modi_date, c.regi_date), 'YYYY-mm-dd')
+		        WHEN b.reprt_idx is not null and b.confm_status != 55 THEN TO_CHAR(NVL(b.last_modi_date, b.regi_date), 'YYYY-mm-dd')
+		        WHEN a.cnsl_idx is not null and a.confm_status != 55 THEN TO_CHAR(NVL(a.last_modi_date, a.regi_date), 'YYYY-mm-dd')
+		      END as start_date
+		      , CASE
+		        WHEN c.ct_idx is not null and c.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date))
+		        WHEN b.reprt_idx is not null and b.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date))
+		        WHEN a.cnsl_idx is not null and a.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(a.last_modi_date, a.regi_date))
+		      END as delay
+          		, a.cnsl_type
+		      , ROW_NUMBER() OVER(ORDER BY a.cnsl_idx desc) as rn
+		    FROM hrd_cnsl a, hrd_cnsl_report b, hrd_cnsl_cost c
+		    WHERE
+		      a.cnsl_idx = b.cnsl_idx(+) AND a.cnsl_idx = c.cnsl_idx(+) AND a.cnsl_type in (1,2,3))
+		, CLINIC AS (
+		    SELECT a.bpl_no
+		    , CASE WHEN f.cli_idx is not null THEN '비용 처리'
+		      WHEN e.cli_idx is not null then '활동 결과'
+		      WHEN c.cli_idx is not null then '계획 수립'
+		      WHEN b.cli_idx is not null then '클리닉 신청'
+		    END as stage
+		    , a.cli_idx idx
+		    , CASE WHEN f.cli_idx is not null then f.SPORT_IDX 
+		      WHEN e.cli_idx is not null then e.reslt_idx 
+		      WHEN c.cli_idx is not null then c.plan_idx 
+		      WHEN b.cli_idx is not null then b.req_idx 
+		    END as status_idx
+		    , CASE WHEN f.cli_idx is not null then f.confm_status
+		      WHEN e.cli_idx is not null then e.confm_status
+		      WHEN c.cli_idx is not null then c.confm_status
+		      WHEN b.cli_idx is not null then b.confm_status
+		    END as status
+		    , CASE WHEN f.cli_idx is not null and f.confm_status != 55 THEN TO_CHAR(NVL(f.last_modi_date, f.regi_date), 'YYYY-mm-dd')
+		      WHEN e.cli_idx is not null and e.confm_status != 55 THEN TO_CHAR(NVL(e.last_modi_date, e.regi_date), 'YYYY-mm-dd')
+		      WHEN c.cli_idx is not null and c.confm_status != 55 THEN TO_CHAR(NVL(c.last_modi_date, c.regi_date), 'YYYY-mm-dd')
+		      WHEN b.cli_idx is not null and b.confm_status != 55 THEN TO_CHAR(NVL(b.last_modi_date, b.regi_date), 'YYYY-mm-dd')
+		    END as start_date
+		    , CASE WHEN f.cli_idx is not null and f.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(f.last_modi_date, f.regi_date))
+		      WHEN e.cli_idx is not null and e.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(e.last_modi_date, e.regi_date))
+		      WHEN c.cli_idx is not null and c.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(c.last_modi_date, c.regi_date))
+		      WHEN b.cli_idx is not null and b.confm_status != 55 THEN TRUNC(sysdate)- TRUNC(NVL(b.last_modi_date, b.regi_date))
+		    END as delay
+		    FROM
+		      HRD_CLI a, HRD_CLI_REQ b, HRD_CLI_PLAN c, HRD_CLI_RSLT e
+		      , (select * FROM (select b.*, ROW_NUMBER() OVER(PARTITION BY a.bpl_no ORDER BY b.SPORT_IDX desc) rn FROM HRD_CLI a, HRD_CLI_SPT b WHERE a.cli_idx = b.cli_idx) WHERE rn = 1) f
+		    WHERE a.cli_idx = b.cli_idx(+)
+		      AND a.cli_idx = c.cli_idx(+)
+		      AND a.cli_idx = e.cli_idx(+)
+		      AND a.cli_idx = f.cli_idx(+))
+		, SOJT AS (
+		    SELECT
+		      DECODE(a.confm_status, 10, 'S-OJT 신청', 30, 'S-OJT 접수', 50, '1차 승인', 55, '최종승인', 'S-OJT') sojt_stage
+		      , a.sojt_idx, a.confm_status sojt_status, b.bpl_no
+		      , to_char(NVL(a.last_modi_date, a.regi_date), 'YYYY-MM-dd') start_date
+			  , trunc(sysdate)-trunc(nvl(nvl(a.last_modi_date, a.regi_date), sysdate)) sojt_delay
+		    FROM hrd_dgns_sojt_req a, hrd_dgns_bsc b
+		    WHERE a.bsc_idx = b.bsc_idx
+		      AND a.isdelete = '0')
+		, AGREM AS (
+			SELECT
+		      DECODE(a.status, 10, '협약 신청', 30, '협약 접수', 50, '1차 승인', 55, '최종승인', '협약') stage
+		      , a.agrem_idx, a.status status, a.bpl_no
+		      , to_char(NVL(a.last_modi_date, a.regi_date), 'YYYY-MM-dd') start_date
+			  , trunc(sysdate)-trunc(nvl(nvl(a.last_modi_date, a.regi_date), sysdate)) delay
+		    FROM hrd_sptj_agrem a
+		    WHERE a.isdelete = '0')
+		, SUPPORT AS (
+			SELECT
+		      DECODE(a.status, 10, '신청', 30, '접수', 55, '완료', '지원 요청') stage
+		      , a.req_idx, a.status status, a.bpl_no
+		      , to_char(NVL(a.last_modi_date, a.regi_date), 'YYYY-MM-dd') start_date
+			  , trunc(sysdate)-trunc(nvl(nvl(a.last_modi_date, a.regi_date), sysdate)) delay
+		    FROM hrd_sptj_req a
+		    WHERE a.isdelete = '0' AND end_date <![CDATA[>=]]> sysdate)
+		SELECT a.*
+			, ROW_NUMBER() OVER(ORDER BY a.delay desc) as rn
+		FROM (
+			SELECT 'bsis' program, a.bpl_no, z.bpl_nm, y.instt_idx, a.stage, a.status, a.start_date, a.delay, a.idx, 'HRD기초컨설팅' tname FROM HRD_BSIS a, hrd_bsk z, inf_zip_group y, hrd_com_instt x WHERE a.bpl_no = z.bpl_no AND trim(z.bpl_zip) = y.zip AND y.instt_idx = x.instt_idx
+			union all
+			SELECT 'cnsl' program, b.bpl_no, z.bpl_nm, y.instt_idx, b.stage, b.status, b.start_date, b.delay, b.idx, DECODE(b.cnsl_type, 4, '심층진단 컨설팅', 5, '훈련체계수립 컨설팅', '현장활용 컨설팅') tname  FROM CNSL_ADV b, hrd_bsk z, inf_zip_group y, hrd_com_instt x WHERE b.bpl_no = z.bpl_no AND trim(z.bpl_zip) = y.zip AND y.instt_idx = x.instt_idx
+			union all
+			SELECT 'custom' program, c.bpl_no, z.bpl_nm, y.instt_idx, c.stage, c.status, c.start_date, c.delay, c.idx, DECODE(c.cnsl_type, 1, '사업주훈련 컨설팅', 2, '직무전수OJT 컨설팅', '현장개선OJT 컨설팅') tname FROM CNSL_CUSTOM c, hrd_bsk z, inf_zip_group y, hrd_com_instt x WHERE c.bpl_no = z.bpl_no AND trim(z.bpl_zip) = y.zip AND y.instt_idx = x.instt_idx
+			union all
+			SELECT 'clinic' program, d.bpl_no, z.bpl_nm, y.instt_idx, d.stage, d.status, d.start_date, d.delay, d.idx, '능력개발클리닉' tname FROM CLINIC d, hrd_bsk z, inf_zip_group y, hrd_com_instt x WHERE d.bpl_no = z.bpl_no AND trim(z.bpl_zip) = y.zip AND y.instt_idx = x.instt_idx
+			union all
+			SELECT 'sojt' program, e.bpl_no, z.bpl_nm, y.instt_idx, e.sojt_stage stage, e.sojt_status status, e.start_date, e.sojt_delay delay, e.sojt_idx idx, '체계적현장OJT' tname FROM SOJT e, hrd_bsk z, inf_zip_group y, hrd_com_instt x WHERE e.bpl_no = z.bpl_no AND trim(z.bpl_zip) = y.zip AND y.instt_idx = x.instt_idx
+			union all
+			SELECT 'agreement' program, e.bpl_no, z.bpl_nm, y.instt_idx, e.stage, e.status, e.start_date, e.delay, e.agrem_idx idx, '협약' tname FROM AGREM e, hrd_bsk z, inf_zip_group y, hrd_com_instt x WHERE e.bpl_no = z.bpl_no AND trim(z.bpl_zip) = y.zip AND y.instt_idx = x.instt_idx
+			union all
+			SELECT 'support' program, e.bpl_no, z.bpl_nm, y.instt_idx, e.stage, e.status, e.start_date, e.delay, e.req_idx idx, '지원요청' tname FROM SUPPORT e, hrd_bsk z, inf_zip_group y, hrd_com_instt x WHERE e.bpl_no = z.bpl_no AND trim(z.bpl_zip) = y.zip AND y.instt_idx = x.instt_idx
+		) a
+		WHERE delay <![CDATA[>=]]> 5 and STATUS in ('0', '7', '10', '30', '50', '70', '75')
+      	  <if test="type_name == 'instt'">
+      	  	AND instt_idx = (SELECT instt_idx FROM hrd_com_doctor WHERE apply_yn = 'Y' AND member_idx = #{member_idx})
+      	  	AND program in ('bsis', 'cnsl', 'custom', 'clinic', 'sojt', 'support')
+      	  </if>
+      	  <if test="type_name == 'consultant'">
+      	  	AND bpl_no in (SELECT a.bpl_no from hrd_cnsl a, hrd_cnsl_team b, hrd_cnsl_report c WHERE a.cnsl_idx = b.cnsl_idx AND c.confm_status != 55 AND b.member_idx = #{member_idx} GROUP BY a.bpl_no)
+      	  	AND program in ('cnsl', 'custom') AND stage = '보고서 작성'
+      	  </if>
+      	  <if test="type_name == 'center'">
+      	  	AND bpl_no in (SELECT bpl_no FROM hrd_sptj_agrem WHERE status = 55 AND to_char(last_modi_date, 'YYYY') = to_char(sysdate, 'YYYY') and member_idx = #{member_idx})
+      	  	AND program in ('agreement')
+      	  </if>
+      	  <if test="type_name == 'corpo'">
+      	  	AND bpl_no = #{bpl_no}
+      	  </if>
+	</select>
+</mapper>

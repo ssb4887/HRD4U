@@ -1,0 +1,242 @@
+{
+	"item_info":{
+		"items":{
+		    "insttIdx":{
+				"column_id":"INSTT_IDX"
+				, "item_name":"기관식별색인"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "memberIdx":{
+				"column_id":"MEMBER_IDX"
+				, "item_name":"회원 일련번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "blockCode":{
+				"column_id":"BLOCK_CD"
+				, "item_name":"관할구역"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":4
+				, "master_code":"SIDO_SIGUNGU"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "clsfCd":{
+				"column_id":"CLSF_CD"
+				, "item_name":"부서장 결재"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":5
+				, "master_code":"YN"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "default_value":"N"
+			}, "doctorOfcps":{
+				"column_id":"DOCTOR_OFCPS"
+				, "item_name":"직위"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "doctorDept":{
+				"column_id":"DOCTOR_DEPT_NAME"
+				, "item_name":"부서"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},"doctorTel":{
+				"column_id":"DOCTOR_TELNO"
+				, "item_name":"전화번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "applyYn":{
+				"column_id":"APPLY_YN"
+				, "item_name":"적용여부"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "default_value":"Y"
+			}, "status":{
+				"column_id":"STATUS"
+				, "item_name":"상태"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "default_value":"1"
+			}, "doctorYn":{
+				"column_id":"DOCTOR_YN"
+				, "item_name":"주치의 여부"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+			
+		}, "list_order":[
+			"blockCode"
+		]
+		, "view_order":[
+			"blockCode"
+		]
+		, "write_order":[
+		    "insttIdx"
+			, "memberIdx"
+			, "blockCode"
+			, "clsfCd"
+			, "doctorOfcps"
+			, "doctorDept"
+			, "doctorTel"
+			, "applyYn"
+			, "status"
+			, "doctorYn"
+		]
+		, "writeproc_order":[
+			"insttIdx"
+			, "memberIdx"
+			, "blockCode"
+			, "clsfCd"
+			, "doctorOfcps"
+			, "doctorDept"
+			, "applyYn"
+			, "status"
+			, "doctorYn"
+		]
+		, "modify_order":[
+			"insttIdx"
+			, "memberIdx"
+			, "blockCode"
+			, "clsfCd"
+			, "doctorOfcps"
+			, "doctorDept"
+			, "doctorTel"
+			, "applyYn"
+			, "status"
+			, "doctorYn"
+		]
+		, "modifyproc_order":[
+		    "insttIdx"
+			, "memberIdx"
+			, "blockCode"
+			, "clsfCd"
+			, "doctorOfcps"
+			, "doctorDept"
+			, "applyYn"
+			, "status"
+			, "doctorYn"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "loginId":{
+						"column_id":"LOGINID"
+						, "item_name":"아이디"
+					},
+					 "hName":{
+						"column_id":"HNAME"
+						, "item_name":"이름"
+					}
+				}, "select_order":[
+				    "loginId"
+					, "hName"
+				]
+			}, "key":{
+				"items":{
+					"instt_idx":{
+						"column_id":"INSTT_IDX"
+						, "item_name":"소속기관"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+					}
+				}
+			}, "searchForm_order":[
+				"instt_idx"
+				 , "keyField"
+			], "search_order":[
+				 "instt_idx"
+			], "searchAddOptn_order":[
+				"keyField"
+			]
+		}, "actList_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "loginId":{
+						"column_id":"LOGINID"
+						, "item_name":"아이디"
+					},
+					 "hName":{
+						"column_id":"HNAME"
+						, "item_name":"이름"
+					}
+				}, "select_order":[
+				    "hName"
+					, "loginId"
+				]
+			}, "key":{
+				"items":{
+					"instt_idx":{
+						"column_id":"INSTT_IDX"
+						, "item_name":"소속기관"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+					}
+				}
+			}, "searchForm_order":[
+				"instt_idx"
+				 , "keyField"
+			], "search_order":[
+				 "instt_idx"
+			], "searchAddOptn_order":[
+				"keyField"
+			]
+		}
+	}
+}

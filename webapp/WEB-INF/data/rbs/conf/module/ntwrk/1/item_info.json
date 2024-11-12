@@ -1,0 +1,273 @@
+{
+	"item_info":{
+		"items":{
+		    "ntwrkIdx":{
+				"column_id":"NTWRK_IDX"
+				, "item_name":"네트워크 식별 색인"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"insttIdx":{
+				"column_id":"INSTT_IDX"
+				, "item_name":"기관 식별 색인"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"clprnName":{
+				"column_id":"CLPRN_NAME"
+				, "item_name":"체결자 이름"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"cmptinstName":{
+				"column_id":"CMPTINST_NAME"
+				, "item_name":"기관명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"agremName":{
+				"column_id":"AGREM_NAME"
+				, "item_name":"협약명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"agremCn":{
+				"column_id":"AGREM_CN"
+				, "item_name":"협약 내용"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"relateBiz":{
+				"column_id":"RElATE_BIZ"
+				, "item_name":"관련 사업"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"rsltCn":{
+				"column_id":"RSLT_CN"
+				, "item_name":"성과 내용"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"bgndt":{
+				"column_id":"BGNDT"
+				, "item_name":"시작일"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"enddt":{
+				"column_id":"ENDDT"
+				, "item_name":"종료일"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"fromBgndtToEnddt":{
+				"column_id":"FROM_BGND_TO_ENDDT"
+				, "item_name":"기간"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"remarks":{
+				"column_id":"REMARKS"
+				, "item_name":"비고"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"reason":{
+				"column_id":"REASON"
+				, "item_name":"이유"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"useYn":{
+				"column_id":"USE_YN"
+				, "item_name":"유효"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"insttName":{
+				"column_id":"INSTT_NAME"
+				, "item_name":"주관 기관"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "file":{
+				"item_id":"file"
+				, "column_id":"FILE"
+				, "item_name":"관련 문서"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "use_setting_id":"use_file"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"subject"
+			, "name"
+			, "contents"
+		]
+		, "view_order":[
+			"name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "write_order":[
+		    "name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "writeproc_order":[
+			"name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "modify_order":[
+			"name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "modifyproc_order":[
+		    "name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"insttIdx": {
+						"item_name":"주관 기관"
+						,"column_id":"INSTT_IDX"
+						,"format_type" : 0
+						,"object_type" : 2
+						,"option_type" : 1
+						,"master_code" : "ORG_CODE"
+						,"default_item" : 1
+					},
+					"cmptinstName": {
+						"item_name":"기관명"
+						,"column_id":"CMPTINST_NAME"
+					},
+					"agremName": {
+						"item_name":"협약명"
+						,"column_id":"AGREM_NAME"
+					},
+					"useYn": {
+						"item_name":"유효여부"
+						,"column_id":"USE_YN"
+						,"format_type": 0
+						,"object_type": 14
+					}
+				}
+			}, "searchForm_order":[
+				 "insttIdx",
+				 "cmptinstName",
+				 "agremName",
+				 "useYn",
+				 "bplNo"
+			], "search_order":[
+				 "insttIdx",
+				 "cmptinstName",
+				 "agremName",
+				 "useYn",
+				 "bplNo"
+			]
+		}
+	}
+}

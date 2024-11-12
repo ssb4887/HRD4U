@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. ${targetTableIdxColumnName}, 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.develop.developFileMapper">
+	<!-- 테이블명 -->
+	<sql id="FILE_TABLE_NAME">HRD_DEVELOP_FILE</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.*
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND ${targetTableIdxColumnName} = #{targetTableIdxValue}
+			ORDER BY A.ORDER_IDX
+	</select>
+	
+	<select id="filenameList" parameterType="java.util.HashMap" resultType="java.util.List">
+			SELECT 
+			A.FILE_SAVED_NAME
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<if test="targetTableIdxValue > 0">AND ${targetTableIdxColumnName} = #{targetTableIdxValue}</if>
+	</select>
+	
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(FLE_IDX), 0)</trim> + 1 MAXID
+		FROM 
+			${targetTable} A
+		WHERE ${targetTableIdxColumnName} = #{targetTableIdxValue}
+		<include refid="rbs.commonMapper.COM_LK_WHERE"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			${targetTable} A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.FILE_SAVED_NAME, A.FILE_ORIGIN_NAME
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.*
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET DWN_CNT = DWN_CNT + 1 
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+		AND ${targetTableIdxColumnName} = #{targetTableIdxValue}
+	</update>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO ${targetTable} (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, CNSL_IDX, ${targetTableIdxColumnName}, FLE_IDX
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, #{CNSL_IDX}, #{targetTableIdxValue}, #{FLE_IDX}
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET 
+		<include refid="rbs.commonMapper.UPDATE_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+		AND ${targetTableIdxColumnName} = #{targetTableIdxValue}
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM ${targetTable}  
+		WHERE ${targetTableIdxColumnName} = #{targetTableIdxValue}
+		<include refid="rbs.commonMapper.COM_LK_WHERE"/>
+	</delete>
+</mapper>            

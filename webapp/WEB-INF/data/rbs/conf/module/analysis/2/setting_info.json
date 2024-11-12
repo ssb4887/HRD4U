@@ -1,0 +1,17 @@
+{
+   "setting_info":{
+      "list_title":"훈련성과분석 등록(사용자)",
+      "input_title":"훈련성과분석 등록(사용자)",
+      "deleteList_title":"훈련성과분석 삭제목록(사용자)",
+      "dset_input_npname": "IDX_VIEW",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"rsltAnalsIdx",
+      "idx_column":"RSLT_ANALS_IDX",
+      "design":"web",
+      "use_file":1,
+      "use_new":1
+   }
+}

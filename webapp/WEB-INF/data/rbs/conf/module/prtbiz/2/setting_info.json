@@ -1,0 +1,17 @@
+{
+   "setting_info":{
+      "list_title":"훈련과정 목록",
+      "input_title":"훈련과정 등록",
+      "deleteList_title":"훈련과정 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":10,
+      "dset_input_npname": "IDX_VIEW",
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"tpIdx",
+      "idx_column":"TP_IDX",
+      "design":"training",
+      "use_file":1,
+      "use_new":1
+   }
+}

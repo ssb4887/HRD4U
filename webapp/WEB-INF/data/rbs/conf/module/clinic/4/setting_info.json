@@ -1,0 +1,31 @@
+{
+   "setting_info":{
+      "list_title":"능력개발클리닉 활동일지 목록(사용자)",
+      "input_title":"능력개발클리닉 활동일지 등록(사용자)",
+      "deleteList_title":"능력개발클리닉 활동일지 삭제목록(사용자)",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"acmsltIdx",
+      "idx_column":"ACMSLT_IDX",
+      "design":"activity",
+      "use_file":1,
+      "use_new":1
+   },
+      "clinicDct_setting_info":{
+      "list_title":"능력개발클리닉 활동일지 목록(관리자)",
+      "input_title":"능력개발클리닉 활동일지 등록(관리자)",
+      "deleteList_title":"능력개발클리닉 활동일지 삭제목록(관리자)",
+      "dset_input_npname": "IDX_VIEW",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"acmsltIdx",
+      "idx_column":"ACMSLT_IDX",
+      "design":"activity",
+      "use_file":1,
+      "use_new":1
+   }
+}

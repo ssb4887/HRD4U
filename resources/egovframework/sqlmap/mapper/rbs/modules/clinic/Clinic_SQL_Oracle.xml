@@ -1,0 +1,839 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. 
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.clinic.clinicMapper">
+	
+	
+	<!-- 마지막 CLI_IDX의  다음 값을 가져온다.(insert하기위한 준비용)-->
+	<select id="nextCliIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(CLI_IDX), 0)</trim> + 1 MAXID
+		FROM 
+		HRD_CLI A
+	</select>
+	
+		<!-- CLI_IDX와 PLAN_IDX에 해당하는 CHG_IDX의 다음 값을 가져온다 -->
+	<select id="nextChgIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(CHG_IDX), 0)</trim> + 1 MAXID
+		FROM 
+			HRD_CLI_PLAN_CHANGE A
+		WHERE
+			A.CLI_IDX = #{CLI_IDX}
+		AND A.PLAN_IDX = #{PLAN_IDX}
+	</select>	
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(${targetTableIdx}), 0)</trim> + 1 MAXID
+		FROM 
+		${targetTable} A
+	</select>		
+	
+	<select id="getCondition" parameterType="java.util.HashMap" resultType="java.lang.String">		
+		
+		SELECT '<include refid="rbs.commonMapper.COM_SG_WHERE"/>' FROM DAUL
+	</select>
+	
+	<!-- 특정 테이블 IDX의 max 값 가져오기 -->
+	<select id="selectMaxIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT 
+			MAX(${targetTableIdx})
+		FROM 
+			${targetTable} A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<!-- 특정 조건에서  nextId 찾기 -->
+	<select id="nextIdWithSearchList" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(${targetTableIdx}), 0)</trim> + 1 MAXID
+		FROM 
+			${targetTable} A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.${targetTableIdx}), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		${targetTable} A 
+		WHERE A.${targetTableIdx} LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<!-- 기업의 가장 최근 기초컨설팅 식별번호를 가져온다 -->
+	<select id="getMaxBsc" parameterType="java.util.HashMap" resultType="java.lang.Long">
+		SELECT NVL(MAX(BSISCNSL_IDX),0) AS BSISCNSL_IDX FROM HRD_DGNS_BSISCNSL
+		WHERE BPL_NO = #{BPL_NO}
+	</select>
+	
+	<!-- 기업 자가 확인 체크리스트 목록 가져오기 -->
+	<select id="selectCheckList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT *
+		FROM 
+			HRD_CLI_CHECKLIST
+		WHERE 
+			ISDELETE = '0'
+		ORDER BY CHKLST_NO
+	</select>
+	<!-- 기업 자가 확인 체크리스트 답변 목록 가져오기 -->
+	<select id="selectCheckListAnswer" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT *
+		FROM 
+			HRD_CLI_CHECKLIST_ANSWER A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		ORDER BY CHKLST_NO
+	</select>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*,
+			FN_GET_DOCTOR_NAME((select doctor_idx from hrd_cli where cli_idx = a.cli_idx)) as DOCTOR_NAME,
+			TO_CHAR(SYSDATE,'YYYY') - SUBSTR((SELECT B.VALID_START_DATE FROM HRD_CLI B WHERE CLI_IDX = A.CLI_IDX), 0, 4) + 1 AS YEARLY
+			<include refid="editAuthListQuery"/>
+			FROM 
+			${targetTable} A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND CLI_IDX = #{CLI_IDX}
+			ORDER BY 
+				A.REGI_DATE DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			${targetTable} A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/> 
+			AND CLI_IDX = #{CLI_IDX}	
+			ORDER BY 
+				A.REGI_DATE DESC
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			<if test='targetTable == "HRD_CLI_SPT"'>
+				PKG_DGUARD.FN_DEC_ACNUTNO(A.ACNUTNO)  AS ACNUTNO,		
+			</if>
+			<if test='targetTable == "HRD_CLI_REQ"'>
+				PKG_DGUARD.FN_DEC_TELNO(A.TELNO) AS TELNO,
+			</if>
+			A.*
+			<include refid="editAuthListQuery"/>
+		FROM 
+		${targetTable} A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.${columnItem}_SAVED_NAME, A.${columnItem}_ORIGIN_NAME
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1 
+		WHERE ${targetTableIdx} = #{KEY_IDX}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		${targetTable} A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		<if test='targetTable == "HRD_CLI_SPT"'>
+			PKG_DGUARD.FN_DEC_ACNUTNO(A.ACNUTNO)  AS ACNUTNO,		
+		</if>
+		<if test='targetTable == "HRD_CLI_REQ"'>
+			PKG_DGUARD.FN_DEC_TELNO(A.TELNO) AS TELNO,
+		</if>
+		A.* 
+		FROM 
+		${targetTable} A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO ${targetTable} (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE		
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>	
+		)
+	</insert>
+	
+	
+	<insert id="insertConfm" parameterType="java.util.HashMap">
+		INSERT INTO ${targetTable} (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			ORDER BY ${targetTableIdx}
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		${targetTable} A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM ${targetTable}  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	
+	<!-- 기존의 클리닉기관 식별색인 가져오기 -->
+	<select id="selectCliInstt" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT 
+			A.CLI_INSTT_IDX
+		FROM 
+			HRD_CLI A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		AND A.CLI_IDX = #{CLI_IDX}
+	</select>
+	
+	<!-- LDG 능력개발클리닉 참여 신청서 기업정보 select -->
+	<select id="selectCorpInfo" parameterType="java.util.HashMap" resultType="dataMap">		
+			SELECT 
+			A.BPL_NM,
+			A.BPL_NO,
+            (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE BPL_NO = A.BPL_NO AND APPLY_YN = 'Y') AS INSTT_IDX,
+			A.BIZR_NO,
+			A.INDUTY_CD,
+			CASE WHEN 
+            B.NAME IS NOT NULL AND B.LCLAS_NM IS NOT NULL 
+            THEN B.NAME || ' / ' || B.LCLAS_NM 
+            ELSE UNISTR('') END AS INDUTY_NM,  
+			A.TOT_WORK_CNT,
+			A.BPL_ADDR || ' ' || ADDR_DTL AS BPL_ADDR
+			FROM
+			HRD_BSK A 
+            LEFT JOIN
+            TMP_INDUSTRY_LIMIT B
+            ON A.INDUTY_CD = B.CODE
+            WHERE A.BPL_NO = #{BPL_NO}
+	</select>
+	
+	<!-- BPL_NO에 해당하는 CLI_IDX의 MAX값 select -->
+	<select id="selectMaxCliIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT 
+			NVL(MAX(CLI_IDX),0) AS CLI_IDX
+		FROM 
+			HRD_CLI A
+		WHERE 
+			A.BPL_NO = #{BPL_NO}
+			AND A.ISDELETE ='0'
+	</select>
+	
+	<!-- BPL_NO에 해당하는 CLI_IDX의 VALID_START_DATE select -->
+	<select id="selectCliValidStartDate" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT NVL(MAX(VALID_START_DATE),0) AS CLI_IDX
+		FROM 
+		HRD_CLI A
+		  WHERE A.BPL_NO = #{BPL_NO}
+	</select>
+	
+	
+	<!-- 최종승인된 cliIdx 가져오기 -->
+	<select id="selectCliIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">		 
+		SELECT NVL(A.CLI_IDX, 0) AS CLI_IDX
+		FROM 
+		HRD_CLI A, HRD_CLI_REQ B
+		WHERE A.BPL_NO = #{BPL_NO}
+		 AND A.CLI_IDX = B.CLI_IDX
+		 AND B.CONFM_STATUS = '55'
+		 AND TO_CHAR(SYSDATE,'YYYYMMDD') BETWEEN A.VALID_START_DATE AND A.VALID_END_DATE
+		 AND A.ISDELETE = '0'
+	</select>
+	
+	<!-- 클리닉 선정여부 -->
+	<select id="selectIsCli" parameterType="java.util.HashMap" resultType="java.lang.Integer">		 
+		SELECT COUNT(*)
+		FROM 
+		HRD_CLI A, HRD_CLI_REQ B
+		WHERE A.BPL_NO = #{BPL_NO}
+		 AND A.CLI_IDX = B.CLI_IDX
+		 AND B.CONFM_STATUS = '55'
+		 AND TO_CHAR(SYSDATE,'YYYYMMDD') BETWEEN A.VALID_START_DATE AND A.VALID_END_DATE
+		 AND A.ISDELETE = '0'
+	</select>
+	
+	
+	<!-- 훈련계획서 등록여부 -->
+	<select id="selectIsPlan" parameterType="java.util.HashMap" resultType="java.lang.Integer">		 
+		SELECT COUNT(*) FROM HRD_CLI_PLAN
+		WHERE CLI_IDX = #{CLI_IDX}
+		AND TO_CHAR(REGI_DATE,'YYYY') <![CDATA[<=]]> TO_CHAR(SYSDATE,'YYYY')
+	</select>	
+	
+	<!-- 성과보고서 등록여부 -->
+	<select id="selectIsResult" parameterType="java.util.HashMap" resultType="java.lang.Integer">		 
+		SELECT COUNT(*) FROM HRD_CLI_RSLT
+		WHERE CLI_IDX = #{CLI_IDX}
+		AND TO_CHAR(REGI_DATE,'YYYY') <![CDATA[<=]]> TO_CHAR(SYSDATE,'YYYY')
+	</select>
+	
+		<!-- 지원금 신청서 등록여부 -->
+	<select id="selectIsSupport" parameterType="java.util.HashMap" resultType="java.lang.Integer">		 
+		SELECT COUNT(*) FROM HRD_CLI_SPT
+		WHERE CLI_IDX = #{CLI_IDX}
+		AND TO_CHAR(REGI_DATE,'YYYY') <![CDATA[<=]]> TO_CHAR(SYSDATE,'YYYY')
+	</select>	
+	
+	<!-- 특정 메뉴에서 등록을 할 때 이전 단계가 최종승인이 되었는지 확인 -->
+	<select id="selectIsApprove" parameterType="java.util.HashMap" resultType="java.lang.Integer">		 
+		SELECT 
+			COUNT(*) 
+		FROM 
+			${targetTable}
+		WHERE 
+			CLI_IDX = #{CLI_IDX}
+			AND TO_CHAR(REGI_DATE,'YYYY') <![CDATA[<=]]> TO_CHAR(SYSDATE,'YYYY')
+			AND CONFM_STATUS IN ('53', '55')
+	</select>
+	
+	<!-- 신청서 등록여부 (1: 등록 O / 2: 등록 X) -->
+<!--       기간포함      중도포기 -->
+<!--       Y          Y       => 0 승인 됐으나 중도포기(신청 가능) -->
+<!--       Y          N       => 1 승인 됐으나 중도포기아님(신청 불가능) -->
+<!--       N          Y       => 0 기간 지났고 중도포기(신청 가능) -->
+<!--       N          N       => 0 승인도 안됐고 포기도 안했고(신청 가능) -->
+	<select id="selectIsReq" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM 
+		HRD_CLI A, HRD_CLI_REQ B
+		WHERE A.CLI_IDX = B.CLI_IDX
+		 AND A.BPL_NO = #{BPL_NO}
+		 AND TO_CHAR(SYSDATE,'YYYYMMDD') BETWEEN NVL(A.VALID_START_DATE,'19000101') AND NVL(A.VALID_END_DATE,'99991231') <!-- 승인되기 전 신청서는 해당날짜가 없기에 넓은 범위로 하드코딩 -->
+		 AND A.ISDELETE = '0'
+	</select>
+	
+	<!-- 지원항목  + 금액 -->
+	<select id="getSportList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 	OPTION_CODE AS SPORT_CD,
+				OPTION_NAME AS SPORT_NM,
+		        ETC1 AS COST,
+		        ETC2 AS TOTALCOST,
+		        REMARKS AS SILBIYN
+		FROM RBS_OPTION_INFO
+		WHERE MASTER_CODE = 'SPORT_ITEM'
+		AND OPTION_CODE IN ('01', '04', '05', '08', '09')
+		ORDER BY ORDER_IDX ASC
+	</select>
+	
+	<!-- 훈련과정 자체개발 -->
+	<!-- SPORT_IDX가 0이 아닐 때(수정화면일 때) 수정하는 지원금 신청서에서 비용신청한 활동일지 목록은 나와야 함 > 서브쿼리에 SPORT_IDX != #{SPORT_IDX} 조건 추가 -->
+	<select id="getActivityCode" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT * FROM HRD_CLI_ACMSLT
+		WHERE CLI_IDX = #{CLI_IDX}
+		AND ACMSLT_ACT_CD = #{OPTION_CODE}
+		<choose>
+			<when test="SPORT_IDX == 0">
+				AND ACMSLT_IDX NOT IN (SELECT SPORT_ITEM_IDX FROM HRD_CLI_SPT_SUB WHERE CLI_IDX = #{CLI_IDX} AND SPORT_ITEM_CD = #{OPTION_CODE})
+			</when>
+			<otherwise>
+				AND ACMSLT_IDX NOT IN (SELECT SPORT_ITEM_IDX FROM HRD_CLI_SPT_SUB WHERE CLI_IDX = #{CLI_IDX} AND SPORT_IDX != #{SPORT_IDX} AND SPORT_ITEM_CD = #{OPTION_CODE})
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectReqView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*, B.*
+		FROM 
+		${targetTable} A, HRD_CLI B 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		AND A.CLI_IDX = B.CLI_IDX
+	</select>
+	
+	<select id="selectReqModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*, B.*
+		FROM 
+		${targetTable} A, HRD_CLI B 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		AND A.CLI_IDX = B.CLI_IDX
+	</select>
+		
+	<select id="getActivityList" parameterType="java.util.HashMap" resultType="dataMap">
+				SELECT * FROM(
+				SELECT A.PLAN_IDX AS IDX,
+                       '필수' AS ESSNTL_SE_NM,
+                       'Y'   AS ESSNTL_SE,
+                       '계획수립' AS GUBUNNM,
+                       'plan'      AS GUBUNCD,       
+                       '훈련계획수립' AS SPORT_ITEM_NM,
+                       A.CONFM_STATUS AS CONFM_STATUS,
+                       (SELECT OPTION_NAME FROM RBS_OPTION_INFO WHERE OPTION_CODE = A.CONFM_STATUS AND MASTER_CODE='CONFM_STATUS') AS CONFM_STATUS_NM,
+                       TO_CHAR(SYSDATE,'YYYY') - TO_CHAR(TO_DATE(B.VALID_START_DATE,'YYYYMMDD'),'YYYY') + 1 AS YEARLY,
+                       NULL AS ACT_DATE,
+                       NVL2(TO_CHAR(A.REGI_DATE,'YYYY-MM-DD'),TO_CHAR(A.REGI_DATE,'YYYY-MM-DD'),'-') AS REGI_DATE,
+                       500000 AS SUPPORT_COST,
+                       TO_CHAR((SELECT OPTION_NAME FROM RBS_OPTION_INFO
+                        WHERE MASTER_CODE = 'CONFM_STATUS'
+                        AND OPTION_CODE = ( SELECT CONFM_STATUS FROM HRD_CLI_SPT
+                                            WHERE SPORT_IDX = ( SELECT MAX(SPORT_IDX) FROM HRD_CLI_SPT_SUB
+                                                                WHERE SPORT_ITEM_CD = '01'
+                                                                AND CLI_IDX = B.CLI_IDX)))) AS SPRMNY_REQST_YN,
+                       '(추후 업데이트 예정)' AS SPRMNY_PYMNT_YN
+                FROM HRD_CLI_PLAN A, HRD_CLI B
+                WHERE B.BPL_NO = #{BPL_NO}
+                AND   B.ISDELETE = '0'
+                AND   A.CLI_IDX = B.CLI_IDX
+                UNION ALL
+		        SELECT 
+                    A.ACMSLT_IDX AS IDX,
+		            DECODE(B.ESSNTL_SE,'R','필수','C','선택') AS ESSNTL_SE_NM,
+		            DECODE(B.ESSNTL_SE,'R','Y','C','N') AS ESSNTL_SE,
+		            (CASE WHEN B.SPORT_ITEM_CD = '07' THEN '컨설팅' 
+                          /*WHEN B.SPORT_ITEM_CD = '01' THEN '계획수립'
+                          	WHEN B.SPORT_ITEM_CD = '05' THEN '성과보고'*/
+                          ELSE  '능력개발활동' END) AS GUBUNNM,   
+		            (CASE WHEN B.SPORT_ITEM_CD = '07' THEN 'cnsl' ELSE  'acmslt' END) AS GUBUNCD,
+		            TO_CHAR((SELECT OPTION_NAME 
+		                 FROM RBS_OPTION_INFO 
+		                 WHERE MASTER_CODE = 'SPORT_ITEM' 
+		                  AND OPTION_CODE = B.SPORT_ITEM_CD)) AS SPORT_ITEM_NM,    
+		            A.CONFM_STATUS AS CONFM_STATUS,
+                    (SELECT OPTION_NAME FROM RBS_OPTION_INFO WHERE OPTION_CODE = A.CONFM_STATUS AND MASTER_CODE='CONFM_STATUS') AS CONFM_STATUS_NM,
+		            TO_CHAR(SYSDATE,'YYYY') - TO_CHAR(TO_DATE(C.VALID_START_DATE,'YYYYMMDD'),'YYYY') + 1 AS YEARLY,
+                    DECODE(TO_CHAR(A.ACMSLT_START_DT,'YYYY-MM-DD') || ' ~ ' || TO_CHAR(A.ACMSLT_END_DT,'YYYY-MM-DD'),' ~ ', '-', TO_CHAR(A.ACMSLT_START_DT,'YYYY-MM-DD') || ' ~ ' || TO_CHAR(A.ACMSLT_END_DT,'YYYY-MM-DD')) AS ACT_DATE,
+		            NVL2(TO_CHAR(A.REGI_DATE,'YYYY-MM-DD'),TO_CHAR(A.REGI_DATE,'YYYY-MM-DD'),'-') AS REGI_DATE,
+                    NVL(A.ACMSLT_SPORT_AMT,0) AS SUPPORT_COST,
+                    /*DECODE((SELECT SPRMNY_REQST_YN 
+		                FROM HRD_CLI_SPT_SUB 
+		                WHERE ACMSLT_IDX = A.ACMSLT_IDX),'Y','신청','-') AS SPRMNY_REQST_YN,*/
+                    TO_CHAR((SELECT OPTION_NAME FROM RBS_OPTION_INFO WHERE OPTION_CODE = (SELECT CONFM_STATUS 
+                                                                FROM HRD_CLI_SPT
+                                                                WHERE SPORT_IDX = (SELECT SPORT_IDX 
+                                                                                    FROM HRD_CLI_SPT_SUB 
+                                                                                    WHERE CLI_IDX = A.CLI_IDX
+                                                                                     AND SPORT_ITEM_IDX = A.ACMSLT_IDX 
+                                                                                     AND SPORT_ITEM_CD = A.ACMSLT_ACT_CD)) 
+                                            AND MASTER_CODE='CONFM_STATUS')) AS SPRMNY_REQST_YN,
+		            '(추후 업데이트 예정)' AS SPRMNY_PYMNT_YN      
+		        FROM HRD_CLI_ACMSLT A, HRD_CLI_PLAN_SUB B, HRD_CLI C
+		        WHERE BPL_NO = #{BPL_NO} 
+		        AND   A.PLAN_IDX = B.PLAN_IDX
+		        AND   A.CLI_IDX  = B.CLI_IDX
+		        AND   B.CLI_IDX =  C.CLI_IDX
+		        AND   A.ACMSLT_ACT_CD = B.SPORT_ITEM_CD
+		         <if test='total == "Y"'>
+                UNION ALL
+                SELECT A.RESLT_IDX AS IDX,
+                       '필수' AS ESSNTL_SE_NM,
+                       'Y'   AS ESSNTL_SE,
+                       '성과보고' AS GUBUNNM,
+                       'rslt'      AS GUBUNCD,       
+                       '클리닉 성과보고' AS SPORT_ITEM_NM,
+                       A.CONFM_STATUS AS CONFM_STATUS,
+                       (SELECT OPTION_NAME FROM RBS_OPTION_INFO WHERE OPTION_CODE = A.CONFM_STATUS AND MASTER_CODE='CONFM_STATUS') AS CONFM_STATUS_NM,
+                       TO_CHAR(SYSDATE,'YYYY') - TO_CHAR(TO_DATE(B.VALID_START_DATE,'YYYYMMDD'),'YYYY') + 1 AS YEARLY,
+                       NULL AS ACT_DATE,
+                       NVL2(TO_CHAR(A.REGI_DATE,'YYYY-MM-DD'),TO_CHAR(A.REGI_DATE,'YYYY-MM-DD'),'-') AS REGI_DATE,
+                       1000000 AS SUPPORT_COST,
+                       TO_CHAR((SELECT OPTION_NAME FROM RBS_OPTION_INFO
+                        WHERE MASTER_CODE = 'CONFM_STATUS'
+                        AND OPTION_CODE = ( SELECT CONFM_STATUS FROM HRD_CLI_SPT
+                                            WHERE SPORT_IDX = ( SELECT MAX(SPORT_IDX) FROM HRD_CLI_SPT_SUB
+                                                                WHERE SPORT_ITEM_CD = '05'
+                                                                AND CLI_IDX = B.CLI_IDX)))) AS SPRMNY_REQST_YN,
+                       '(추후 업데이트 예정)' AS SPRMNY_PYMNT_YN
+                FROM HRD_CLI_RSLT A, HRD_CLI B
+                WHERE B.BPL_NO = #{BPL_NO}
+                AND   B.ISDELETE = '0'
+                AND   A.CLI_IDX = B.CLI_IDX
+                </if>
+		        UNION ALL
+		        SELECT
+                    A.CNSL_IDX AS IDX,
+		            '선택' AS ESSNTL_SE_NM,
+		            'N' AS ESSNTL_SE,            
+		            '컨설팅' AS GUBUNNM,
+		            'cnsl' AS GUBUNCD,
+		            (SELECT TO_CHAR(OPTION_NAME) FROM RBS_OPTION_INFO WHERE MASTER_CODE = 'CNSL_TYPE' AND OPTION_CODE = A.CNSL_TYPE) AS SPORT_ITEM_NM,
+		            A.CONFM_STATUS AS CONFM_STATUS,
+                    (SELECT OPTION_NAME FROM RBS_OPTION_INFO WHERE OPTION_CODE = A.CONFM_STATUS AND MASTER_CODE='CONFM_STATUS') AS CONFM_STATUS_NM,
+		            TO_CHAR(SYSDATE,'YYYY') - TO_CHAR(TO_DATE(A.CNSL_START_DATE,'YYYYMMDD'),'YYYY') + 1 AS YEARLY,
+                    DECODE(TO_CHAR(A.CNSL_START_DATE,'YYYY-MM-DD') || ' ~ ' || TO_CHAR(A.CNSL_END_DATE,'YYYY-MM-DD'),' ~ ', '-', A.CNSL_START_DATE || ' ~ ' || A.CNSL_END_DATE) AS ACT_DATE,
+                    NVL2(TO_CHAR(A.REGI_DATE,'YYYY-MM-DD'),TO_CHAR(A.REGI_DATE,'YYYY-MM-DD'),'-') AS REGI_DATE,
+		            NVL(B.SPLPC_AMT,0) AS support_cost,
+		            TO_CHAR( (
+		                SELECT
+		                    option_name
+		                FROM
+		                    rbs_option_info
+		                WHERE
+		                    master_code = 'CONFM_STATUS'
+		                    AND   option_code = B.CONFM_STATUS
+		            ) ) AS sprmny_reqst_yn,
+		           '(추후 업데이트 예정)' AS SPRMNY_PYMNT_YN
+		        FROM HRD_CNSL A LEFT OUTER JOIN HRD_CNSL_COST B ON A.CNSL_IDX = B.CNSL_IDX
+		        WHERE BPL_NO = #{BPL_NO}               
+                ) U,
+                (SELECT SUM(SUPPORT_COST) AS SUM_SUPPORT_COST FROM(
+                    (SELECT ACMSLT_SPORT_AMT AS SUPPORT_COST
+                        FROM HRD_CLI_ACMSLT A, HRD_CLI_PLAN_SUB B, HRD_CLI C
+                        WHERE BPL_NO = #{BPL_NO} 
+                        AND A.PLAN_IDX = B.PLAN_IDX
+                        AND   A.CLI_IDX  = B.CLI_IDX
+                        AND   C.CLI_IDX =  A.CLI_IDX
+                        AND   A.ACMSLT_ACT_CD = B.SPORT_ITEM_CD
+                    UNION ALL
+                    SELECT 0 AS SUPPORT_COST FROM HRD_CNSL A LEFT OUTER JOIN HRD_CNSL_COST B ON A.CNSL_IDX = B.CNSL_IDX
+                    WHERE BPL_NO = #{BPL_NO}
+                 <if test='total == "Y"'>
+                    UNION ALL
+                    SELECT 500000 AS SUPPORT_COST
+                        FROM HRD_CLI_PLAN A, HRD_CLI B
+                    WHERE B.BPL_NO = #{BPL_NO}
+                     AND   B.ISDELETE = '0'
+                     AND   A.CLI_IDX = B.CLI_IDX
+                    UNION ALL
+                    SELECT 1000000 AS SUPPORT_COST
+                        FROM HRD_CLI_RSLT A, HRD_CLI B
+                    WHERE B.BPL_NO = #{BPL_NO}
+                     AND   B.ISDELETE = '0'
+                     AND   A.CLI_IDX = B.CLI_IDX
+                  </if>
+                     ))) V
+		WHERE 1=1
+		<if test='YEARLY != null and YEARLY != "0"'>
+			AND YEARLY = #{YEARLY}
+		</if>
+		<if test='ESSNTL_SE != null and ESSNTL_SE != "0"'>
+			AND ESSNTL_SE = #{ESSNTL_SE}
+		</if>
+		<if test='GUBUNCD != null and GUBUNCD != "0"'>
+			AND GUBUNCD = #{GUBUNCD}
+		</if>
+	    <if test='DCTFLAG == "Y"'>
+           	AND CONFM_STATUS NOT IN (5,20)
+        </if>
+	</select>
+	
+	<select id="selectInsttList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+		    A.INSTT_NAME,
+		    B.INSTT_IDX,
+		    B.BLOCK_CD
+		FROM
+		    HRD_COM_INSTT A,
+		    HRD_COM_INSTT_BLOCK B
+		WHERE
+		    A.INSTT_IDX = B.INSTT_IDX
+	</select>
+		
+	<select id="getPlanProgress" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*
+		FROM 
+			HRD_CLI_PLAN A
+		WHERE 
+			A.CLI_IDX = #{CLI_IDX}
+			AND TO_CHAR(A.REGI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+	</select>
+	
+	<select id="getPlanCode" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*,
+			CASE 
+			    WHEN A.PLAN_IDX = (SELECT SPORT_ITEM_IDX FROM HRD_CLI_SPT_SUB WHERE CLI_IDX = #{CLI_IDX} AND SPORT_ITEM_CD = '01' <if test="SPORT_IDX != 0">AND SPORT_IDX != #{SPORT_IDX}</if>) THEN 0
+			    ELSE 1
+			END AS SPT_POSBL
+		FROM 
+			HRD_CLI_PLAN A
+		WHERE 
+			A.CLI_IDX = #{CLI_IDX}
+			AND TO_CHAR(A.REGI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+	</select>
+	
+	<select id="getActivityCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM HRD_CLI_ACMSLT
+		WHERE CLI_IDX = #{CLI_IDX}
+		AND TO_CHAR(REGI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+	</select>
+	
+	<select id="getResultProgress" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*
+		FROM 
+			HRD_CLI_RSLT A
+		WHERE 
+			A.CLI_IDX = #{CLI_IDX}
+			AND TO_CHAR(A.REGI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+	</select>
+	
+	<select id="getResultCode" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*,
+			CASE 
+			    WHEN A.RESLT_IDX = (SELECT SPORT_ITEM_IDX FROM HRD_CLI_SPT_SUB WHERE CLI_IDX = #{CLI_IDX} AND SPORT_ITEM_CD = '05' <if test="SPORT_IDX != 0">AND SPORT_IDX != #{SPORT_IDX}</if>) THEN 0
+			    ELSE 1
+			END AS SPT_POSBL
+		FROM 
+			HRD_CLI_RSLT A
+		WHERE 
+			A.CLI_IDX = #{CLI_IDX}
+			AND TO_CHAR(A.REGI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+	</select>
+	
+	<!-- <select id="getSupportProgress" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			(SELECT OPTION_NAME FROM RBS_OPTION_INFO WHERE MASTER_CODE = 'SPORT_ITEM' AND OPTION_CODE = A.SPORT_ITEM_CD ) AS SPORT_ITEM_NM,
+			B.CONFM_STATUS AS CONFM_STATUS
+		FROM 
+			HRD_CLI_SPT_SUB A, 
+			HRD_CLI_SPT B
+		WHERE 
+			A.CLI_IDX = (SELECT CLI_IDX FROM HRD_CLI WHERE BPL_NO = #{BPL_NO})
+		AND 
+			A.CLI_IDX = B.CLI_IDX
+	</select> -->
+	
+	<select id="getSupportProgress" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+		    A.CONFM_STATUS,
+		    COUNT(A.CONFM_STATUS) AS STATUSCT
+		FROM
+		    HRD_CLI_SPT A
+		WHERE
+		    A.CLI_IDX = #{CLI_IDX}
+		    AND   A.CONFM_STATUS IN ('10', '30', '55')
+		    AND TO_CHAR(A.REGI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+		GROUP BY
+		    A.CONFM_STATUS
+		ORDER BY
+		    A.CONFM_STATUS
+	</select>
+	
+	<select id="selectSptSub" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+		    SPORT_ITEM_CD,
+		    SUM(SPT_PAY) AS SPT_PAY
+		FROM
+		    HRD_CLI_SPT_SUB
+		WHERE
+		    CLI_IDX = #{CLI_IDX}
+		    AND   SPORT_IDX = #{SPORT_IDX}
+		GROUP BY
+		    SPORT_ITEM_CD
+	</select>
+	
+	<select id="selectSptPayList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+		    SPORT_ITEM_CD,
+		    SPT_PAY,
+		    ( COST - SPT_PAY ) AS POSBL_PAY
+		FROM
+		    (
+		        SELECT
+		            B.SPORT_ITEM_CD,
+		            SUM(B.SPT_PAY) AS SPT_PAY,
+		            (
+		                SELECT
+		                    CASE
+		                        WHEN OPTION_CODE IN ('04', '08', '10') THEN ETC2
+		                        ELSE ETC1
+		                    END
+		                FROM
+		                    RBS_OPTION_INFO
+		                WHERE
+		                    MASTER_CODE = 'SPORT_ITEM'
+		                    AND   OPTION_CODE = B.SPORT_ITEM_CD
+		            ) AS COST
+		        FROM
+		            HRD_CLI_SPT A,
+		            HRD_CLI_SPT_SUB B
+		        WHERE
+		            A.SPORT_IDX = B.SPORT_IDX
+		            AND   A.CLI_IDX = #{CLI_IDX}
+		            AND   A.SPRMNY_PYMNT_YN = 'Y'
+		            AND   TO_CHAR(A.REGI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+		        <if test="SPORT_IDX != 0">
+				    AND A.SPORT_IDX != #{SPORT_IDX}
+			    </if>
+		        GROUP BY
+		            B.SPORT_ITEM_CD
+		    )
+	</select>
+	
+	<select id="getTrainingCntList" parameterType="java.lang.String" resultType="dataMap">
+		SELECT 
+		    COUNT(DEVLOP_IDX) AS TRAINING_CNT,
+		    '1' AS TR_RESULT_REPRT_SE
+		FROM (
+		    SELECT DEVLOP_IDX FROM HRD_CNSL_RSLT_ANALS
+		    WHERE BPL_NO = #{BPL_NO}
+		    AND TR_RESULT_REPRT_SE = 1
+		    GROUP BY DEVLOP_IDX
+		)
+		UNION ALL
+		SELECT 
+		    COUNT(DEVLOP_IDX) AS TRAINING_CNT,
+		    '2' AS TR_RESULT_REPRT_SE
+		FROM (
+		    SELECT DEVLOP_IDX FROM HRD_CNSL_RSLT_ANALS
+		    WHERE BPL_NO = #{BPL_NO}
+		    AND TR_RESULT_REPRT_SE = 2
+		    GROUP BY DEVLOP_IDX
+		)
+	</select>
+	
+	<select id="getSurveyTargetList" parameterType="java.lang.String"  resultType="dataMap">
+		SELECT 
+			COUNT(*) AS SURVEY_TARGET_CNT,
+			'1' AS TR_RESULT_REPRT_SE
+		FROM HRD_CNSL_RSLT_ANALS
+		WHERE BPL_NO = #{BPL_NO}
+		  AND TR_RESULT_REPRT_SE = 1
+		UNION ALL
+		SELECT 
+			COUNT(*) AS SURVEY_TARGET_CNT,
+			'2' AS TR_RESULT_REPRT_SE
+		FROM HRD_CNSL_RSLT_ANALS
+		WHERE BPL_NO = #{BPL_NO}
+		  AND TR_RESULT_REPRT_SE = 2
+	</select>
+	
+	<select id="getAnswerList" parameterType="java.lang.String"  resultType="dataMap">
+	SELECT * FROM (
+	       SELECT
+		            ROUND(AVG(gnrlz),1) AS avg_gnrlz,
+		            ROUND(AVG(edc_crse1),1) AS avg_edc_crse1,
+		            ROUND(AVG(edc_crse2),1) AS avg_edc_crse2,
+		            ROUND(AVG(edc_crse3),1) AS avg_edc_crse3,
+		            ROUND(AVG(edc_crse4),1) AS avg_edc_crse4,
+		            ROUND(AVG(edc_crse5),1) AS avg_edc_crse5,
+		            ROUND(AVG(knwldg_tchnlgy_pickup1),1) AS avg_knwldg_tchlgy_pickup1,
+		            ROUND(AVG(knwldg_tchnlgy_pickup2),1) AS avg_knwldg_tchlgy_pickup2,
+		            ROUND(AVG(knwldg_tchnlgy_pickup3),1) AS avg_knwldg_tchlgy_pickup3,
+		            ROUND(AVG(knwldg_tchnlgy_pickup4),1) AS avg_knwldg_tchlgy_pickup4,
+		            NULL AS avg_stoprt_applc1,
+		            NULL AS avg_stoprt_applc2,
+		            NULL AS avg_stoprt_applc3,
+		            NULL AS avg_stoprt_applc4,
+		            '1' AS tr_result_reprt_se
+		        FROM
+		            (
+		                SELECT
+		                    gnrlz,
+		                    edc_crse1,
+		                    edc_crse2,
+		                    edc_crse3,
+		                    edc_crse4,
+		                    edc_crse5,
+		                    knwldg_tchnlgy_pickup1,
+		                    knwldg_tchnlgy_pickup2,
+		                    knwldg_tchnlgy_pickup3,
+		                    knwldg_tchnlgy_pickup4
+		                FROM
+		                    hrd_cnsl_rslt_anals
+		                WHERE
+		                    bpl_no ='60581208340'
+		                    AND   tr_result_reprt_se = 1
+		            )
+		        UNION ALL
+		        SELECT
+		            NULL AS avg_gnrlz,
+		            NULL AS avg_edc_crse1,
+		            NULL AS avg_edc_crse2,
+		            NULL AS avg_edc_crse3,
+		            NULL AS avg_edc_crse4,
+		            NULL AS avg_edc_crse5,
+		            NULL AS avg_knwldg_tchlgy_pickup1,
+		            NULL AS avg_knwldg_tchlgy_pickup2,
+		            NULL AS avg_knwldg_tchlgy_pickup3,
+		            NULL AS avg_knwldg_tchlgy_pickup4,
+		            ROUND(AVG(stoprt_applc1),1) AS avg_stoprt_applc1,
+		            ROUND(AVG(stoprt_applc2),1) AS avg_stoprt_applc2,
+		            ROUND(AVG(stoprt_applc3),1) AS avg_stoprt_applc3,
+		            ROUND(AVG(stoprt_applc4),1) AS avg_stoprt_applc4,
+		            '2' AS tr_result_reprt_se
+			    FROM (
+				    SELECT 
+				    STOPRT_APPLC1,
+				    STOPRT_APPLC2,
+				    STOPRT_APPLC3,
+				    STOPRT_APPLC4
+			    FROM HRD_CNSL_RSLT_ANALS
+			    WHERE BPL_NO = #{BPL_NO}
+			     AND TR_RESULT_REPRT_SE = 2))
+	</select>
+	
+	<select id="getCompareRequestAndVoByBplNo" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(*) AS IS_REQUEST_BPL_NO 
+		FROM HRD_CLI
+		WHERE CLI_IDX = (SELECT CLI_IDX FROM ${targetTable} WHERE ${targetTableKey} = #{targetTableKeyValue})
+		  AND (ISDELETE = 0 OR TO_CHAR(SYSDATE,'YYYYMMDD') BETWEEN VALID_START_DATE AND VALID_END_DATE)
+		  AND BPL_NO = #{BPL_NO}
+	</select>
+</mapper>            

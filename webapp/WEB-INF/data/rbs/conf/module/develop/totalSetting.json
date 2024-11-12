@@ -1,0 +1,20 @@
+{
+	"item1": {
+		"idx_name": "prtbizIdx",
+		"idx_column": "PRTBIZ_IDX",
+		"use_qna": 0,
+		"use_dldate": 0,
+		"use_private": 0,
+		"use_cont_list": 0,
+		"use_part_type": 0
+	}, "item2": {
+		"idx_name": "tpIdx",
+		"idx_column": "TP_IDX",
+		"use_qna": 0,
+		"use_dldate": 0,
+		"use_private": 0,
+		"use_cont_list": 0,
+		"use_part_type": 0
+	}
+	
+}

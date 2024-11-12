@@ -1,0 +1,116 @@
+{
+	"item_info":{
+		"items":{
+		    "sptjName":{
+				"item_id": "sptjName"
+				, "column_id":"SPTJ_NAME"
+				, "item_name":"서식그룹명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "regiDate":{
+				"item_id": "regiDate"
+				, "column_id":"REGI_DATE"
+				, "item_name":"등록일"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":5
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "regiName":{
+				"item_id": "regiName"
+				,"column_id":"REGI_NAME"
+				, "item_name":"등록자"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+			}, "useYn":{
+				"item_id": "useYn"
+				, "column_id":"USE_YN"
+				, "item_name":"사용여부"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"sptjName"
+			, "regiDate"
+			, "regiName"
+			, "useYn"
+		]
+		, "view_order":[
+			"sptjName"
+			, "regiDate"
+			, "regiName"
+			, "useYn"
+		]
+		, "write_order":[
+			"sptjName"
+			, "regiDate"
+			, "regiName"
+			, "useYn"
+		]
+		, "writeproc_order":[
+			"sptjName"
+			, "regiDate"
+			, "regiName"
+			, "useYn"
+		]
+		, "modify_order":[
+			"sptjName"
+			, "regiDate"
+			, "regiName"
+			, "useYn"
+		]
+		, "modifyproc_order":[
+			"sptjName"
+			, "regiDate"
+			, "regiName"
+			, "useYn"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"sptjName": {
+						"item_name":"서식그룹명"
+						,"column_id":"SPTJ_NAME"
+					},
+					"regiDate": {
+						"item_name":"등록일"
+						,"column_id":"REGI_DATE"
+					},
+					"useYn": {
+						"item_name":"사용여부"
+						,"column_id":"USE_YN"
+						, "format_type":0
+						, "object_type":2
+					}
+				}
+			},
+			 "searchForm_order":[
+				"sptjName"
+				, "regiDate"
+				, "useYn"
+			], "search_order":[
+				"sptjName"
+				, "regiDate"
+				, "useYn"
+			]
+		}
+	} 
+}

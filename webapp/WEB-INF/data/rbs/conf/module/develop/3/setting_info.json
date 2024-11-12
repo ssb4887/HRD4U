@@ -1,0 +1,31 @@
+{
+   "setting_info":{
+      "list_title":"맞춤훈련과정개발 종합관리 목록",
+      "input_title":"맞춤훈련과정개발 종합관리 등록",
+      "deleteList_title":"맞춤훈련과정개발 종합관리삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"devlopIdx",
+      "idx_column":"DEVLOP_IDX",
+      "design":"total",
+      "use_file":1,
+      "use_new":1
+   },
+      "developDct_setting_info":{
+      "list_title":"맞춤훈련과정개발 종합관리 목록(관리자)",
+      "input_title":"맞춤훈련과정개발 종합관리 등록(관리자)",
+      "deleteList_title":"맞춤훈련과정개발 종합관리 삭제목록(관리자)",
+      "dset_input_npname": "IDX_VIEW",
+      "dset_list_block":10,
+      "dset_list_count":10,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"devlopIdx",
+      "idx_column":"DEVLOP_IDX",
+      "design":"total",
+      "use_file":1,
+      "use_new":1
+   }
+}

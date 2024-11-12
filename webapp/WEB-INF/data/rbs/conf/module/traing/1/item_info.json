@@ -1,0 +1,328 @@
+{
+	"item_info":{
+		"items":{
+		    "indutyCode":{
+				"column_id":"INDUTY_CD"
+				, "item_name":"업종"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"INDUST_CD"
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "range":{
+				"column_id":"TOT_WORK_CNT_SCOPE"
+				, "item_name":"상시 인원수"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":4
+				, "master_code":"RANGE"
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "rangeForList":{
+				"column_id":"TOT_WORK_CNT_SCOPE"
+				, "item_name":"상시 인원수"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"RANGE"
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "year":{
+				"column_id":"YEAR"
+				, "item_name":"연도"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":19
+				, "object_type":1
+				, "start_year":2020
+				, "module_id":"traing"
+				, "item_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "corp":{
+				"column_id":"NMCORP"
+				, "item_name":"참여기업"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":4
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "tot":{
+				"column_id":"TOTAL_NMPR"
+				, "item_name":"참여인원"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":4
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_write": 1
+				, "use_modify": 1
+			}
+		}, "list_order":[
+			"indutyCode"
+			, "rangeForList"
+			, "year"
+			, "corp"
+			, "tot"
+		]
+		, "view_order":[
+			"indutyCode"
+			, "range"
+			, "year"
+			, "corp"
+			, "tot"
+		]
+		, "write_order":[
+		    "indutyCode"
+			, "range"
+			, "year"
+			, "corp"
+			, "tot"
+		]
+		, "writeproc_order":[
+			"indutyCode"
+			, "range"
+			, "year"
+			, "corp"
+			, "tot"
+		]
+		, "modify_order":[
+			"indutyCode"
+			, "range"
+			, "year"
+			, "corp"
+			, "tot"
+		]
+		, "modifyproc_order":[
+		    "indutyCode"
+			, "range"
+			, "year"
+			, "corp"
+			, "tot"
+		], "list_search":{
+			"key":{
+				"items":{
+					"viewStandard":{
+						"column_id":"INDUTY_CD"
+						, "item_name":"조회 기준"
+						, "format_type":0
+						, "object_type":22
+						, "option_split":1
+						, "master_code":"VIEW_STANDARD"
+						, "style_width":120
+					}
+				}
+			}, "searchForm_order":[
+				"viewStandard"
+			], "search_order":[
+				"viewStandard"
+			]
+		}, "detailList_search":{
+			"key":{
+				"items":{
+					"year":{
+						"column_id":"A.YEAR"
+						, "item_name":"연도"
+						, "format_type":19
+						, "object_type":2
+						, "start_year":2020
+						, "style_width":120
+					},
+					"indutyCd":{
+						"column_id":"A.INDUTY_CD"
+						, "item_name":"업종"
+						, "format_type":0
+						, "object_type":2
+						, "master_code":"INDUST_CD"
+						, "style_width":120
+					},
+					"totCnt":{
+						"column_id":"A.TOT_WORK_CNT_SCOPE"
+						, "item_name":"상시 근로자 수"
+						, "format_type":0
+						, "object_type":2
+						, "master_code":"RANGE"
+						, "style_width":120
+					}
+				}
+			}, "searchForm_order":[
+				"year"
+				, "indutyCd"
+				, "totCnt"
+			], "search_order":[
+				"year"
+				, "indutyCd"
+				, "totCnt"
+			]
+		}
+	}
+	, "sprt_item_info":{
+			"items":{
+			    "indutyCode":{
+					"column_id":"INDUTY_CD"
+					, "item_name":"업종"
+					, "required_write":0
+					, "required_modify":0
+					, "format_type":0
+					, "object_type":2
+					, "master_code":"INDUST_CD"
+					, "write_type":0
+					, "modify_type":0
+					, "default_item":1
+					, "use_write": 1
+					, "use_modify": 1
+				}, "range":{
+					"column_id":"TOT_WORK_CNT_SCOPE"
+					, "item_name":"상시 인원수"
+					, "required_write":0
+					, "required_modify":0
+					, "format_type":0
+					, "object_type":4
+					, "master_code":"RANGE"
+					, "write_type":0
+					, "modify_type":0
+					, "default_item":1
+					, "use_write": 1
+					, "use_modify": 1
+				}, "rangeForList":{
+					"column_id":"TOT_WORK_CNT_SCOPE"
+					, "item_name":"상시 인원수"
+					, "required_write":0
+					, "required_modify":0
+					, "format_type":0
+					, "object_type":2
+					, "master_code":"RANGE"
+					, "option_type":0
+					, "write_type":0
+					, "modify_type":0
+					, "default_item":1
+					, "use_write": 1
+					, "use_modify": 1
+				}, "year":{
+					"column_id":"YEAR"
+					, "item_name":"연도"
+					, "required_write":0
+					, "required_modify":0
+					, "format_type":19
+					, "start_year":2020
+					, "module_id":"traing"
+					, "object_type":1
+					, "item_type":1
+					, "write_type":0
+					, "modify_type":0
+					, "default_item":1
+					, "use_write": 1
+					, "use_modify": 1
+				}, "pay":{
+					"column_id":"SPT_PAY"
+					, "item_name":"지원금액"
+					, "required_write":0
+					, "required_modify":0
+					, "format_type":0
+					, "object_type":4
+					, "write_type":0
+					, "modify_type":0
+					, "default_item":1
+					, "use_write": 1
+					, "use_modify": 1
+				}
+			}, "list_order":[
+				"indutyCode"
+				, "rangeForList"
+				, "year"
+				, "pay"
+			]
+			, "view_order":[
+				"indutyCode"
+				, "range"
+				, "year"
+				, "pay"
+			]
+			, "write_order":[
+			    "indutyCode"
+				, "range"
+				, "year"
+				, "pay"
+			]
+			, "writeproc_order":[
+				"indutyCode"
+				, "range"
+				, "year"
+				, "pay"
+			]
+			, "modify_order":[
+				"indutyCode"
+				, "range"
+				, "year"
+				, "pay"
+			]
+			, "modifyproc_order":[
+			    "indutyCode"
+				, "range"
+				, "year"
+				, "pay"
+			], "detailList_search":{
+			"key":{
+				"items":{
+					"year":{
+						"column_id":"A.YEAR"
+						, "item_name":"연도"
+						, "format_type":19
+						, "object_type":2
+						, "start_year":2020
+						, "style_width":120
+					},
+					"indutyCd":{
+						"column_id":"A.INDUTY_CD"
+						, "item_name":"업종"
+						, "format_type":0
+						, "object_type":2
+						, "master_code":"INDUST_CD"
+						, "style_width":120
+					},
+					"totCnt":{
+						"column_id":"A.TOT_WORK_CNT_SCOPE"
+						, "item_name":"상시 근로자 수"
+						, "format_type":0
+						, "object_type":2
+						, "master_code":"RANGE"
+						, "style_width":120
+					}
+				}
+			}, "searchForm_order":[
+				"year"
+				, "indutyCd"
+				, "totCnt"
+			], "search_order":[
+				"year"
+				, "indutyCd"
+				, "totCnt"
+			]
+		}
+	}
+}

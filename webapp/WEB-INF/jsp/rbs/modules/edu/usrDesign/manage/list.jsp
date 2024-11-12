@@ -1,0 +1,352 @@
+<%@ include file="../../../../include/commonTop.jsp"%>
+<%@ taglib prefix="itui" tagdir="/WEB-INF/tags/item" %>
+<%@ taglib prefix="pgui" tagdir="/WEB-INF/tags/pagination" %>
+<%@ taglib prefix="elui" uri="/WEB-INF/tlds/el-tag.tld"%>
+
+<c:set var="mngAuth" value="${elfn:isAuth('MNG')}"/>
+<c:set var="wrtAuth" value="${elfn:isAuth('WRT')}"/>
+<c:set var="searchFormId" value="fn_techSupportSearchForm"/>
+<c:set var="listFormId" value="fn_techSupportListForm"/>
+<c:set var="inputWinFlag" value=""/><%/* 등록/수정창 새창으로 띄울 경우 사용 */%>
+<c:set var="btnModifyClass" value="fn_btn_modify${inputWinFlag}"/><%/* 수정버튼 class */%>
+<c:if test="${!empty TOP_PAGE}">
+	<jsp:include page="${TOP_PAGE}" flush="false">
+		<jsp:param name="javascript_page" value="${moduleJspRPath}/list.jsp"/>
+		<jsp:param name="searchFormId" value="${searchFormId}"/>
+		<jsp:param name="listFormId" value="${listFormId}"/>
+	</jsp:include>
+</c:if>
+<style>
+	#overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0,0,0,0.5);
+		display: none;
+		z-index: 9999;
+	}
+	
+	.loader {
+		border:4px solid #f3f3f3;
+		border-top: 4px solid #3498db;
+		border-radius: 50%;
+		width: 50px;
+		height: 50px;
+		animation: spin 2s linear infinite;
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		z-index: 10000;
+	}
+	span.update-max { margin-left: 32px; border: solid 1px; padding: 4px; border-radius: 8px; color: white; background-color: gray; cursor: pointer; }
+	
+	@keyframes spin {
+		0% { transform: translate(-50%, -50%) rotate(0deg); }
+		100% { transform: translate(-50%, -50%) rotate(360deg); }
+	}
+</style>
+<script defer type="text/javascript" src="${contextPath}<c:out value="${jsPath}/edu/eduDct.js"/>"></script>
+<div id="overlay"></div>
+<div class="loader"></div>
+
+	<!-- contents  -->
+	<div class="contents-wrapper">
+
+		<!-- CMS 시작 -->
+		
+		<!-- search -->
+<%-- 		<itui:searchFormItem divClass="tbMSearch fn_techSupportSearch" formId="${searchFormId}" formName="${searchFormId}" formAction="${URL_DEFAULT_LIST}" itemListSearch="${itemInfo.list_search}" searchOptnHashMap="${searchOptnHashMap}" searchFormExceptParams="${searchFormExceptParams}" submitBtnId="fn_btn_search" submitBtnClass="btnSearch" submitBtnValue="검색" listAction="${URL_DEFAULT_LIST}" listBtnId="fn_btn_totallist" listBtnClass="btnTotalList"/> --%>
+		<!-- //search -->
+
+		<div class="contents-area02">
+			<form action="<c:out value="${formAction}"/>" method="get" id="fn_techSupportSearchForm" name="fn_techSupportSearchForm">
+				<fieldset>
+					<elui:hiddenInput inputInfo="${queryString}" exceptNames="${searchFormExceptParams}"/>
+					<legend class="blind">교육과정 검색 양식 </legend>
+					
+					<div class="basic-search-wrapper">
+						<div class="one-box">
+							<div class="half-box">
+								<dl>
+									<dt>
+										<label for="is_instt"> 소속기관 </label>
+									</dt>
+									<dd>
+										<select id="is_instt" name="is_instt">
+											<option value="">전체</option>
+											<c:forEach items="${searchOptnHashMap.ORG_CODE}" var="org">
+												<option value="<c:out value='${org.OPTION_CODE}' />"><c:out value='${org.OPTION_NAME}' /></option>
+											</c:forEach>
+										</select>
+									</dd>
+								</dl>
+							</div>
+							<div class="half-box">
+								<dl>
+									<dt>
+										<label for="is_edcStatus"> 접수 상태 </label>
+									</dt>
+									<dd>
+										<select id="is_edcStatus" name="is_edcStatus">
+											<option value="">전체</option>
+											<c:forEach items="${searchOptnHashMap.EDC_STATUS}" var="edcStatus">
+												<option value="<c:out value='${edcStatus.OPTION_CODE}' />"><c:out value='${edcStatus.OPTION_NAME}' /></option>
+											</c:forEach>
+										</select>
+									</dd>
+								</dl>
+	
+							</div>
+						</div>
+						<div class="one-box">
+							<div class="half-box">
+								<dl>
+									<dt>
+										<label for="is_edcDate1"> 교육기간 </label>
+									</dt>
+									<dd>
+										<div class="input-calendar-wrapper">
+											<div class="input-calendar-area">
+												<input type="text" id="is_edcDate1" name="is_edcDate1" class="sdate" title="시작일 입력" placeholder="시작일" autocomplete="off" />
+											</div>
+											<div class="word-unit">~</div>
+											<div class="input-calendar-area">
+												<input type="text" id="is_edcDate2" name="is_edcDate2" class="edate" title="종료일 입력" placeholder="종료일" autocomplete="off" />
+											</div>
+										</div>
+									</dd>
+								</dl>
+							</div>
+							<div class="half-box">
+								<dl>
+									<dt>
+										<label for="is_recptDate1"> 접수기간 </label>
+									</dt>
+									<dd>
+										<div class="input-calendar-wrapper">
+											<div class="input-calendar-area">
+												<input type="text" id="is_recptDate1" name="is_recptDate1" class="sdate1" title="시작일 입력" placeholder="시작일" autocomplete="off" />
+											</div>
+											<div class="word-unit">~</div>
+											<div class="input-calendar-area">
+												<input type="text" id="is_recptDate2" name="is_recptDate2" class="edate1" title="시작일 입력" placeholder="종료일" autocomplete="off" />
+											</div>
+										</div>
+									</dd>
+								</dl>
+							</div>
+	
+	
+						</div>
+						<div class="one-box">
+							<dl>
+								<dt>
+									<label for="keyField">검색</label>
+								</dt>
+								<dd>
+									<div class="input-search-wrapper">
+										<select id="keyField" name="keyField">
+											<option value="edcName">교육명</option>
+											<option value="edcPlace">교육장소</option>
+										</select>
+										<input type="search" id="key" name="key" value="" class="" placeholder="입력해주세요">
+									</div>
+								</dd>
+							</dl>
+						</div>
+	
+					</div>
+					<div class="btns-area">
+						<button type="submit" class="btn-search02 btnSearch" id="fn_btn_search" >
+							<img src="${contextPath}${imgPath}/icon/icon_search03.png" alt="" />
+								<strong>검색</strong>
+						</button>
+						<button type="button" class="btn-search02" style="margin-left: 15px;" onclick="initSearhParams()">
+							<strong>초기화</strong>
+						</button>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+
+
+		<div class="title-wrapper">
+			<p class="total fl">
+				총 <strong><c:out value="${paginationInfo.totalRecordCount}" /></strong> 건 (${paginationInfo.currentPageNo}/${paginationInfo.totalPageCount}페이지)
+			</p>
+			
+			<div class="fr">
+				<a href="javascript:void(0);" class="btn-m01 btn-color01" onclick="openModalForExcel()"> 엑셀업로드 </a>
+				<a href="javascript:void(0);" class="btn-m01 btn-color01" onclick="downloadExcel()"> 엑셀다운로드 </a>
+				<a href="javascript:void(0);" class="btn-m01 btn-color01" onclick="goInput()"> 등록 </a>
+				<a href="javascript:void(0);" class="btn-m01 btn-color02" onclick="deleteCheckedItem()">선택삭제</a>
+			</div>
+		</div>
+
+		<div class="table-type01 horizontal-scroll">
+			<table summary="<c:out value="${settingInfo.list_title}"/> 목록을 볼 수 있고 수정 링크를 통해서 수정페이지로 이동합니다.">
+				<caption><c:out value="${settingInfo.list_title}"/> 목록</caption>
+				<colgroup>
+					<col style="width: 5%" />
+					<col style="width: 5%" />
+					<col style="width: 20%" />
+					<col style="width: 7%" />
+					<col style="width: 15%" />
+					<col style="width: 15%" />
+					<col style="width: 10%" />
+					<col style="width: 7%" />
+					<col style="width: 7%" />
+				</colgroup>
+				<thead>
+					<tr>
+						<th scope="col"><input type="checkbox" class="checkbox-type01" id="checkbox-all" name="checkbox-edc" /></th>
+						<th scope="col">번호</th>
+						<th scope="col"><itui:objectItemName itemId="edcName" itemInfo="${itemInfo}"/></th>
+						<th scope="col">교육신청</th>
+						<th scope="col"><itui:objectItemName itemId="edcDate" itemInfo="${itemInfo}"/></th>
+						<th scope="col"><itui:objectItemName itemId="recptDate" itemInfo="${itemInfo}"/></th>
+						<th scope="col"><itui:objectItemName itemId="edcPlace" itemInfo="${itemInfo}"/></th>
+						<th scope="col"><itui:objectItemName itemId="edcStatus" itemInfo="${itemInfo}"/></th>
+						<th scope="col"><itui:objectItemName itemId="insttIdx" itemInfo="${itemInfo}"/></th>
+					</tr>
+				</thead>
+				<tbody>
+					<c:if test="${empty list}">
+						<tr>
+							<td colspan="9" class="bllist"><spring:message code="message.no.list"/></td>
+						</tr>
+					</c:if>
+					<c:set var="listNo" value="${paginationInfo.totalRecordCount - paginationInfo.firstRecordIndex}" />
+					<c:forEach var="listDt" items="${list}" varStatus="i">
+						<tr>
+							<td><input type="checkbox" class="checkbox-type01" name="checkbox-edc" value="<c:out value='${listDt.EDC_IDX}' />" /></td>
+							<td class="num"><c:out value='${listNo}' /></td>
+							<td>
+								<a href="javascript:void(0);" data-idx="<c:out value='${listDt.EDC_IDX}' />" onclick="goView(event)">
+									<strong class="point-color01">
+										<c:out value='${listDt.EDC_NAME}' />
+									</strong>
+								</a>
+								<a href="javascript:void(0);" class="btn-linked" data-idx="<c:out value='${listDt.EDC_IDX}' />" onclick="goView(event)">
+									<img src="${contextPath}${imgPath}/icon/icon_search04.png" alt="" />
+								</a>
+							</td>
+							<td>
+								<c:out value='${listDt.EDC_MEMBER_COUNT}' /> 명
+							</td>
+							<td>
+								<fmt:formatDate pattern="yyyy-MM-dd" value="${listDt.EDC_START_DATE}"/>
+								~<br/>
+								<fmt:formatDate pattern="yyyy-MM-dd" value="${listDt.EDC_END_DATE}"/> 
+							</td>
+							<td>
+								<fmt:formatDate pattern="yyyy-MM-dd" value="${listDt.RECPT_BGNDT}"/>
+								~<br/>
+								<fmt:formatDate pattern="yyyy-MM-dd" value="${listDt.RECPT_ENDDT}"/> 
+							</td>
+							<td>
+								<c:out value='${listDt.EDC_PLACE}' />
+							</td>
+							<td>
+								<c:out value='${listDt.RECPT_STATUS_NAME}' />
+							</td>
+							<td>
+								<c:out value='${listDt.INSTT_NAME}' />
+							</td>
+						</tr>
+						<c:set var="listNo" value="${listNo - 1}"/>
+					</c:forEach>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="paging-navigation-wrapper">
+			<!-- 페이징 네비게이션 -->
+			<pgui:pagination listUrl="${URL_PAGE_LIST}" pgInfo="${paginationInfo}" imgPath="${imgPath}" pageName="${elfn:getString(settingInfo.page_name, 'page')}"/>
+			
+			<!-- <p class="paging-navigation">
+				<a href="#none" class="btn-first">맨 처음 페이지로 이동</a> <a
+					href="#none" class="btn-preview">이전 페이지로 이동</a> <strong>1</strong>
+				<a href="#">2</a> <a href="#">3</a> <a href="#">4</a> <a
+					href="#">5</a> <a href="#none" class="btn-next">다음 페이지로
+					이동</a> <a href="#none" class="btn-last">맨 마지막 페이지로 이동</a>
+			</p> -->
+
+			<!-- //페이징 네비게이션 -->
+		</div>
+
+
+		<!-- //CMS 끝 -->
+	</div>
+<!-- //contents  -->
+<form action="" method="post" style="display: none;" id="form-box">
+	<input type="hidden" name="idx" id="idx" value="" />
+</form>
+
+<!-- 엑셀 업로드 모달창 -->
+	<div class="mask"></div>
+    <div class="modal-wrapper" id="modal-excelupload">
+    	<h2>교육과정 엑셀 업로드</h2>
+        <div class="modal-area">
+        	<form action="" id="excelUploadForm">
+				<div class="contents-box pl0">
+					<div class="basic-search-wrapper">
+						<div class="one-box">
+							<dl>
+								<dt>
+									<label for="sample">샘플 파일</label>
+								</dt>
+								<dd class="block">
+									<p class="word-linked01" id="sample">
+										<a href="${contextPath}/dct/eduDct/downloadSample.do?mId=<c:out value='${crtMenu.menu_idx}' />">교육과정 업로드 샘플 파일.xlsx</a>
+									</p>
+								</dd>
+							</dl>
+						</div>
+	
+						<div class="one-box">
+							<dl>
+								<dt>
+									<label for="excelFile">첨부 파일</label>
+								</dt>
+								<dd class="block">
+									<div class="fileBox">
+										<input type="text" id="fileName" class="fileName" readonly="readonly" placeholder="파일찾기">
+										<label for="input-file" class="btn_file">찾아보기</label>
+										<input type="file" id="input-file" class="input-file" required onchange="javascript:document.getElementById('fileName').value = this.value">
+									</div>
+								</dd>
+							</dl>
+						</div>
+	
+						<div class="one-box">
+							<dl>
+								<dt>
+									<label> 비고 </label>
+								</dt>
+								<dd class="block">
+									<p class="word">
+										<strong>엑셀 업로드를 이용한 데이터입력은 다운받은 엑셀 서식을 이용하여 업로드해주시기 바랍니다.</strong>
+									</p>
+								</dd>
+							</dl>
+						</div>
+					</div>
+				</div>
+	
+				<div class="btns-area">
+					<button type="button" class="btn-b02 round01 btn-color03 left" data-mId="<c:out value='${crtMenu.menu_idx}' />" onclick="uploadExcel(event)">
+						<span>업로드</span>
+						<img src="${contextPath}${imgPath}/icon/icon_arrow_right03.png" alt="업로드 버튼 아이콘" class="arrow01" />
+					</button>
+				</div>
+			</form>
+		</div>
+
+        <button type="button" class="btn-modal-close">모달 창 닫기</button>
+  </div>
+<!-- // 엑셀 업로드 모달 끝 -->
+<c:if test="${!empty BOTTOM_PAGE}"><jsp:include page="${BOTTOM_PAGE}" flush="false"/></c:if>

@@ -1,0 +1,32 @@
+{
+   "setting_info":{
+      "list_title":"최근 직업훈련 실시 현황",
+      "input_title":"최근 직업훈련 실시 현황 등록",
+      "deleteList_title":"최근 직업훈련 실시 현황 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "dset_input_npname": "IDX_VIEW",
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"execIdx",
+      "idx_column":"EXEC_IDX",
+      "design":"default",
+      "use_file":1,
+      "use_new":1
+   }
+   , "sprt_setting_info":{
+      "list_title":"최근 직업훈련 지원 현황 목록",
+      "input_title":"최근 직업훈련 지원 현황 등록",
+      "deleteList_title":"최근 직업훈련 지원 현황 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "dset_input_npname": "IDX_VIEW",
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"sprtIdx",
+      "idx_column":"SPRT_IDX",
+      "design":"default",
+      "use_file":1,
+      "use_new":1
+   }
+}

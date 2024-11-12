@@ -1,0 +1,350 @@
+{
+	"item_info":{
+		"items":{
+			"applyIdx":{
+				"column_id":"APPLY_IDX"
+				, "item_name":"컨설팅신청식별색인"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bplNo":{
+				"column_id":"BPL_NO"
+				, "item_name":"사업장관리번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":11
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "corpNm":{
+				"column_id":"CORP_NM"
+				, "item_name":"기업명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":50
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "zip":{
+				"column_id":"ZIP"
+				, "item_name":"우편번호1"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":10
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bplAddr":{
+				"column_id":"BPL_ADDR"
+				, "item_name":"사업장주소"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":255
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bplAddrDtl":{
+				"column_id":"BPL_ADDR_DTL"
+				, "item_name":"사업장상세주소"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "cmptncBrffcIdx":{
+				"column_id":"CMPTNC_BRFFC_IDX"
+				, "item_name":"관할지부지사식별색인"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "corpPicNm":{
+				"column_id":"CORP_PIC_NM"
+				, "item_name":"기업담당자명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":30
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "corpPicTelNo":{
+				"column_id":"CORP_PIC_TELNO"
+				, "item_name":"기업담당자전화번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":30
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},"corpPicEmail":{
+				"column_id":"CORP_PIC_EMAIL"
+				, "item_name":"기업담당자이메일"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":40
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "recomendPsitn":{
+				"column_id":"RECOMEND_PSITN"
+				, "item_name":"추천인소속"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":50
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "recomendPsitnEtc":{
+				"column_id":"RECOMEND_PSITN_ETC"
+				, "item_name":"추천인소속(기타)"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":50
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "recomendNm":{
+				"column_id":"RECOMEND_NM"
+				, "item_name":"추천인명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":50
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "recomendTelno":{
+				"column_id":"RECOMEND_TELNO"
+				, "item_name":"추천인연락처"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "maximum":30
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "status":{
+				"column_id":"STATUS"
+				, "item_name":"처리상태"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+			
+		}, "list_order":[
+			"applyIdx"
+			, "bplNo"
+			, "corpNm"
+			, "zip"
+			, "bplAddr"
+			, "bplAddrDtl"
+			, "cmptncBrffcIdx"
+			, "corpPicNm"
+			, "corpPicTelNo"
+			, "corpPicEmail"
+			, "recomendPsitn"
+			, "recomendPsitnEtc"
+			, "recomendNm"
+			, "recomendTelno"
+			, "status"
+		]
+		, "view_order":[
+			"applyIdx"
+			, "bplNo"
+			, "corpNm"
+			, "zip"
+			, "bplAddr"
+			, "bplAddrDtl"
+			, "cmptncBrffcIdx"
+			, "corpPicNm"
+			, "corpPicTelNo"
+			, "corpPicEmail"
+			, "recomendPsitn"
+			, "recomendPsitnEtc"
+			, "recomendNm"
+			, "recomendTelno"
+			, "status"
+		]
+		, "write_order":[
+			"bplNo"
+			, "corpNm"
+			, "zip"
+			, "bplAddr"
+			, "bplAddrDtl"
+			, "cmptncBrffcIdx"
+			, "corpPicNm"
+			, "corpPicEmail"
+			, "recomendPsitn"
+			, "recomendPsitnEtc"
+			, "recomendNm"
+		]
+		, "writeproc_order":[
+			"bplNo"
+			, "corpNm"
+			, "zip"
+			, "bplAddr"
+			, "bplAddrDtl"
+			, "cmptncBrffcIdx"
+			, "corpPicNm"
+			, "corpPicEmail"
+			, "recomendPsitn"
+			, "recomendPsitnEtc"
+			, "recomendNm"
+		]
+		, "modify_order":[
+			"status"
+		]
+		, "modifyproc_order":[
+			"status"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"applyIdx": {
+						"item_name":"컨설팅신청식별색인"
+						,"column_id":"APPLY_IDX"
+					},
+					"bplNo" : {
+						"item_name":"사업장관리번호"
+						,"column_id":"BPL_NO"
+					},
+					"corpNm": {
+						"item_name":"기업명"
+						,"column_id":"CORP_NM"
+					},
+					"zip": {
+						"item_name":"우편번호"
+						,"column_id":"ZIP"
+					},
+					"bplAddr" : {
+						"item_name":"사업장주소"
+						,"column_id":"BPL_ADDR"
+					},
+					"bplAddrDtl" : {
+						"item_name":"사업장상세주소"
+						,"column_id":"BPL_ADDR_DTL"
+					},
+					"cmptncBrffcIdx" : {
+						"item_name":"관할지부지사식별색인"
+						,"column_id":"CMPTNC_BRFFC_IDX"
+					},
+					"corpPicNm" : {
+						"item_name":"기업담당자명"
+						,"column_id":"CORP_PIC_NM"
+					},
+					"corpPicTelNo" : {
+						"item_name":"기업담당자전화번호"
+						,"column_id":"CORP_PIC_TELNO"
+					},
+					"corpPicEmail" : {
+						"item_name":"CORP_PIC_EMAIL"
+						,"column_id":"기업담당자이메일"
+					},
+					"recomendPsitn" : {
+						"item_name":"추천인소속"
+						,"column_id":"RECOMEND_PSITN"
+					},
+					"recomendPsitnEtc" : {
+						"item_name":"추천인소속(기타)"
+						,"column_id":"RECOMEND_PSITN_ETC"
+					},
+					"recomendNm" : {
+						"item_name":"추천인명"
+						,"column_id":"RECOMEND_NM"
+					},
+					"recomendTelno" : {
+						"item_name":"추천인연락처"
+						,"column_id":"RECOMEND_TELNO"
+					},
+					"status" : {
+						"item_name":"처리상태"
+						,"column_id":"STATUS"
+					}
+				}
+			},
+			"searchForm_order":[
+				"applyIdx"
+				, "bplNo"
+				, "corpNm"
+				, "zip"
+				, "bplAddr"
+				, "bplAddrDtl"
+				, "cmptncBrffcIdx"
+				, "corpPicNm"
+				, "corpPicTelNo"
+				, "corpPicEmail"
+				, "recomendPsitn"
+				, "recomendPsitnEtc"
+				, "recomendNm"
+				, "recomendTelno"
+				, "status"
+			], "search_order":[
+				"applyIdx"
+				, "bplNo"
+				, "corpNm"
+				, "zip"
+				, "bplAddr"
+				, "bplAddrDtl"
+				, "cmptncBrffcIdx"
+				, "corpPicNm"
+				, "corpPicTelNo"
+				, "corpPicEmail"
+				, "recomendPsitn"
+				, "recomendPsitnEtc"
+				, "recomendNm"
+				, "recomendTelno"
+				, "status"
+			], "searchAddOptn_order":[
+				"trRecord"
+			]
+		}
+	}
+}

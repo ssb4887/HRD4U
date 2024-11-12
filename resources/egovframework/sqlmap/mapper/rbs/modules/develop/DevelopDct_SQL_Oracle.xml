@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. ${targetTableIdx}, ${targetTable}, [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.develop.developDctMapper">
+	<!-- 테이블명 -->
+	<sql id="DEVELOP_TABLE_NAME">HRD_DEVELOP</sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(${targetTableIdx}), 0)</trim> + 1 MAXID
+		FROM 
+		${targetTable} A
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.${targetTableIdx}), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		${targetTable} A 
+		WHERE A.${targetTableIdx} LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*
+			<include refid="editAuthListQuery"/>
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			ORDER BY ${orderColumn}
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			${targetTable} A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<select id="getSupportListCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+			SELECT 
+				COUNT(*)
+			FROM HRD_CNSL A, HRD_CNSL_COST B
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND B.ISDELETE = '0'
+			AND A.CNSL_TYPE IN ('1', '2', '3')
+			AND A.CNSL_IDX = B.CNSL_IDX
+			AND B.CONFM_STATUS NOT IN ('5', '20')
+			<if test="YEAR != null">
+				AND TO_CHAR(A.REGI_DATE,'YYYY') = #{YEAR}
+			</if>
+	</select>
+	
+	<select id="getSupportList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+				A.CNSL_IDX,
+				B.CT_IDX,
+				A.BPL_NO,
+				TO_CHAR(A.REGI_DATE,'YYYY') AS START_YEAR,
+				CASE TO_CHAR(A.CNSL_TYPE)
+						         WHEN '1' THEN '사업주자체훈련' 
+						         WHEN '2' THEN 'S-OJT(일반)'
+						         ELSE 'S-OJT(특화)'
+						         END AS BIZ_TYPE,
+				A.CNSL_TYPE,
+				A.CNSL_TME,
+				B.CONFM_STATUS,
+				B.REGI_DATE,
+				B.LAST_MODI_DATE,
+				B.SPLPC_AMT,
+				(
+			        SELECT
+			            INSTT_NAME
+			        FROM
+			            HRD_COM_INSTT
+			        WHERE
+			            INSTT_IDX = A.CMPTNC_BRFFC_IDX
+			    ) AS INSTT_NAME,
+			    (SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = A.BPL_NO) AS BPL_NM
+			FROM 
+				HRD_CNSL A, HRD_CNSL_COST B
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+				AND B.ISDELETE = '0'
+				AND A.CNSL_TYPE IN ('1', '2', '3')
+				AND A.CNSL_IDX = B.CNSL_IDX
+				AND B.CONFM_STATUS NOT IN ('5', '20')
+			<if test="YEAR != null">
+				AND TO_CHAR(A.REGI_DATE,'YYYY') = #{YEAR}
+			</if>
+			ORDER BY 
+				CONFM_STATUS ASC
+	</select>
+	
+	<select id="selectHelpInfo" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		(SELECT CLASS_NAME FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'SIDO_SIGUNGU'
+		        AND CLASS_IDX = SUBSTR(A.TR_OPRTN_GUGUN_CD, 0, 2))
+		|| ' ' ||
+		(SELECT CLASS_NAME FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'SIDO_SIGUNGU'
+		        AND CLASS_IDX = A.TR_OPRTN_GUGUN_CD)
+		 AS SIDO_NAME,
+		(SELECT CLASS_NAME FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = SUBSTR(A.TR_DTY, 0, 2))
+		|| ' <![CDATA[>]]> ' ||
+		(SELECT CLASS_NAME FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = SUBSTR(A.TR_DTY, 0, 4))
+		|| ' <![CDATA[>]]> ' ||
+		(SELECT CLASS_NAME FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = A.TR_DTY)
+		AS NCS_NAME,
+		(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = A.TR_OPRTN_BRFFC_CD) AS INSTT_NAME,
+		A.ETC_DEMAND_MATTER,
+		A.CONFM_STATUS,
+		A.DOCTOR_OPINION
+		FROM 
+			HRD_DEVLOP A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<select id="selectDevList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*, B.TP_NM, SUBSTR(B.NCS_SCLAS_CD, 0, 2) AS NCS_LCLAS_CD, B.PRTBIZ_IDX,
+			(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = A.TR_OPRTN_BRFFC_CD) AS INSTT_NAME,
+			(SELECT CLASS_NAME FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = SUBSTR(B.NCS_SCLAS_CD, 0, 2)) AS NCS_LCLAS_NM,
+			(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = A.BPL_NO) AS BPL_NM
+			FROM 
+				HRD_DEVLOP A, HRD_DEVLOP_TP B
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+				AND A.DEVLOP_IDX = B.DEVLOP_IDX(+)
+				AND A.CONFM_STATUS NOT IN ('5','20')
+			<if test="ISHEAD == null and INSTT_IDX != null">
+				AND A.TR_OPRTN_BRFFC_CD = #{INSTT_IDX}
+			</if>
+			<if test="ISHEAD == null and DOCTOR_IDX != null">
+				AND A.DOCTOR_IDX = #{DOCTOR_IDX}
+			</if>
+			ORDER BY A.REGI_DATE DESC, A.CONFM_STATUS ASC 
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectSummary" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*,
+			CASE WHEN ALL_YEAR_CT != 0 THEN YEAR_CT / ALL_YEAR_CT ELSE 0 END AS COMPLETE_RATIO,
+			(
+				SELECT 
+					COUNT(CASE WHEN EXTRACT(MONTH FROM A.REGI_DATE) = EXTRACT(MONTH FROM SYSDATE) THEN 1 ELSE NULL END) 
+				FROM 
+					HRD_DEVLOP A 
+				WHERE 
+					A.ISDELETE = '0' 
+					AND A.CONFM_STATUS = '55'
+					<if test="INSTT_IDX != null">
+						AND TR_OPRTN_BRFFC_CD = #{INSTT_IDX}
+					</if>
+					<if test="DOCTOR_IDX != null">
+						AND DOCTOR_IDX = #{DOCTOR_IDX}
+					</if>
+			) AS DEVLOP_MONTH_CT,
+        	(
+        		SELECT 
+        			COUNT(CASE WHEN EXTRACT(MONTH FROM B.REGI_DATE) = EXTRACT(MONTH FROM SYSDATE) THEN 1 ELSE NULL END) 
+        		FROM 
+        			HRD_CNSL B 
+        		WHERE 
+        			B.ISDELETE = '0' 
+        			AND B.CONFM_STATUS = '55' 
+        			AND B.CNSL_TYPE IN ('1', '2', '3')
+        			<if test="INSTT_IDX != null">
+						AND CMPTNC_BRFFC_IDX = #{INSTT_IDX}
+					</if>
+					<if test="DOCTOR_IDX != null">
+						AND CMPTNC_BRFFC_PIC_IDX = (SELECT MEMBER_IDX FROM HRD_COM_DOCTOR WHERE DOCTOR_IDX = #{DOCTOR_IDX})
+					</if>
+        	) AS CNSL_MONTH_CT
+		FROM
+		(
+			SELECT
+				SUM(ALL_CT) AS ALL_CT,
+				SUM(ALL_YEAR_CT) AS ALL_YEAR_CT,
+				SUM(COMPLETE_CT) AS COMPLETE_CT,
+				SUM(NO_HANDLING_CT) AS NO_HANDLING_CT,
+				SUM(NO_HANDLING_IMPEND_CT) AS NO_HANDLING_IMPEND_CT,
+				SUM(YEAR_CT) AS YEAR_CT,
+				SUM(MONTH_CT) AS MONTH_CT
+			FROM
+			(
+				SELECT 
+					COUNT(DEVLOP_IDX) AS ALL_CT,
+					COUNT(CASE WHEN EXTRACT(YEAR FROM REGI_DATE) = EXTRACT(YEAR FROM SYSDATE) THEN 1 ELSE NULL END) AS ALL_YEAR_CT,
+				    COUNT(CASE WHEN CONFM_STATUS = '55' THEN 1 ELSE NULL END) AS COMPLETE_CT,
+				    COUNT(CASE WHEN REGI_DATE + 10 <![CDATA[>=]]> SYSDATE AND CONFM_STATUS NOT IN ('5', '55') THEN 1 ELSE NULL END) AS NO_HANDLING_CT,
+				    COUNT(CASE WHEN REGI_DATE + 7 <![CDATA[<]]> SYSDATE AND CONFM_STATUS NOT IN ('5', '55') THEN 1 ELSE NULL END) AS NO_HANDLING_IMPEND_CT,
+				    COUNT(CASE WHEN EXTRACT(YEAR FROM REGI_DATE) = EXTRACT(YEAR FROM SYSDATE) AND CONFM_STATUS = '55' THEN 1 ELSE NULL END) AS YEAR_CT,
+				    COUNT(CASE WHEN EXTRACT(MONTH FROM REGI_DATE) = EXTRACT(MONTH FROM SYSDATE) AND CONFM_STATUS = '55' THEN 1 ELSE NULL END) AS MONTH_CT,
+				    'DEVELOP' AS DEVLOP_TYPE
+				FROM 
+					HRD_DEVLOP
+				WHERE 
+					ISDELETE = '0'
+					AND CONFM_STATUS NOT IN ('5', '20', '42')
+				<if test="INSTT_IDX != null">
+					AND TR_OPRTN_BRFFC_CD = #{INSTT_IDX}
+				</if>
+				<if test="DOCTOR_IDX != null">
+					AND DOCTOR_IDX = #{DOCTOR_IDX}
+				</if>
+				UNION
+				SELECT 
+					COUNT(CNSL_IDX) AS ALL_CT,
+					COUNT(CASE WHEN EXTRACT(YEAR FROM REGI_DATE) = EXTRACT(YEAR FROM SYSDATE) THEN 1 ELSE NULL END) AS ALL_YEAR_CT,
+				    COUNT(CASE WHEN CONFM_STATUS = '55' THEN 1 ELSE NULL END) AS COMPLETE_CT,
+				    COUNT(CASE WHEN REGI_DATE + 10 <![CDATA[>=]]> SYSDATE AND CONFM_STATUS NOT IN ('5', '55') THEN 1 ELSE NULL END) AS NO_HANDLING_CT,
+				    COUNT(CASE WHEN REGI_DATE + 7 <![CDATA[<]]> SYSDATE AND CONFM_STATUS NOT IN ('5', '55') THEN 1 ELSE NULL END) AS NO_HANDLING_IMPEND_CT,
+				    COUNT(CASE WHEN EXTRACT(YEAR FROM REGI_DATE) = EXTRACT(YEAR FROM SYSDATE) AND CONFM_STATUS = '55' THEN 1 ELSE NULL END) AS YEAR_CT,
+				    COUNT(CASE WHEN EXTRACT(MONTH FROM REGI_DATE) = EXTRACT(MONTH FROM SYSDATE) AND CONFM_STATUS = '55' THEN 1 ELSE NULL END) AS MONTH_CT,
+				    'CNSL' AS DEVLOP_TYPE
+				FROM 
+					HRD_CNSL
+				WHERE 
+					ISDELETE = '0'
+					AND CONFM_STATUS NOT IN ('5', '20')
+					AND CNSL_TYPE IN ('1', '2', '3')
+				<if test="INSTT_IDX != null">
+					AND CMPTNC_BRFFC_IDX = #{INSTT_IDX}
+				</if>
+				<if test="DOCTOR_IDX != null">
+					AND CMPTNC_BRFFC_PIC_IDX = (SELECT MEMBER_IDX FROM HRD_COM_DOCTOR WHERE DOCTOR_IDX = #{DOCTOR_IDX})
+				</if>
+			)
+		) A
+	</select>
+	
+	<select id="selectNoHandlingList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+		    A.DEVLOP_IDX AS IDX,
+		    A.BPL_NO,
+		    A.CONFM_STATUS,
+		    B.TP_NM,
+		    '표준개발' AS DEV_TYPE,
+		    A.REGI_DATE,
+		    TRUNC(SYSDATE) - TRUNC(A.REGI_DATE) AS DAY_CT
+		FROM
+		    HRD_DEVLOP A,
+		    HRD_DEVLOP_TP B
+		WHERE
+		    A.ISDELETE = '0'
+		    AND A.DEVLOP_IDX = B.DEVLOP_IDX
+		    AND A.CONFM_STATUS NOT IN ('5', '20', '42', '55')
+		    AND A.DOCTOR_IDX = #{DOCTOR_IDX}
+		UNION
+		SELECT
+		    A.CNSL_IDX AS IDX,
+		    A.BPL_NO,
+		    A.CONFM_STATUS,
+		    TO_CHAR(SYSDATE,'YYYY') || UNISTR('년 맞춤개발') AS TP_NM,
+		    '맞춤개발' AS DEV_TYPE,
+		    A.REGI_DATE,
+		    TRUNC(SYSDATE) - TRUNC(A.REGI_DATE) AS DAY_CT
+		FROM
+		    HRD_CNSL A
+		WHERE
+		    A.ISDELETE = '0'
+		    AND A.CONFM_STATUS NOT IN ('5', '20', '55')
+		    AND A.CMPTNC_BRFFC_PIC_IDX = #{DOCTOR_IDX}
+	</select>
+	
+	<select id="selectDevCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			HRD_DEVLOP A, HRD_DEVLOP_TP B
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND A.DEVLOP_IDX = B.DEVLOP_IDX(+)
+			AND A.CONFM_STATUS NOT IN ('5','20')
+		<if test="ISHEAD == null and INSTT_IDX != null">
+			AND A.TR_OPRTN_BRFFC_CD = #{INSTT_IDX}
+		</if>
+		<if test="ISHEAD == null and DOCTOR_IDX != null">
+			AND A.DOCTOR_IDX = #{DOCTOR_IDX}
+		</if>
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*
+			<include refid="editAuthListQuery"/>
+		FROM 
+		${targetTable} A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.*
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1 
+		WHERE ${targetTableIdx} = #{KEY_IDX}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		${targetTable} A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		A.* 
+		FROM 
+		${targetTable} A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO ${targetTable} (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<insert id="insertConfm" parameterType="java.util.HashMap">
+		INSERT INTO ${targetTable} (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			ORDER BY ${orderColumn}
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		${targetTable} A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM ${targetTable}  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	
+</mapper>            

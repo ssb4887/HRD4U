@@ -1,0 +1,23 @@
+SVN 설치 후 셋팅
+
+1. Tomcat 7.0, jdk 1.7 선택
+2. globals.properties에서 경로(LINE 120 이후부터 수정) 및 licenseKey 수정
+3. server.xml
+
+<Context docBase="Source" path="/" reloadable="true" source="org.eclipse.jst.jee.server:Source"/>
+
+밑의 경우처럼 수정  
+
+ <Context docBase="Source" path="/Source" reloadable="true" source="org.eclipse.jst.jee.server:Source">
+      	<Resource auth="Container" driverClassName="oracle.jdbc.driver.OracleDriver" factory="oracle.jdbc.pool.OracleDataSourceFactory" logAbandoned="true" maxActive="100" maxIdle="10" maxWait="10000" minEvictableIdleTimeMillis="60000" name="jdbc/RBISDB" password="hrd4U1@3$" removeAbandoned="true" removeAbandonedTimeout="300" timeBetweenEvictionRunsMillis="10000" type="oracle.jdbc.pool.OracleDataSource" url="jdbc:oracle:thin:@165.213.109.68:1521:ORCL" user="HRD4U_USER"/>
+      </Context>
+
+4. maven 파일 설치 및 일부 파일 삭제
+
+※삭제 jar 파일 목록
+1) aspectjrt-1.8.11.jar
+2) isoparser-1.1.22.jar
+3) itextpdf-5.5.13.1.jar
+4) tika-core-1.16.jar
+5) tika-parsers-1.16.jar
+6) xmlworker-5.5.13.1.jar

@@ -1,0 +1,883 @@
+{
+	"item_info": {
+		"items": {
+			"hrpId": {
+				"column_id": "HRP_ID",
+				"item_name": "전문가인력풀ID",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"entrstRoleCd": {
+				"column_id": "ENTRST_ROLE_CD",
+				"item_name": "위촉역할코드",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"sortSn": {
+				"column_id": "SORT_SN",
+				"item_name": "정렬순번",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"diaryIdx": {
+				"column_id": "DIARY_IDX",
+				"item_name": "일지식별색인",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"evlDe": {
+				"column_id": "EVL_DE",
+				"item_name": "평가일자",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"evlItem1": {
+				"column_id": "EVL_ITEM1",
+				"item_name": "평가항목1",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},"evlItem2": {
+				"column_id": "EVL_ITEM2",
+				"item_name": "평가항목2",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},"evlItem3": {
+				"column_id": "EVL_ITEM3",
+				"item_name": "평가항목3",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},"evlItem4": {
+				"column_id": "EVL_ITEM4",
+				"item_name": "평가항목4",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},"evlItem5": {
+				"column_id": "EVL_ITEM5",
+				"item_name": "평가항목5",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"inptBgndt": {
+				"column_id": "INPT_BGNDT",
+				"item_name": "투입시작일",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"inputEnddt": {
+				"column_id": "INPT_ENDDT",
+				"item_name": "투입종료일",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"inptBgntm": {
+				"column_id": "INPT_BGNTM",
+				"item_name": "투입시작시간",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"inptEndtm": {
+				"column_id": "INPT_ENDTM",
+				"item_name": "투입종료시간",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"evlTotPoint": {
+				"column_id": "EVL_TOT_POINT",
+				"item_name": "평가총점",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"evlGrad": {
+				"column_id": "EVL_GRAD",
+				"item_name": "평가등급",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"gnrlzOption": {
+				"column_id": "GNRLZ_OPINION",
+				"item_name": "종합의견",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"bizNm": {
+				"column_id": "BIZ_NM",
+				"item_name": "사업명",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"actDe": {
+				"column_id": "ACT_DE",
+				"item_name": "활동일자",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"actDaycnt": {
+				"column_id": "ACT_DAYCNT",
+				"item_name": "활동일수",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"actRoleCd": {
+				"column_id": "ACT_ROLE_CD",
+				"item_name": "활동역할코드",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"allwnc": {
+				"column_id": "ALLWNC",
+				"item_name": "수당",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"brffcNm": {
+				"column_id": "BRFFC_NM",
+				"item_name": "지부지사명",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"fatherSign": {
+				"column_id": "FATHER_SIGN",
+				"item_name": "부서명",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"picNm": {
+				"column_id": "PIC_NM",
+				"item_name": "담당자명",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"rspnsYn": {
+				"column_id": "RSPNS_YN",
+				"item_name": "응답여부",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"inoutSe": {
+				"column_id": "INOUT_SE",
+				"item_name": "내외구분",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"hrpSe": {
+				"column_id": "HRP_SE",
+				"item_name": "전문가인력풀구분",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"evlStatus": {
+				"column_id": "EVL_STATUS",
+				"item_name": "평가상태",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"isdelete": {
+				"column_id": "ISDELETE",
+				"item_name": "삭제가부",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"regiIdx": {
+				"column_id": "REGI_IDX",
+				"item_name": "등록식별색인",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"regiId": {
+				"column_id": "REGI_ID",
+				"item_name": "등록아이디",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"regiName": {
+				"column_id": "REGI_NAME",
+				"item_name": "등록이름",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"regiDate": {
+				"column_id": "REGI_DATE",
+				"item_name": "등록일자",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"regiIp": {
+				"column_id": "REGI_IP",
+				"item_name": "등록아이피",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"lastModiIdx": {
+				"column_id": "LAST_MODI_IDX",
+				"item_name": "최종수정식별색인",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"lastModiId": {
+				"column_id": "LAST_MODI_ID",
+				"item_name": "최종수정아이디",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"lastModiName": {
+				"column_id": "LAST_MODI_NAME",
+				"item_name": "최종수정이름",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"lastModiDate": {
+				"column_id": "LAST_MODI_DATE",
+				"item_name": "최종수정일자",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"lastModiIp": {
+				"column_id": "LAST_MODI_IP",
+				"item_name": "최종수정아이피",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": 1,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			}
+		},
+		"list_order": [
+			"hrpId",
+			"entrstRoleCd",
+			"sortSn",
+			"diaryIdx",
+			"cnslTme",
+			"evlDe",
+			"evlItem1",
+			"evlItem2",
+			"evlItem3",
+			"evlItem4",
+			"evlItem5",
+			"inptBgndt",
+			"inputEnddt",
+			"inptBgntm",
+			"inptEndtm",
+			"evlTotPoint",
+			"evlGrad",
+			"gnrlzOption",
+			"bizNm",
+			"actDe",
+			"actDaycnt",
+			"actRoleCd",
+			"allwnc",
+			"brffcNm",
+			"fatherSign",
+			"picNm",
+			"rspnsYn",
+			"inoutSe",
+			"hrpSe",
+			"evlStatus"
+		],
+		"view_order": [
+			"hrpId",
+			"entrstRoleCd",
+			"sortSn",
+			"diaryIdx",
+			"cnslTme",
+			"evlDe",
+			"evlItem1",
+			"evlItem2",
+			"evlItem3",
+			"evlItem4",
+			"evlItem5",
+			"inptBgndt",
+			"inputEnddt",
+			"inptBgntm",
+			"inptEndtm",
+			"evlTotPoint",
+			"evlGrad",
+			"gnrlzOption",
+			"bizNm",
+			"actDe",
+			"actDaycnt",
+			"actRoleCd",
+			"allwnc",
+			"brffcNm",
+			"fatherSign",
+			"picNm",
+			"rspnsYn",
+			"inoutSe",
+			"hrpSe",
+			"evlStatus"
+		]
+		, "write_order":[
+			"hrpId",
+			"entrstRoleCd",
+			"sortSn",
+			"diaryIdx",
+			"cnslTme",
+			"evlDe",
+			"evlItem1",
+			"evlItem2",
+			"evlItem3",
+			"evlItem4",
+			"evlItem5",
+			"inptBgndt",
+			"inputEnddt",
+			"inptBgntm",
+			"inptEndtm",
+			"evlTotPoint",
+			"evlGrad",
+			"gnrlzOption",
+			"bizNm",
+			"actDe",
+			"actDaycnt",
+			"actRoleCd",
+			"allwnc",
+			"brffcNm",
+			"fatherSign",
+			"picNm",
+			"rspnsYn",
+			"inoutSe",
+			"hrpSe",
+			"evlStatus"
+		]
+		, "writeproc_order":[
+			"hrpId",
+			"entrstRoleCd",
+			"sortSn",
+			"diaryIdx",
+			"cnslTme",
+			"evlDe",
+			"evlItem1",
+			"evlItem2",
+			"evlItem3",
+			"evlItem4",
+			"evlItem5",
+			"inptBgndt",
+			"inputEnddt",
+			"inptBgntm",
+			"inptEndtm",
+			"evlTotPoint",
+			"evlGrad",
+			"gnrlzOption",
+			"bizNm",
+			"actDe",
+			"actDaycnt",
+			"actRoleCd",
+			"allwnc",
+			"brffcNm",
+			"fatherSign",
+			"picNm",
+			"rspnsYn",
+			"inoutSe",
+			"hrpSe",
+			"evlStatus"
+		]
+		, "modify_order":[
+			"entrstRoleCd",
+			"sortSn",
+			"cnslTme",
+			"evlDe",
+			"evlItem1",
+			"evlItem2",
+			"evlItem3",
+			"evlItem4",
+			"evlItem5",
+			"inptBgndt",
+			"inputEnddt",
+			"inptBgntm",
+			"inptEndtm",
+			"evlTotPoint",
+			"evlGrad",
+			"gnrlzOption",
+			"bizNm",
+			"actDe",
+			"actDaycnt",
+			"actRoleCd",
+			"allwnc",
+			"evlStatus"
+		]
+		, "modifyproc_order":[
+			"entrstRoleCd",
+			"sortSn",
+			"cnslTme",
+			"evlDe",
+			"evlItem1",
+			"evlItem2",
+			"evlItem3",
+			"evlItem4",
+			"evlItem5",
+			"inptBgndt",
+			"inputEnddt",
+			"inptBgntm",
+			"inptEndtm",
+			"evlTotPoint",
+			"evlGrad",
+			"gnrlzOption",
+			"bizNm",
+			"actDe",
+			"actDaycnt",
+			"actRoleCd",
+			"allwnc",
+			"evlStatus"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"hrpId": {
+						"item_name":"전문가인력풀ID"
+						,"column_id":"HRP_ID"
+					},
+					"entrstRoleCd" : {
+						"item_name":"위촉역할코드"
+						,"column_id":"ENTRST_ROLE_CD"
+					},
+					"sortSn": {
+						"item_name":"정렬순번"
+						,"column_id":"SORT_SN"
+					},
+					"diaryIdx": {
+						"item_name":"일지식별색인"
+						,"column_id":"DIARY_IDX"
+					},
+					"evlDe" : {
+						"item_name":"평가일자"
+						,"column_id":"EVL_DE"
+					},
+					"evlItem1" : {
+						"item_name":"평가항목1"
+						,"column_id":"EVL_ITEM1"
+					},
+					"evlItem2" : {
+						"item_name":"평가항목2"
+						,"column_id":"EVL_ITEM2"
+					},
+					"evlItem3" : {
+						"item_name":"평가항목3"
+						,"column_id":"EVL_ITEM3"
+					},
+					"evlItem4" : {
+						"item_name":"평가항목4"
+						,"column_id":"EVL_ITEM4"
+					},
+					"evlItem5" : {
+						"item_name":"평가항목5"
+						,"column_id":"EVL_ITEM5"
+					},
+					"inptBgndt" : {
+						"item_name":"투입시작일"
+						,"column_id":"INPT_BGNDT"
+					},
+					"inputEnddt" : {
+						"item_name":"투입종료일"
+						,"column_id":"INPT_ENDDT"
+					},
+					"inptBgntm" : {
+						"item_name":"투입시작시간"
+						,"column_id":"INPT_BGNTM"
+					},
+					"inptEndtm" : {
+						"item_name":"투입종료시간"
+						,"column_id":"INPT_ENDTM"
+					},
+					"evlTotPoint" : {
+						"item_name":"평가총점"
+						,"column_id":"EVL_TOT_POINT"
+					},
+					"evlGrad" : {
+						"item_name":"평가등급"
+						,"column_id":"EVL_GRAD"
+					},
+					"gnrlzOption" : {
+						"item_name":"종합의견"
+						,"column_id":"GNRLZ_OPINION"
+					},
+					"bizNm" : {
+						"item_name":"사업명"
+						,"column_id":"BIZ_NM"
+					},
+					"actDe" : {
+						"item_name":"활동일자"
+						,"column_id":"ACT_DE"
+					},
+					"actDaycnt" : {
+						"item_name":"활동일수"
+						,"column_id":"ACT_DAYCNT"
+					},
+					"actRoleCd" : {
+						"item_name":"활동역할코드"
+						,"column_id":"ACT_ROLE_CD"
+					},
+					"allwnc" : {
+						"item_name":"수당"
+						,"column_id":"ALLWNC"
+					},
+					"brffcNm" : {
+						"item_name":"지부지사명"
+						,"column_id":"BRFFC_NM"
+					},
+					"fatherSign" : {
+						"item_name":"부서명"
+						,"column_id":"FATHER_SIGN"
+					},
+					"picNm" : {
+						"item_name":"담당자명"
+						,"column_id":"PIC_NM"
+					},
+					"rspnsYn" : {
+						"item_name":"응답여부"
+						,"column_id":"RSPNS_YN"
+					},
+					"inoutSe" : {
+						"item_name":"내외구분"
+						,"column_id":"INOUT_SE"
+					},
+					"hrpSe" : {
+						"item_name":"전문가인력풀 구분"
+						,"column_id":"HRP_SE"
+					},
+					"evlStatus" : {
+						"item_name":"평가상태"
+						,"column_id":"EVL_STATUS"
+					}
+				}
+			},
+			"searchForm_order":[
+				"hrpId",
+				"entrstRoleCd",
+				"sortSn",
+				"diaryIdx",
+				"cnslTme",
+				"evlDe",
+				"evlItem1",
+				"evlItem2",
+				"evlItem3",
+				"evlItem4",
+				"evlItem5",
+				"inptBgndt",
+				"inputEnddt",
+				"inptBgntm",
+				"inptEndtm",
+				"evlTotPoint",
+				"evlGrad",
+				"gnrlzOption",
+				"bizNm",
+				"actDe",
+				"actDaycnt",
+				"actRoleCd",
+				"allwnc",
+				"brffcNm",
+				"fatherSign",
+				"picNm",
+				"rspnsYn",
+				"inoutSe",
+				"hrpSe",
+				"evlStatus"
+			], "search_order":[
+				"hrpId",
+				"entrstRoleCd",
+				"sortSn",
+				"diaryIdx",
+				"cnslTme",
+				"evlDe",
+				"evlItem1",
+				"evlItem2",
+				"evlItem3",
+				"evlItem4",
+				"evlItem5",
+				"inptBgndt",
+				"inputEnddt",
+				"inptBgntm",
+				"inptEndtm",
+				"evlTotPoint",
+				"evlGrad",
+				"gnrlzOption",
+				"bizNm",
+				"actDe",
+				"actDaycnt",
+				"actRoleCd",
+				"allwnc",
+				"brffcNm",
+				"fatherSign",
+				"picNm",
+				"rspnsYn",
+				"inoutSe",
+				"hrpSe",
+				"evlStatus"
+			], "searchAddOptn_order":[
+				"trRecord"
+			]
+		}
+	}
+}

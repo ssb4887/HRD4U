@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rbs.modules.busisSelect.busisSelectMapper">
+	<!-- 테이블명 -->
+	
+	<sql id="COUNT_TOP"><trim>SELECT COUNT(rn) FROM( SELECT rownum rn, TB.* FROM (</trim></sql>
+	<sql id="COUNT_BOTTOM"><trim>) TB )</trim></sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX([KEY_IDX_COLUMN]), 0)</trim> + 1 MAXID
+		FROM HRD_SPTJ_DGNS A
+	</select>
+	
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+		SELECT A.SPTDGNS_IDX
+					, B.SPTJ_IDX
+				    , B.SPTJ_NAME
+				    , COUNT(DISTINCT C.ADMSFM_IDX) AS ADMSFMCOUNT
+				    , D.BPL_NO
+				    , D.BPL_NM
+				    , A.TMPR_SAVE_YN
+				    , A.REGI_DATE
+				    , A.REGI_NAME
+		<include refid="editAuthListQuery"/>
+		FROM HRD_SPTJ_DGNS A
+		LEFT OUTER JOIN HRD_SPTJ B
+			ON A.SPTJ_IDX = B.SPTJ_IDX
+		LEFT OUTER JOIN HRD_SPTJ_SPTJADMSFM C
+			ON B.SPTJ_IDX = C.SPTJ_IDX
+		LEFT OUTER JOIN HRD_BSK D
+			ON A.BPL_NO = D.BPL_NO
+		WHERE A.ISDELETE ='0'
+		<foreach collection="searchList" item="searchItem" index="i">
+			<choose>
+				<when test="searchItem.columnId == 'REGI_DATE1'">
+					AND TO_CHAR(A.REGI_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+				</when>
+				<when test="searchItem.columnId == 'REGI_DATE2'">
+					AND TO_CHAR(A.REGI_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+				</when>
+				<when test="searchItem.columnId == 'SPTJ_NAME'">
+					AND B.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+				</when>
+				<when test="searchItem.columnId == 'BPL_NM'">
+					AND D.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+				</when>
+				<otherwise>
+					AND B.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+				</otherwise>
+			</choose>
+		</foreach>
+		GROUP BY A.SPTDGNS_IDX, B.SPTJ_IDX, B.SPTJ_NAME, D.BPL_NO, D.BPL_NM, A.TMPR_SAVE_YN, A.REGI_DATE, A.REGI_NAME
+		ORDER BY A.SPTDGNS_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP"/>
+		SELECT A.SPTDGNS_IDX
+					, B.SPTJ_IDX
+				    , B.SPTJ_NAME
+				    , COUNT(DISTINCT C.ADMSFM_IDX) AS ADMSFMCOUNT
+				    , D.BPL_NO
+				    , D.BPL_NM
+				    , A.REGI_DATE
+   				    , A.REGI_NAME
+		<include refid="editAuthListQuery"/>
+		FROM HRD_SPTJ_DGNS A
+		LEFT OUTER JOIN HRD_SPTJ B
+			ON A.SPTJ_IDX = B.SPTJ_IDX
+		LEFT OUTER JOIN HRD_SPTJ_SPTJADMSFM C
+			ON B.SPTJ_IDX = C.SPTJ_IDX
+		LEFT OUTER JOIN HRD_BSK D
+			ON A.BPL_NO = D.BPL_NO
+		WHERE A.ISDELETE ='0'
+		<foreach collection="searchList" item="searchItem" index="i">
+			<choose>
+				<when test="searchItem.columnId == 'REGI_DATE1'">
+					AND TO_CHAR(A.REGI_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+				</when>
+				<when test="searchItem.columnId == 'REGI_DATE2'">
+					AND TO_CHAR(A.REGI_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+				</when>
+				<when test="searchItem.columnId == 'SPTJ_NAME'">
+					AND B.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+				</when>
+				<when test="searchItem.columnId == 'BPL_NM'">
+					AND D.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+				</when>
+				<otherwise>
+					AND B.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+				</otherwise>
+			</choose>
+		</foreach>
+		GROUP BY A.SPTDGNS_IDX, B.SPTJ_IDX, B.SPTJ_NAME, D.BPL_NO, D.BPL_NM, A.REGI_DATE, A.REGI_NAME
+		<include refid="COUNT_BOTTOM" />	
+	</select>
+	
+	<select id="selectBskList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT BSK.BPL_NO
+					    , BSK.BIZR_NO
+					    , BSK.BPL_NM
+					    , INSTT.INSTT_IDX
+					    , INSTT.INSTT_NAME
+					    , BSK.INDUTY_CD
+					    , INDUST.NAME
+					    , BSK.HEADBPL_CD
+			<include refid="editAuthListQuery"/>
+			FROM HRD_BSK BSK
+			LEFT OUTER JOIN HRD_COM_INSTT INSTT
+			    ON BSK.INSTT_IDX = INSTT.INSTT_IDX
+		    LEFT OUTER JOIN TMP_INDUSTRY_LIMIT INDUST
+    			ON INDUST.CODE = BSK.INDUTY_CD 
+			WHERE BSK.INDUTY_CD IS NOT NULL
+			    AND BSK.BPL_STATUS_CD = '1'
+			<choose>
+				<when test="insttIdx != null ">
+					<if test="insttIdx == 33">
+						AND 1=1
+					</if>
+					<if test="insttIdx != 33">
+						AND BSK.INSTT_IDX = #{insttIdx}
+					</if>
+				</when>
+				<otherwise>
+					AND 1=1
+				</otherwise>
+			</choose>
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND INSTT.${searchItem.columnId} = #{isInsttIdx}
+					</when>
+					<when test="searchItem.columnId == 'INDUTY_CD'">
+						AND SUBSTR(BSK.${searchItem.columnId}, 1, 3) = #{isIndutyCd}
+					</when>
+					<when test="searchItem.columnId == 'HEADBPL_CD'">
+						<if test='searchItem.columnValue =="1"'>
+							AND BSK.${searchItem.columnId} = '1'
+						</if>
+						<if test='searchItem.columnValue =="2"'>
+							AND (BSK.${searchItem.columnId} = '2' OR BSK.${searchItem.columnId} IS NULL)
+						</if>
+					</when>
+					<otherwise>
+						AND BSK.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</otherwise>
+				</choose>
+			</foreach>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectBskCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP"/>	
+			SELECT BSK.BPL_NO
+					    , BSK.BIZR_NO
+					    , BSK.BPL_NM
+					    , INSTT.INSTT_IDX
+					    , INSTT.INSTT_NAME
+					    , BSK.INDUTY_CD
+					    , INDUST.NAME
+					    , BSK.HEADBPL_CD
+			<include refid="editAuthListQuery"/>
+			FROM HRD_BSK BSK
+			LEFT OUTER JOIN HRD_COM_INSTT INSTT
+			    ON BSK.INSTT_IDX = INSTT.INSTT_IDX
+		    LEFT OUTER JOIN TMP_INDUSTRY_LIMIT INDUST
+    			ON INDUST.CODE = BSK.INDUTY_CD 
+			WHERE BSK.INDUTY_CD IS NOT NULL
+			    AND BSK.BPL_STATUS_CD = '1'
+			<choose>
+				<when test="insttIdx != null ">
+					<if test="insttIdx == 33">
+						AND 1=1
+					</if>
+					<if test="insttIdx != 33">
+						AND BSK.INSTT_IDX = #{insttIdx}
+					</if>
+				</when>
+				<otherwise>
+					AND 1=1
+				</otherwise>
+			</choose>
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND INSTT.${searchItem.columnId} = #{isInsttIdx}
+					</when>
+					<when test="searchItem.columnId == 'INDUTY_CD'">
+						AND SUBSTR(BSK.${searchItem.columnId}, 1, 3) = #{isIndutyCd}
+					</when>
+					<when test="searchItem.columnId == 'HEADBPL_CD'">
+						<if test='searchItem.columnValue =="1"'>
+							AND BSK.${searchItem.columnId} = '1'
+						</if>
+						<if test='searchItem.columnValue =="2"'>
+							AND (BSK.${searchItem.columnId} = '2' OR BSK.${searchItem.columnId} IS NULL)
+						</if>
+					</when>
+					<otherwise>
+						AND BSK.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</otherwise>
+				</choose>
+			</foreach>
+		<include refid="COUNT_BOTTOM" />	
+	</select>
+	
+	<select id="selectSptjdgns" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT A.SPTDGNS_IDX
+		    , A.SPTJ_IDX
+		    , B.SPTJ_NAME
+		    , C.BPL_NM
+		FROM HRD_SPTJ_DGNS A
+		JOIN HRD_SPTJ B
+		ON A.SPTJ_IDX = B.SPTJ_IDX
+		JOIN HRD_BSK C
+		ON A.BPL_NO = C.BPL_NO
+		WHERE A.SPTDGNS_IDX = #{sptdgnsIdx}
+	</select>
+	
+	<select id="selectSupportList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT SPTJADMSFM.SPTJ_IDX
+			    , SPTJ.SPTJ_NAME
+			    , SPTJ.USE_YN
+			    , SPTJ.TMPR_SAVE_YN
+			    , COUNT(DISTINCT SPTJADMSFM.ADMSFM_IDX) AS ADMSFMCOUNT
+			    , SPTJ.REGI_DATE
+			<include refid="editAuthListQuery"/>
+			FROM HRD_SPTJ SPTJ
+			JOIN HRD_SPTJ_SPTJADMSFM SPTJADMSFM
+			ON SPTJ.SPTJ_IDX = SPTJADMSFM.SPTJ_IDX
+			WHERE SPTJ.ISDELETE = '0'
+				AND SPTJ.USE_YN = 'Y'			
+				AND SPTJ.DCSN_YN = 'Y'			
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'REGI_DATE1'">
+						AND TO_CHAR(SPTJ.REGI_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+					</when>
+					<when test="searchItem.columnId == 'REGI_DATE2'">
+						AND TO_CHAR(SPTJ.REGI_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+					</when>
+					<otherwise>
+						AND SPTJ.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</otherwise>
+				</choose>
+			</foreach>
+			GROUP BY SPTJADMSFM.SPTJ_IDX, SPTJ.TMPR_SAVE_YN, SPTJ.SPTJ_NAME, SPTJ.USE_YN, SPTJ.REGI_DATE
+			ORDER BY SPTJ_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectSupportCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP"/>	
+			SELECT SPTJADMSFM.SPTJ_IDX
+			    , SPTJ.SPTJ_NAME
+			    , SPTJ.USE_YN
+			    , SPTJ.TMPR_SAVE_YN
+			    , COUNT(DISTINCT SPTJADMSFM.ADMSFM_IDX) AS ADMSFMCOUNT
+			    , SPTJ.REGI_DATE
+			FROM HRD_SPTJ SPTJ
+			JOIN HRD_SPTJ_SPTJADMSFM SPTJADMSFM
+			ON SPTJ.SPTJ_IDX = SPTJADMSFM.SPTJ_IDX
+			WHERE SPTJ.ISDELETE = '0'
+				AND SPTJ.USE_YN = 'Y'
+				AND SPTJ.DCSN_YN = 'Y'
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'REGI_DATE1'">
+						AND TO_CHAR(SPTJ.REGI_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+					</when>
+					<when test="searchItem.columnId == 'REGI_DATE2'">
+						AND TO_CHAR(SPTJ.REGI_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+					</when>
+					<otherwise>
+						AND SPTJ.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</otherwise>
+				</choose>
+			</foreach>
+			GROUP BY SPTJADMSFM.SPTJ_IDX, SPTJ.TMPR_SAVE_YN, SPTJ.SPTJ_NAME, SPTJ.USE_YN, SPTJ.REGI_DATE
+		<include refid="COUNT_BOTTOM" />	
+	</select>
+	
+	<select id="selectSptj" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT SPTJ.SPTJ_IDX
+		            , SPTJ.SPTJ_NAME
+					, LISTAGG(ADMSFM.ADMSFM_IDX,',') WITHIN GROUP(ORDER BY ADMSFM.ADMSFM_IDX)AS ADMSFM_IDX
+					, LISTAGG(ADMSFM.ADMSFM_NM,',') WITHIN GROUP(ORDER BY ADMSFM.ADMSFM_IDX)AS ADMSFM_NM
+					, LISTAGG(ADMSFM.ELCTRN_FORMAT_ID,',') WITHIN GROUP(ORDER BY ADMSFM.ADMSFM_IDX)AS FORMAT_ID
+		FROM HRD_SPTJ SPTJ
+		JOIN HRD_SPTJ_SPTJADMSFM SPTJADMSFM
+		ON SPTJ.SPTJ_IDX = SPTJADMSFM.SPTJ_IDX
+		JOIN HRD_SPTJ_ADMSFM ADMSFM
+		ON ADMSFM.ADMSFM_IDX = SPTJADMSFM.ADMSFM_IDX
+		WHERE SPTJ.SPTJ_IDX = #{sptjIdx}
+        GROUP BY SPTJ.SPTJ_IDX, SPTJ.SPTJ_NAME
+	</select>
+	
+	<select id="selectPublish" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT SPTJ.SPTDGNS_IDX
+			    , SPTJ.TMPR_SAVE_YN
+			    , SPTJ.ELCTRN_FORMAT_PBLICTE_ID
+                , SPTJ.LAST_MODI_IDX
+                , SPTJ.LAST_MODI_NAME
+                , SPTJ.LAST_MODI_DATE
+                , DOC.DOCTOR_DEPT_NAME
+		FROM HRD_SPTJ_DGNS SPTJ
+        LEFT OUTER JOIN HRD_COM_DOCTOR DOC
+        ON SPTJ.REGI_IDX = DOC.MEMBER_IDX
+		WHERE SPTDGNS_IDX = #{sptdgnsIdx}
+	</select>
+
+	<select id="selectBpl" parameterType="java.util.HashMap" resultType="dataMap">
+    	SELECT BSK.BPL_NM BPL_NM
+    				, BSK.BPL_NO
+    				, BSK.BIZR_NO
+    				, '(' || BSK.BPL_ZIP || ') ' || BSK.BPL_ADDR || ' ' || BSK.ADDR_DTL CORP_LOCATION
+    				, BSK.INDUTY_CD
+    				, INDUST.NAME INDUTY_NAME
+		      		, NVL(BSK.TOT_WORK_CNT,0) TOT_WORK_CNT
+		            , INSTT.INSTT_NAME
+		FROM 
+			HRD_BSK BSK, TMP_INDUSTRY_LIMIT INDUST, HRD_COM_INSTT INSTT
+		WHERE INDUST.CODE = BSK.INDUTY_CD
+            AND INSTT.INSTT_IDX = BSK.INSTT_IDX
+			AND BSK.BPL_NO = #{bplNo}
+	</select>
+
+	<select id="selectTr" parameterType="java.util.HashMap" resultType="dataMap">
+	<![CDATA[
+	    SELECT
+		  NVL(LISTAGG(A.PROGRAM, ',') WITHIN GROUP(ORDER BY PROGRAM), '-') AS PROGRAM
+		FROM
+		  (
+		  SELECT 
+		    PROGRAM
+		  FROM (SELECT
+		          PROGRAM
+		        FROM
+		          (SELECT '사업주 훈련' program, A.* FROM (select distinct TP_NM, TP_CD, TP_TME, TR_MTH, tr_start_date, tr_end_date FROM HRD_BSK_BPR WHERE BPL_NO = #{bplNo} AND TR_START_DATE is not null AND TOT_TR_CT > 0) A
+		          	UNION ALL
+		          SELECT '컨소시엄' program, B.* FROM (SELECT distinct TP_NM, TP_CD, TP_TME, TR_MTH, tr_start_date, tr_end_date FROM HRD_BSK_CON WHERE BPL_NO = #{bplNo} AND TR_START_DATE is not null AND TOT_TR_CT > 0) B
+		            UNION ALL
+		          SELECT '지역산업맞춤 훈련' program, C.* FROM (SELECT DISTINCT TP_NM, TP_CD, TP_TME, TR_MTH, tr_start_date, tr_end_date FROM HRD_BSK_REG WHERE BPL_NO = #{bplNo} AND TR_START_DATE is not null AND TOT_TR_CT > 0) C
+		          ) ORDER BY TR_START_DATE DESC
+		        )
+		  ) A
+		  WHERE ROWNUM < 4
+		  ]]>
+	  </select>
+		
+	<select id="selectInsttList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT INSTT_NO AS CODE
+					, INSTT_NAME AS NAME
+		FROM HRD_COM_INSTT
+		WHERE ISDELETE = '0'
+	</select>
+	
+	<select id="industCdSelectList" resultType="java.util.HashMap">
+		SELECT *
+		FROM TMP_INDUSTRY_LIMIT
+		WHERE LENGTH(CODE) = 3
+	</select>
+	
+	<select id="selectALSclas" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT A.BPL_NO
+					, C.LCLAS_NM
+					, LISTAGG(NVL(D.SCLAS_NM, '-'), ',') WITHIN GROUP(ORDER BY SCLAS_NM) AS SCLAS_NM
+		FROM HRD_BSK_CL_ATMC_LCLAS A
+		LEFT JOIN HRD_BSK_CL_ATMC_SCLAS B 
+        ON A.BPL_NO = B.BPL_NO
+		LEFT JOIN HRD_BSK_CL_LCLAS C 
+        ON A.LCLAS_CD = C.LCLAS_CD
+		LEFT JOIN HRD_BSK_CL_SCLAS D 
+        ON B.SCLAS_CD = D.SCLAS_CD
+		WHERE A.BPL_NO = #{bplNo}
+			AND A.ISDELETE != '1'
+		GROUP BY A.BPL_NO, C.LCLAS_NM
+	</select>
+
+	<select id="selectPLSclas" parameterType="java.util.HashMap" resultType="dataMap">
+        SELECT A.BPL_NO
+        			, C.LCLAS_NM
+        			, LISTAGG(NVL(D.SCLAS_NM, '-'), ',') WITHIN GROUP(ORDER BY SCLAS_NM) AS SCLAS_NM
+		FROM HRD_BSK_CL_PASSIV_LCLAS A
+		LEFT JOIN HRD_BSK_CL_PASSIV_SCLAS B 
+        ON A.LCLAS_IDX = B.LCLAS_IDX
+		LEFT JOIN HRD_BSK_CL_LCLAS C 
+		ON A.LCLAS_CD = C.LCLAS_CD
+		LEFT JOIN HRD_BSK_CL_SCLAS D 
+        ON B.SCLAS_CD = D.SCLAS_CD 
+       	 AND B.LCLAS_CD = D.LCLAS_CD
+		WHERE A.BPL_NO = #{bplNo}
+			AND A.STATUS = 'Y'
+		GROUP BY A.BPL_NO, C.LCLAS_NM
+	</select>
+	
+	<select id="selectLSclas" parameterType="java.util.HashMap" resultType="dataMap">
+	SELECT A.BPL_NO, A.BPL_NM ,A.LCLAS_NM ,NVL(A.SCLAS_NM, '-') AS SCLAS_NM
+	FROM (
+	    SELECT * 
+	    FROM (
+	        SELECT BSK.* 
+	        FROM (
+	            SELECT HRD_BSK.* 
+	                    ,( SELECT HRD_BSK_CL_LCLAS.LCLAS_NM 
+	                        FROM (
+	                            SELECT LCLAS_CD, BPL_NO 
+	                            FROM HRD_BSK_CL_PASSIV_LCLAS 
+	                            WHERE STATUS = 'Y' 
+	                            UNION ALL 
+	                            SELECT LCLAS_CD, BPL_NO 
+	                            FROM HRD_BSK_CL_ATMC_LCLAS 
+	                                WHERE STATUS = 'Y' 
+	                                AND BPL_NO NOT IN (
+	                                            SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_LCLAS WHERE STATUS = 'Y')
+	                            )Q 
+	                        LEFT JOIN HRD_BSK_CL_LCLAS 
+	                        ON Q.LCLAS_CD = HRD_BSK_CL_LCLAS.LCLAS_CD 
+	                        WHERE HRD_BSK.BPL_NO = Q.BPL_NO) as LCLAS_NM 
+	                        ,( SELECT LISTAGG(SCLAS_NM, ',') WITHIN GROUP(ORDER BY SCLAS_NM) AS SCLAS_NM 
+	                            FROM (
+	                                SELECT DISTINCT(SCLAS_NM) 
+	                                FROM (
+	                                    SELECT SCLAS_CD, BPL_NO 
+	                                    FROM HRD_BSK_CL_PASSIV_SCLAS 
+	                                    WHERE STATUS = 'Y' 
+	                                    UNION ALL 
+	                                    SELECT SCLAS_CD, BPL_NO 
+	                                    FROM HRD_BSK_CL_ATMC_SCLAS 
+	                                    WHERE STATUS = 'Y' 
+	                                    AND BPL_NO NOT IN (
+	                                                    SELECT BPL_NO 
+	                                                    FROM HRD_BSK_CL_PASSIV_SCLAS 
+	                                                    WHERE STATUS = 'Y')
+	                                    )R 
+	                                LEFT JOIN HRD_BSK_CL_SCLAS 
+	                                ON R.SCLAS_CD = HRD_BSK_CL_SCLAS.SCLAS_CD 
+	                                WHERE R.BPL_NO = HRD_BSK.BPL_NO)
+	                            ) as SCLAS_NM 
+	                        FROM HRD_BSK 
+	                        LEFT JOIN HRD_BSK_PSITN_INSTT Q 
+	                        ON HRD_BSK.BPL_NO = Q.BPL_NO AND Q.APPLY_YN = 'Y' 
+	                        WHERE BPL_STATUS_CD = '1' AND (Q.INSTT_IDX = (SELECT INSTT_NO FROM HRD_COM_INSTT WHERE BRFFC_CD = #{insttIdx} )) 
+	        )BSK )HRD_BSK ) A 
+	LEFT JOIN TMP_INDUSTRY_LIMIT P 
+	ON A.INDUTY_CD = P.CODE
+	WHERE A.BPL_NO = #{bplNo}
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap" useGeneratedKeys="true" keyProperty="sptdgnsIdx" >
+	<selectKey keyProperty="sptdgnsIdx" resultType="Integer" order="BEFORE">
+		SELECT SPTDGNS_SEQ.NEXTVAL FROM DUAL
+	</selectKey>
+		INSERT INTO HRD_SPTJ_DGNS(SPTDGNS_IDX, SPTJ_IDX, BPL_NO, TMPR_SAVE_YN, ELCTRN_FORMAT_PBLICTE_ID, REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES (#{sptdgnsIdx}, #{sptjIdx}, #{bplNo}, #{tmprSaveYn}, #{reqSetKeyList}, #{regiIdx}, #{regiId}, #{regiName}, sysdate, #{regiIp})
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE HRD_SPTJ_DGNS 
+		SET TMPR_SAVE_YN = #{tmprSaveYn}
+			, LAST_MODI_IDX = #{lastModiIdx}
+			, LAST_MODI_ID = #{lastModiId}
+			, LAST_MODI_NAME = #{lastModiName}
+			, LAST_MODI_DATE = sysdate
+			, LAST_MODI_IP = #{lastModiIp}
+		WHERE SPTDGNS_IDX = #{sptdgnsIdx}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM HRD_SPTJ_DGNS A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+</mapper>            

@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. IDX, <include refid="PRTBIZ_TABLE_NAME"/>, [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.prtbiz.prtbizMapper">
+	<!-- 테이블명 -->
+	<sql id="PRTBIZ_TABLE_NAME">
+		<choose>
+			<when test="fnIdx == 1">
+				HRD_DGNS_PRTBIZ
+			</when>
+			<otherwise>
+				HRD_DGNS_PRTBIZ_TP
+			</otherwise>
+		</choose>
+	</sql>
+	<!-- IDX 설정 -->
+	<sql id="PRTBIZ_KEY_IDX">
+		<choose>
+			<when test="fnIdx == 1">
+				PRTBIZ_IDX
+			</when>
+			<otherwise>
+				TP_IDX
+			</otherwise>
+		</choose>
+	</sql>	
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(<include refid="PRTBIZ_KEY_IDX"/>), 0)</trim> + 1 MAXID
+		FROM 
+		<include refid="PRTBIZ_TABLE_NAME"/> A
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.TP_IDX), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		<include refid="PRTBIZ_TABLE_NAME"/> A 
+		WHERE A.TP_IDX LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*,
+			TO_CHAR(A.REGI_DATE, 'yyyy-MM-dd') as REGI_DATE_FORMAT
+			<if test="fnIdx == 2">
+				, (
+					SELECT 
+						CLASS_NAME 
+					FROM
+						RBS_ICLASS_INFO 
+					WHERE CLASS_IDX = A.NCS_SCLAS_CD 
+						  AND MASTER_CODE ='NCS_CODE'
+				) AS NCS_NAME
+			</if>
+			<include refid="editAuthListQuery"/>
+			FROM 
+			<include refid="PRTBIZ_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<if test="TP_NAME != null">
+				AND A.PRTBIZ_IDX IN (
+			        SELECT
+			            B.PRTBIZ_IDX
+			        FROM
+			            HRD_DGNS_PRTBIZ_TP B
+			        WHERE
+			            LOWER(REPLACE(B.TP_NAME,' ','') ) LIKE #{TP_NAME}
+			    )
+			</if>
+			ORDER BY <include refid="PRTBIZ_KEY_IDX"/> DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			<include refid="PRTBIZ_TABLE_NAME"/> A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<if test="TP_NAME != null">
+				AND A.PRTBIZ_IDX IN (
+			        SELECT
+			            B.PRTBIZ_IDX
+			        FROM
+			            HRD_DGNS_PRTBIZ_TP B
+			        WHERE
+			            LOWER(REPLACE(B.TP_NAME,' ','') ) LIKE #{TP_NAME}
+			    )
+			</if>
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		<choose>
+			<when test="fnIdx == 1">
+				SELECT 
+					A.*
+				FROM 
+				<include refid="PRTBIZ_TABLE_NAME"/> A 
+				<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			</when>
+			<otherwise>
+				SELECT
+				    A.TP_IDX, A.PRTBIZ_IDX, A.TP_NAME, A.TP_OPRINST, A.NCS_LCLAS_CD, A.NCS_SCLAS_CD, A.TRTM,
+				    (SELECT C.CLASS_NAME FROM RBS_ICLASS_INFO C WHERE C.CLASS_IDX = A.NCS_LCLAS_CD AND C.MASTER_CODE = 'NCS_CODE') AS NCS_LCLAS_NAME,
+				    (SELECT C.CLASS_NAME FROM RBS_ICLASS_INFO C WHERE C.CLASS_IDX = A.NCS_SCLAS_CD AND C.MASTER_CODE = 'NCS_CODE') AS NCS_SCLAS_NAME,
+				    A.TR_DAYCNT, A.FTHTEC_CATE, A.APPLY_INDUTY, A.TR_SFE, A.XPTEFFECT, A.TR_GOAL, A.TRNREQM, A.REGI_NAME, A.REGI_DATE
+				FROM
+				    <include refid="PRTBIZ_TABLE_NAME"/> A 
+				    <include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectTpSubList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+				A.*
+			FROM 
+				HRD_DGNS_PRTBIZ_TP_SUB A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			<include refid="PRTBIZ_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.${columnItem}_SAVED_NAME, A.${columnItem}_ORIGIN_NAME
+			FROM 
+			<include refid="PRTBIZ_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<select id="selectPrtbizIdx" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+				LISTAGG(A.PRTBIZ_IDX, ',') WITHIN GROUP (ORDER BY A.PRTBIZ_IDX) AS PRTBIZ_IDX_LIST,
+				LISTAGG(A.PRTBIZ_NAME, ',') WITHIN GROUP (ORDER BY A.PRTBIZ_IDX) AS PRTBIZ_NAME_LIST
+			FROM 
+				HRD_DGNS_PRTBIZ A
+	</select>
+	
+	<select id="selectIndust" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT
+			    LCLAS,
+			    TO_CHAR(CODE) AS OPTION_CODE,
+			    NAME AS OPTION_NAME,
+			    SOJT,
+			    LEARNING,
+			    WORKNLEARN,
+			    LCLAS_NM,
+			    CASE
+			            WHEN LENGTH(TO_CHAR(CODE) ) = 3 THEN LCLAS
+			            ELSE SUBSTR(TO_CHAR(CODE),1,LENGTH(TO_CHAR(CODE) ) - 1)
+			        END
+			    AS PARENT_OPTION_CODE,
+			    CASE
+			            WHEN LENGTH(TO_CHAR(CODE) ) = 3 THEN 2
+			            WHEN LENGTH(TO_CHAR(CODE) ) = 4 THEN 3
+			            ELSE 4
+			        END
+			    AS OPTION_LEVEL
+			FROM
+			    TMP_INDUSTRY_LIMIT
+	</select>
+	
+	<select id="selectIndustMasterCode" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT DISTINCT
+			    LCLAS_NM AS OPTION_NAME,
+			    LCLAS AS OPTION_CODE,
+			    SOJT,
+			    LEARNING,
+			    WORKNLEARN,
+			    '0' AS PARENT_OPTION_CODE,
+			    '1' AS OPTION_LEVEL
+			FROM
+			    TMP_INDUSTRY_LIMIT
+			ORDER BY
+			    LCLAS ASC
+	</select>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="PRTBIZ_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		<choose>
+			<when test="fnIdx == 1">
+				SELECT 
+					A.*
+				FROM 
+				<include refid="PRTBIZ_TABLE_NAME"/> A 
+				<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			</when>
+			<otherwise>
+				SELECT
+				    A.TP_IDX, A.PRTBIZ_IDX, A.TP_NAME, A.TP_OPRINST, A.NCS_SCLAS_CD, A.TR_DAYCNT, A.FTHTEC_CATE, A.TRTM,
+				    A.APPLY_INDUTY, A.TR_SFE, A.XPTEFFECT, A.TR_GOAL, A.TRNREQM, A.REGI_NAME, A.REGI_DATE
+				FROM
+				    <include refid="PRTBIZ_TABLE_NAME"/> A 
+				    <include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="PRTBIZ_TABLE_NAME"/> (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE <include refid="PRTBIZ_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*
+			FROM 
+			<include refid="PRTBIZ_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			<choose>
+				<when test="fnIdx == 1">
+					ORDER BY A.PRTBIZ_IDX
+				</when>
+				<otherwise>
+					ORDER BY B.TP_IDX
+				</otherwise>
+			</choose>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="PRTBIZ_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE <include refid="PRTBIZ_TABLE_NAME"/> SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE <include refid="PRTBIZ_TABLE_NAME"/> SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="PRTBIZ_TABLE_NAME"/>  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	
+</mapper>            

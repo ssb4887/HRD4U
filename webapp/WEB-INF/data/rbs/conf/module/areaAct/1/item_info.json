@@ -1,0 +1,631 @@
+{
+	"item_info":{
+		"items":{
+		    "name":{
+				"column_id":"NAME"
+				, "item_name":"작성자"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "title":{
+				"column_id":"TITLE"
+				, "item_name":"제목"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "contents":{
+				"column_id":"CONTENTS"
+				, "item_name":"내용"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "editor":1
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "file":{
+				"column_id":"FILE"
+				, "item_name":"파일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			},"year": {
+				"item_id": "year",
+				"column_id": "YEAR",
+				"item_name": "년도",
+				"format_type": 19,
+				"use_privsec": 0,
+				"start_year": 2022,
+				"end_addcnt": 0,
+				"default_current": 1,
+				"object_type": 0,
+				"isimage": 0,
+				"editor_utype": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"maximum": 0,
+				"required_write": 1,
+				"required_modify": 1,
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"item_name_ko": "년도",
+				"item_name_en": "년도",
+				"item_name_ja": "년도",
+				"item_name_zh": "년도",
+				"item_name_fr": "년도",
+				"item_name_de": "년도",
+				"item_name_es": "년도"
+			},"insttIdx": {
+				"item_id": "insttIdx",
+				"column_id": "INSTT_IDX",
+				"item_name": "소속기관",
+				"format_type": 0,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"object_type": 4,
+				"isimage": 0,
+				"editor_utype": 0,
+				"master_code": "ORG_CODE",
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"maximum": 0,
+				"required_write": 1,
+				"required_modify": 1,
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"item_name_ko": "소속기관",
+				"item_name_en": "소속기관",
+				"item_name_ja": "소속기관",
+				"item_name_zh": "소속기관",
+				"item_name_fr": "소속기관",
+				"item_name_de": "소속기관",
+				"item_name_es": "소속기관"
+			}, 
+			"startDate": {
+				"item_id": "startDate",
+				"column_id": "SCHDUL_START_DATE",
+				"item_name": "일정시작일자",
+				"format_type": 5,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"object_type": 0,
+				"isimage": 0,
+				"editor_utype": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"maximum": 0,
+				"required_write": 0,
+				"required_modify": 0,
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"item_name_ko": "일정시작일자",
+				"item_name_en": "일정시작일자",
+				"item_name_ja": "일정시작일자",
+				"item_name_zh": "일정시작일자",
+				"item_name_fr": "일정시작일자",
+				"item_name_de": "일정시작일자",
+				"item_name_es": "일정시작일자"
+			}, 
+			"endDate": {
+				"item_id": "endDate",
+				"column_id": "SCHDUL_END_DATE",
+				"item_name": "일정종료일자",
+				"format_type": 5,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"object_type": 0,
+				"isimage": 0,
+				"editor_utype": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"maximum": 0,
+				"required_write": 0,
+				"required_modify": 0,
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"item_name_ko": "일정종료일자",
+				"item_name_en": "일정종료일자",
+				"item_name_ja": "일정종료일자",
+				"item_name_zh": "일정종료일자",
+				"item_name_fr": "일정종료일자",
+				"item_name_de": "일정종료일자",
+				"item_name_es": "일정종료일자"
+			}, "policy": {
+				"item_id": "policy",
+				"column_id": "POLICI_CN",
+				"item_name": "주요시책",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": "1",
+				"editor_utype": 0,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"object_style": "width:100%;height:400px;",
+				"default_item": 1,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"isimage": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"onclick": "0",
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 1,
+				"item_name_ko": "주요시책",
+				"item_name_en": "주요시책",
+				"item_name_ja": "주요시책",
+				"item_name_zh": "주요시책",
+				"item_name_fr": "주요시책",
+				"item_name_de": "주요시책",
+				"item_name_es": "주요시책"
+			}, "distribution": {
+				"item_id": "distribution",
+				"column_id": "CORP_DISTRB_CN",
+				"item_name": "기업분포",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": "1",
+				"editor_utype": 0,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"object_style": "width:100%;height:400px;",
+				"default_item": 1,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"isimage": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"onclick": "0",
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 1,
+				"item_name_ko": "기업분포",
+				"item_name_en": "기업분포",
+				"item_name_ja": "기업분포",
+				"item_name_zh": "기업분포",
+				"item_name_fr": "기업분포",
+				"item_name_de": "기업분포",
+				"item_name_es": "기업분포"
+			}, "training": {
+				"item_id": "training",
+				"column_id": "TR_CN",
+				"item_name": "직업훈련",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": "1",
+				"editor_utype": 0,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"object_style": "width:100%;height:400px;",
+				"default_item": 1,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"isimage": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"onclick": "0",
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 1,
+				"item_name_ko": "직업훈련",
+				"item_name_en": "직업훈련",
+				"item_name_ja": "직업훈련",
+				"item_name_zh": "직업훈련",
+				"item_name_fr": "직업훈련",
+				"item_name_de": "직업훈련",
+				"item_name_es": "직업훈련"
+			}, "implication": {
+				"item_id": "implication",
+				"column_id": "IMPLT_CN",
+				"item_name": "시사점",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": "1",
+				"editor_utype": 0,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"object_style": "width:100%;height:400px;",
+				"default_item": 1,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"isimage": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"onclick": "0",
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 1,
+				"item_name_ko": "시사점",
+				"item_name_en": "시사점",
+				"item_name_ja": "시사점",
+				"item_name_zh": "시사점",
+				"item_name_fr": "시사점",
+				"item_name_de": "시사점",
+				"item_name_es": "시사점"
+			}, "adjustment": {
+				"item_id": "adjustment",
+				"column_id": "MDAT_CN",
+				"item_name": "조정기준",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": "1",
+				"editor_utype": 0,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"object_style": "width:100%;height:400px;",
+				"default_item": 1,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"isimage": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"onclick": "0",
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 1,
+				"item_name_ko": "조정기준",
+				"item_name_en": "조정기준",
+				"item_name_ja": "조정기준",
+				"item_name_zh": "조정기준",
+				"item_name_fr": "조정기준",
+				"item_name_de": "조정기준",
+				"item_name_es": "조정기준"
+			}, "groupCurrent": {
+				"item_id": "groupCurrent",
+				"column_id": "TRGRPSTT_CN",
+				"item_name": "그룹기업현황",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": "1",
+				"editor_utype": 0,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"object_style": "width:100%;height:400px;",
+				"default_item": 1,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"isimage": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"onclick": "0",
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 1,
+				"item_name_ko": "그룹기업현황",
+				"item_name_en": "그룹기업현황",
+				"item_name_ja": "그룹기업현황",
+				"item_name_zh": "그룹기업현황",
+				"item_name_fr": "그룹기업현황",
+				"item_name_de": "그룹기업현황",
+				"item_name_es": "그룹기업현황"
+			}, "strategy": {
+				"item_id": "strategy",
+				"column_id": "TRGRPSTRGACC_CN",
+				"item_name": "그룹별 접근전략",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": "1",
+				"editor_utype": 0,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"object_style": "width:100%;height:400px;",
+				"default_item": 1,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"isimage": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"onclick": "0",
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 1,
+				"item_name_ko": "그룹별 접근전략",
+				"item_name_en": "그룹별 접근전략",
+				"item_name_ja": "그룹별 접근전략",
+				"item_name_zh": "그룹별 접근전략",
+				"item_name_fr": "그룹별 접근전략",
+				"item_name_de": "그룹별 접근전략",
+				"item_name_es": "그룹별 접근전략"
+			}, "goal": {
+				"item_id": "goal",
+				"column_id": "GOAL_CN",
+				"item_name": "목표내용",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": "1",
+				"editor_utype": 0,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"object_style": "width:100%;height:400px;",
+				"default_item": 1,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"isimage": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"onclick": "0",
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 1,
+				"item_name_ko": "목표내용",
+				"item_name_en": "목표내용",
+				"item_name_ja": "목표내용",
+				"item_name_zh": "목표내용",
+				"item_name_fr": "목표내용",
+				"item_name_de": "목표내용",
+				"item_name_es": "목표내용"
+			}, "detail": {
+				"item_id": "detail",
+				"column_id": "DETAIL_CN",
+				"item_name": "세부내용",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 1,
+				"editor": "1",
+				"editor_utype": 0,
+				"maximum": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"object_style": "width:100%;height:400px;",
+				"default_item": 1,
+				"use_privsec": 0,
+				"start_year": 0,
+				"end_addcnt": 0,
+				"default_current": 0,
+				"isimage": 0,
+				"use_file_ext": 0,
+				"dset_simg_width": 0,
+				"dset_simg_height": 0,
+				"minimum": 0,
+				"onclick": "0",
+				"use_list": 1,
+				"use_view": 1,
+				"use_write": 1,
+				"use_modify": 1,
+				"use_reply": 1,
+				"item_name_ko": "세부내용",
+				"item_name_en": "세부내용",
+				"item_name_ja": "세부내용",
+				"item_name_zh": "세부내용",
+				"item_name_fr": "세부내용",
+				"item_name_de": "세부내용",
+				"item_name_es": "세부내용"
+			}
+		}, "list_order":[
+			"title"
+			, "name"
+			, "year"
+			, "insttIdx"
+			, "startDate"
+			, "endDate"
+		]
+		, "view_order":[
+			"title"
+			, "year"
+			, "insttIdx"
+			, "policy"
+			, "distribution"
+			, "training"
+			, "implication"
+			, "adjustment"
+			, "groupCurrent"
+			, "strategy"
+			, "goal"
+			, "detail"
+		]
+		, "write_order":[
+			"title"
+			, "year"
+			, "insttIdx"
+		]
+		, "writeproc_order":[
+			"title"
+			, "year"
+			, "insttIdx"
+		]
+		, "plan_order":[
+			"title"
+			, "year"
+			, "insttIdx"
+			, "policy"
+			, "distribution"
+			, "training"
+			, "implication"
+			, "adjustment"
+			, "groupCurrent"
+			, "strategy"
+			, "goal"
+			, "detail"
+			
+		]
+		, "planproc_order":[
+			"insttIdx"
+			, "policy"
+			, "distribution"
+			, "training"
+			, "implication"
+			, "adjustment"
+			, "groupCurrent"
+			, "strategy"
+			, "goal"
+			, "detail"
+		]
+		, "regiproc_order":[
+			"startDate"
+			, "endDate"
+		]
+		, "modify_order":[
+			"title"
+			, "year"
+			, "insttIdx"
+		]
+		, "modifyproc_order":[
+		    "title"
+			, "year"
+			, "insttIdx"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "subject":{
+						"column_id":"SUBJECT"
+						, "item_name":"제목"
+					},
+					 "contents":{
+						"column_id":"CONTENTS"
+						, "item_name":"내용"
+					}
+				}, "select_order":[
+				    "subject"
+					, "contents"
+				]
+			}, "key":{
+				"items":{
+					"year":{
+						"column_id":"YEAR"
+						, "item_name":"년도"
+						, "format_type": 19
+						, "use_privsec": 0
+						, "start_year": 2022
+						, "end_addcnt": 0
+						, "default_current": 1
+						, "object_type": 0
+						, "style_width":50
+					}
+				}
+			}, "searchForm_order":[
+				"year"
+				, "keyField"
+			], "search_order":[
+				 "year"
+				, "keyField"
+			]
+		}
+	}
+}

@@ -1,0 +1,216 @@
+{
+	"item_info":{
+		"items":{
+		    "resveDate":{
+				"column_id":"RESVE_DATE"
+				, "item_name":"예약일자"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":22
+			}, "resveHour":{
+				"column_id":"RESVE_HOUR"
+				, "item_name":"예약시간"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "resveMinute":{
+				"column_id":"RESVE_MINUTE"
+				, "item_name":"예약분"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "startDate":{
+				"column_id":"START_DATE"
+				, "item_name":"시작일자"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":5
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},"endDate":{
+				"column_id":"END_DATE"
+				, "item_name":"종료일자"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":5
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},"result":{
+				"column_id":"RESULT"
+				, "item_name":"결과"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},"regiName":{
+				"column_id":"REGI_NAME"
+				, "item_name":"등록자명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},"status":{
+				"column_id":"STATUS"
+				, "item_name":"상태"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"resveDate"
+			, "resveHour"
+			, "resveMinute"
+			, "startDate"
+			, "endDate"
+			, "result"
+			, "regiName"
+			, "status"
+		]
+		, "view_order":[
+			"resveDate"
+			, "resveHour"
+			, "resveMinute"
+			, "startDate"
+			, "endDate"
+			, "result"
+			, "regiName"
+			, "status"
+		]
+		, "write_order":[
+			"resveDate"
+			, "resveHour"
+			, "resveMinute"
+			, "startDate"
+			, "endDate"
+			, "result"
+			, "regiName"
+			, "status"
+		]
+		, "writeproc_order":[
+			"resveDate"
+			, "resveHour"
+			, "resveMinute"
+			, "startDate"
+			, "endDate"
+			, "result"
+			, "regiName"
+			, "status"
+		]
+		, "modify_order":[
+			"resveDate"
+			, "resveHour"
+			, "resveMinute"
+			, "startDate"
+			, "endDate"
+			, "result"
+			, "regiName"
+			, "status"
+		]
+		, "modifyproc_order":[
+			"resveDate"
+			, "resveHour"
+			, "resveMinute"
+			, "startDate"
+			, "endDate"
+			, "result"
+			, "regiName"
+			, "status"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"resveDate": {
+						"item_name":"예약일자"
+						,"column_id":"RESVE_DATE"
+					},
+					"resveHour": {
+						"item_name":"예약시간"
+						,"column_id":"RESVE_HOUR"
+					},
+					"resveMinute" : {
+						"item_name":"예약분"
+						,"column_id":"RESVE_MINUTE"
+					},
+					"startDate" : {
+						"item_name":"시작일자"
+						,"column_id":"TOT_EMP_CNT"
+					},
+					"endDate" : {
+						"item_name":"종료일자"
+						,"column_id":"STRTNM_CODE"
+					},
+					"result" : {
+						"item_name" :"결과"
+						,"column_id":"RESULT"
+						
+					},
+					"status" : {
+						"item_name" :"상태"
+						,"column_id":"STATUS"
+						
+					},
+					"regiName" : {
+						"item_name" :"등록자명"
+						,"column_id":"REGI_NAME"
+						
+					}
+					}
+			},
+			"searchForm_order":[
+				"resveDate"
+				, "resveHour"
+				, "resveMinute"
+				, "startDate"
+				, "endDate"
+				, "result"
+				, "regiName"
+				, "status"
+			], "search_order":[
+				"resveDate"
+				, "resveHour"
+				, "resveMinute"
+				, "startDate"
+				, "endDate"
+				, "result"
+				, "regiName"
+				, "status"
+			], "searchAddOptn_order":[
+				"trRecord"
+			]
+		}
+	}
+}

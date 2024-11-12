@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. NTWRK_IDX, HRD_BSISCNSL, [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.ntwrk.ntwrkMapper">
+	<!-- 테이블명 -->
+	<sql id="NTWRK"><trim>HRD_NTWRK</trim></sql>
+	<sql id="NTWRK_FILE"><trim>HRD_NTWRK_FILE</trim></sql>
+	<sql id="NTWRK_CMPTINST"><trim>HRD_NTWRK_CMPTINST</trim></sql>
+	<sql id="NTWRK_CMPTINST_ATT"><trim>HRD_NTWRK_CMPTINST_ATT</trim></sql>
+	<sql id="COM_INSTT">HRD_COM_INSTT</sql>
+	
+	<sql id="COUNT_TOP">
+		<trim>SELECT COUNT(rn) FROM( SELECT rownum rn, TB.* FROM (</trim>
+	</sql>
+	
+	<sql id="COUNT_BOTTOM">
+		<trim>) TB )</trim>
+	</sql>
+	
+	<insert id="insertNtwrkData" parameterType="map" useGeneratedKeys="true" keyProperty="ntwrkIdx">
+		<selectKey keyProperty="ntwrkIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_NTWRK_IDX.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO <include refid="NTWRK" /> 
+		(NTWRK_IDX, INSTT_IDX, CLPRN_NAME, CMPTINST_NAME, AGREM_NAME, AGREM_CN,
+		RELATE_BIZ, RSLT_CN, BGNDT, ENDDT, REMARKS, REASON, USE_YN, 
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES 
+		(#{ntwrkIdx}, #{insttIdx}, #{clprnName}, #{cmptinstName}, #{agremName}, #{agremCn},
+		#{relateBiz}, #{rsltCn}, #{bgndt}, #{enddt}, #{remarks}, #{reason}, #{useYn},
+		#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP})
+	</insert>
+	
+	<insert id="insertNtwrkCmptinst" parameterType="map" useGeneratedKeys="true" keyProperty="attIdx">
+		<selectKey keyProperty="attIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_NTWRK_ATT_IDX.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO <include refid="NTWRK_CMPTINST_ATT" /> 
+		(NTWRK_IDX, ATT_IDX, CMPTINST_IDX) 
+		VALUES 
+		(#{ntwrkIdx}, #{attIdx}, #{cmptinstIdx})
+	</insert>
+	
+	<insert id="insertFileData" parameterType="map" useGeneratedKeys="true" keyProperty="fleIdx">
+		<selectKey keyProperty="fleIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_NTWRK_FILE_IDX.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO <include refid="NTWRK_FILE" />
+		(NTWRK_IDX, FLE_IDX, ITEM_ID, FILE_SAVED_NAME, FILE_ORIGIN_NAME, FILE_SIZE, REPLC_TEXT, ORDER_IDX,
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP) 
+		VALUES 
+		(#{ntwrkIdx}, #{fleIdx}, 'FILE', #{fileSavedName}, #{fileOriginName}, #{fileSize}, #{replcText}, #{orderIdx},
+		#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP})
+	</insert>
+	
+	<select id="selectNtwrkList" parameterType="map" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+			SELECT A.*, B.INSTT_NAME 
+			FROM <include refid="NTWRK" /> A 
+			LEFT JOIN <include refid="COM_INSTT"/> B 
+			ON A.INSTT_IDX=B.INSTT_IDX 
+			<where>
+				<foreach collection="searchList" item="searchItem" index="i">
+					<choose>
+						<when test="searchItem.columnId == 'INSTT_IDX'">
+							AND A.${searchItem.columnId} = #{searchItem.columnValue}
+						</when>
+						<when test="searchItem.columnId == 'USE_YN'">
+							AND A.USE_YN = #{searchItem.columnValue}
+						</when>
+						<otherwise>
+							AND A.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</otherwise>
+					</choose>
+				</foreach>
+				AND A.ISDELETE != 1 
+			</where>
+			ORDER BY 
+				CASE 
+					WHEN A.LAST_MODI_DATE IS NOT NULL THEN A.LAST_MODI_DATE 
+					ELSE A.REGI_DATE
+				END DESC 
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+	
+	<select id="selectNtwrkTotalCount" parameterType="map" resultType="int">
+		<include refid="COUNT_TOP" />
+			SELECT A.*, B.INSTT_NAME 
+			FROM <include refid="NTWRK" /> A 
+			LEFT JOIN <include refid="COM_INSTT"/> B 
+			ON A.INSTT_IDX=B.INSTT_IDX 
+			<where>
+				<foreach collection="searchList" item="searchItem" index="i">
+					<choose>
+						<when test="searchItem.columnId == 'INSTT_IDX'">
+							AND A.${searchItem.columnId} = #{searchItem.columnValue}
+						</when>
+						<when test="searchItem.columnId == 'USE_YN'">
+							AND A.USE_YN = #{searchItem.columnValue}
+						</when>
+						<otherwise>
+							AND A.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</otherwise>
+					</choose>
+				</foreach>
+				AND A.ISDELETE != 1 
+			</where>
+			ORDER BY 
+				CASE 
+					WHEN A.LAST_MODI_DATE IS NOT NULL THEN A.LAST_MODI_DATE 
+					ELSE A.REGI_DATE
+				END DESC 
+		<include refid="COUNT_BOTTOM" />
+	</select>
+	
+	<select id="selectNtwrkOne" parameterType="map" resultType="map">
+		SELECT A.*, B.INSTT_NAME 
+		FROM <include refid="NTWRK" /> A 
+		LEFT JOIN <include refid="COM_INSTT"/> B 
+		ON A.INSTT_IDX=B.INSTT_IDX 
+		WHERE A.ISDELETE != 1 AND A.NTWRK_IDX=#{ntwrkIdx} 
+		FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<select id="selectNtwrkCmptinstList" parameterType="map" resultType="dataMap">
+		SELECT A.*, B.CMPTINST_NAME 
+		FROM <include refid="NTWRK_CMPTINST_ATT" /> A 
+		LEFT JOIN  <include refid="NTWRK_CMPTINST" /> B 
+		ON A.CMPTINST_IDX=B.CMPTINST_IDX 
+		WHERE NTWRK_IDX = #{ntwrkIdx}
+	</select>
+	
+	<update id="deleteNtwrk" parameterType="map">
+		UPDATE <include refid="NTWRK" />
+		SET ISDELETE = 1, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE NTWRK_IDX IN 
+		<foreach collection="deleteIdxs" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="selectNtwrkListByCmptinst" parameterType="map" resultType="dataMap">
+		SELECT A.ATT_IDX, B.*, C.INSTT_NAME 
+		FROM <include refid="NTWRK_CMPTINST_ATT" /> A 
+		LEFT JOIN <include refid="NTWRK" /> B
+		ON A.NTWRK_IDX = B.NTWRK_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> C 
+		ON B.INSTT_IDX=C.INSTT_IDX 
+		WHERE CMPTINST_IDX=#{cmptinstIdx} 
+		AND B.ISDELETE != 1 
+	</select>
+	
+	<select id="selectNtwrkFileList" parameterType="map" resultType="dataMap">
+		SELECT A.* FROM <include refid="NTWRK_FILE" /> A 
+		WHERE A.NTWRK_IDX = #{ntwrkIdx} 
+		AND ISDELETE != 1 
+		ORDER BY ORDER_IDX ASC, FLE_IDX DESC
+	</select>
+	
+	<select id="selectNtwrkFileOne" parameterType="map" resultType="map">
+		SELECT A.* FROM <include refid="NTWRK_FILE" /> A 
+		WHERE FLE_IDX = #{fleIdx} 
+		FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<update id="updateNtwrkData" parameterType="map">
+		UPDATE <include refid="NTWRK" /> 
+		SET INSTT_IDX=#{insttIdx}, CLPRN_NAME=#{clprnName}, CMPTINST_NAME=#{cmptinstName}, AGREM_NAME=#{agremName}, AGREM_CN=#{agremCn}, RELATE_BIZ=#{relateBiz}, RSLT_CN=#{rsltCn}, BGNDT=#{bgndt}, ENDDT=#{enddt}, REMARKS=#{remarks},
+		REASON=#{reason}, USE_YN=#{useYn}, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_IP=#{LAST_MODI_IP}, LAST_MODI_DATE=SYSDATE 
+		WHERE NTWRK_IDX=#{ntwrkIdx}
+	</update>
+	
+	<update id="deleteNtwrkCmptinst" parameterType="map">
+		DELETE FROM <include refid="NTWRK_CMPTINST_ATT" /> 
+		WHERE NTWRK_IDX=#{ntwrkIdx}
+	</update>
+	
+	<update id="updateNtwrkFileData" parameterType="map">
+		UPDATE <include refid="NTWRK_FILE" /> 
+		SET ORDER_IDX=#{orderIdx}, ISDELETE=#{isdelete}, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_IP=#{LAST_MODI_IP}, LAST_MODI_DATE = sysdate  
+		WHERE FLE_IDX=#{fleIdx} 
+	</update>
+	
+	<select id="selectNtwrkListForExcel" parameterType="map" resultType="dataMap">
+		SELECT 
+			A.NTWRK_IDX, A.CLPRN_NAME, A.CMPTINST_NAME, A.AGREM_NAME, A.AGREM_CN, A.RELATE_BIZ, A.RSLT_CN, A.REMARKS, A.BGNDT, A.ENDDT, A.USE_YN, A.REASON, 
+			D.INSTT_NAME,
+			LISTAGG(C.CMPTINST_NAME, ', ') WITHIN GROUP (ORDER BY C.CMPTINST_NAME) AS CMPTINST_NAMES 
+		FROM <include refid="NTWRK" /> A
+		LEFT JOIN <include refid="NTWRK_CMPTINST_ATT" /> B 
+		ON A.NTWRK_IDX=B.NTWRK_IDX 
+		LEFT JOIN <include refid="NTWRK_CMPTINST" /> C 
+		ON B.CMPTINST_IDX = C.CMPTINST_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> D 
+		ON A.INSTT_IDX = D.INSTT_IDX 
+		<where>
+			AND A.ISDELETE != 1 
+			AND C.ISDELETE != 1 
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND A.${searchItem.columnId} = #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'USE_YN'">
+						AND A.USE_YN = #{searchItem.columnValue}
+					</when>
+					<otherwise>
+						AND A.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</otherwise>
+				</choose>
+			</foreach>
+		</where>
+		GROUP BY 
+			A.NTWRK_IDX, A.CLPRN_NAME, A.CMPTINST_NAME, A.AGREM_NAME, A.AGREM_CN, A.RELATE_BIZ, A.RSLT_CN, A.REMARKS, A.BGNDT, A.ENDDT, A.USE_YN, A.REASON, 
+			D.INSTT_NAME
+	</select>
+</mapper>

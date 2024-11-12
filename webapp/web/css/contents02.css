@@ -1,0 +1,122 @@
+@charset "UTF-8";
+@import url("contents02_pc.css");
+@media only all and (max-width: 1023px) {
+    .board-write.type02 dl dd {
+        min-height: 36px;
+    }
+    .zipcode {
+        padding-right: 100px;
+    }
+    .zipcode>button {
+        width: 90px;
+        height: 36px;
+        line-height: 36px;
+        color: #ffffff;
+        font-size: 12px;
+    }
+    .agreement-area {
+        max-height: 210px;
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+    .agreement-area>p {
+        font-size: 12px;
+        line-height: 18px;
+    }
+    .agreement-area>p+p {
+        margin-top: 15px;
+    }
+    .agreement-area>h4 {
+        font-size: 14px;
+        margin-top: 15px;
+        margin-bottom: 10px;
+    }
+    .agreement-area>ul li,
+    .agreement-area>ol li {
+        font-size: 11px;
+        line-height: 16px;
+    }
+    .agreement-area>ul ul li,
+    .agreement-area>ul ol li,
+    .agreement-area>ol ul li,
+    .agreement-area>ol ol li {
+        font-size: 11px;
+        line-height: 16px;
+        text-indent: -10px;
+        padding-left: 10px;
+    }
+    .agree-all-area .agree-text {
+        margin-bottom: 20px;
+    }
+    .agree-all-area {
+        padding: 25px;
+        margin-bottom: 30px;
+        font-size: 14px;
+        line-height: 18px;
+    }
+	.gray-box01 {
+		margin-bottom: 20px;
+		padding: 20px;
+		border-radius: 15px;
+		font-size: 15px;
+		line-height: 25px;
+	}
+	.gray-box01>h3 {
+		margin-bottom: 15px;
+		font-size: 18px;
+		line-height: 26px;
+	}
+	.title-type05 {
+		margin-bottom: 10px;
+		font-size: 16px;
+		line-height: 24px;
+	}
+	.text-box textarea {
+		padding: 15px;
+		font-size: 13px;
+		line-height: 18px;
+	}
+	.people-add-wrapper button.add,
+	.people-add-wrapper button.delete{
+		width: 22px;
+		height: 22px;
+		background-color: #fff;
+		border-radius: 5px;
+		text-indent: -5000rem;
+		background-repeat: no-repeat;
+		background-size: 13px 13px;
+		background-position: center center;
+		transition: all 0.2s ease;border: 1px solid #ddd;
+	}
+	input.radio-type01[readonly], input.radio-type01[disabled] {
+		width: 20px;
+		height: 20px;
+	}
+	input.radio-type01[readonly]:checked, input.radio-type01[disabled]:checked  {
+		width: 20px;
+		height: 20px;
+		background-size: 20px 20px;
+	}
+	.input-calendar-wrapper.type02 .input-calendar-area {
+		padding-right: 36px;
+		height: 36px;
+	}
+	.input-calendar-wrapper.type02 .input-calendar-area button {
+		top: 50%;
+		margin-top: -16.5px;
+		width: 32px;
+		height: 32px;
+		margin-right: 0px;
+	}
+	/*23.12.11 추가*/
+	.agreement-wrapper.modal {
+		padding: 10px 0;
+		background-color: #fff;
+		border-radius: 20px;
+	}
+	.agree-check-box.modal {
+		margin-top: 15px;
+		flex-direction: row; 
+	}
+	
+}

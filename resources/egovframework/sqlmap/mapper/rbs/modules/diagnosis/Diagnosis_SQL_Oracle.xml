@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. [KEY_IDX_COLUMN], [<include refid="HRD_BSC"/>], [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.diagnosis.diagnosisMapper">
+	<!-- 테이블명 -->
+	<sql id="HRD_BSC">HRD_DGNS_BSC</sql>
+<!-- 	<sql id="HRD_BSC_TRND_TRAIN">HRD_BSC_TRND_TRAIN</sql> -->
+<!-- 	<sql id="HRD_BSC_TRND_FUND">HRD_BSC_TRND_FUND</sql> -->
+	<sql id="HRD_BSC_PRTBIZ">HRD_DGNS_BSC_PRTBIZ</sql>
+	<sql id="HRD_BSC_TR_HST">HRD_DGNS_BSC_TR_HST</sql>
+	<sql id="HRD_BSC_FUND_HST">HRD_DGNS_BSC_FUND_HST</sql>
+	<sql id="HRD_BSC_FUND_HST_DETAIL">HRD_DGNS_BSC_FUND_HST_DETAIL</sql>
+	<sql id="HRD_BSISCNSL">HRD_DGNS_BSISCNSL</sql>
+	<sql id="HRD_BSK">HRD_BSK</sql>
+	<sql id="HRD_INSTT">HRD_COM_INSTT</sql>
+	
+	<sql id="COUNT_TOP"><trim>SELECT COUNT(rn) FROM( SELECT rownum rn, TB.* FROM (</trim></sql>
+	<sql id="COUNT_BOTTOM"><trim>) TB )</trim></sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX([KEY_IDX_COLUMN]), 0)</trim> + 1 MAXID
+		FROM 
+		<include refid="HRD_BSC"/>A
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.[KEY_IDX_COLUMN]), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		<include refid="HRD_BSC"/> A 
+		WHERE A.[KEY_IDX_COLUMN] LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+				BSC.*
+				, SUBSTR(BSK.BPL_NO, 1,10) AS BIZR_NO
+				, BSIS.ISSUE_DATE AS BSIS_ISSUE_DATE
+				, BSIS.STATUS AS BSIS_STATUS
+				, BSIS.RSLT_IDX AS BSIS_RSLT_IDX
+				, RSLT.RSLT_IDX AS RSLT_IDX 
+				, RSLT.STATUS AS QUSTNR_STATUS
+            <include refid="editAuthListQuery"/>
+			FROM HRD_DGNS_BSC BSC
+			LEFT OUTER JOIN HRD_BSK BSK
+			ON BSC.BPL_NO = BSK.BPL_NO
+            LEFT OUTER JOIN HRD_DGNS_QUSTNR_RSLT RSLT
+			ON RSLT.BSC_IDX = BSC.BSC_IDX
+            LEFT OUTER JOIN HRD_DGNS_BSISCNSL BSIS
+			ON BSIS.RSLT_IDX = RSLT.RSLT_IDX
+			<where>
+				<choose>
+					<when test="insttIdx != null ">
+						<if test="insttIdx == 33">
+							AND 1=1
+						</if>
+						<if test="insttIdx != 33">
+							AND BSC.INSTT_IDX = #{insttIdx}
+						</if>
+					</when>
+					<otherwise>
+						AND 1=1
+					</otherwise>
+				</choose>
+				<foreach collection="searchList" item="searchItem" index="i">
+					<choose>
+						<when test="searchItem.columnId == 'ISSUE_DATE1'">
+							AND TO_CHAR(BSC.ISSUE_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+						</when>
+						<when test="searchItem.columnId == 'ISSUE_DATE2'">
+							AND TO_CHAR(BSC.ISSUE_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+						</when>
+						<when test="searchItem.columnId == 'BIZR_NO'">
+							AND BIZR_NO ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</when>
+						<when test="searchItem.columnId == 'BSIS_STATUS'">
+							<if test='searchItem.columnValue =="Y"'>
+								AND BSIS.STATUS = 1
+							</if>
+							<if test='searchItem.columnValue =="N"'>
+								AND (BSIS.STATUS = 0 OR BSIS.STATUS IS NULL)
+							</if>
+						</when>
+						<when test="searchItem.columnId == 'INSTT_IDX' and searchItem.columnValue == 'empty'">
+							AND BSIS.${searchItem.columnId} IS NULL 
+						</when>
+						<when test="searchItem.columnId == 'INSTT_IDX'">
+							AND BSIS.${searchItem.columnId} = #{searchItem.columnValue}
+						</when>
+						<otherwise>
+							AND BSC.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</otherwise>
+					</choose>
+				</foreach>
+			</where>
+			ORDER BY BSC.BSC_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP"/>	
+			SELECT 
+				BSC.*
+				, SUBSTR(BSK.BPL_NO, 1,10) AS BIZR_NO
+				, BSIS.ISSUE_DATE AS BSIS_ISSUE_DATE
+				, BSIS.STATUS AS BSIS_STATUS
+				, BSIS.RSLT_IDX AS BSIS_RSLT_IDX
+            <include refid="editAuthListQuery"/>
+			FROM HRD_DGNS_BSC BSC
+			LEFT OUTER JOIN HRD_BSK BSK
+			ON BSC.BPL_NO = BSK.BPL_NO
+            LEFT OUTER JOIN HRD_DGNS_QUSTNR_RSLT RSLT
+			ON RSLT.BSC_IDX = BSC.BSC_IDX
+            LEFT OUTER JOIN HRD_DGNS_BSISCNSL BSIS
+			ON BSIS.RSLT_IDX = RSLT.RSLT_IDX
+			<where>
+				<choose>
+					<when test="insttIdx != null ">
+						<if test="insttIdx == 33">
+							AND 1=1
+						</if>
+						<if test="insttIdx != 33">
+							AND BSC.INSTT_IDX = #{insttIdx}
+						</if>
+					</when>
+					<otherwise>
+						AND 1=1
+					</otherwise>
+				</choose>
+				<foreach collection="searchList" item="searchItem" index="i">
+					<choose>
+						<when test="searchItem.columnId == 'ISSUE_DATE1'">
+							AND TO_CHAR(BSC.ISSUE_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue} 
+						</when>
+						<when test="searchItem.columnId == 'ISSUE_DATE2'">
+							AND TO_CHAR(BSC.ISSUE_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue} 
+						</when>
+						<when test="searchItem.columnId == 'BIZR_NO'">
+							AND BIZR_NO ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</when>
+						<when test="searchItem.columnId == 'BSIS_STATUS'">
+							<if test='searchItem.columnValue =="Y"'>
+								AND BSIS.STATUS = 1
+							</if>
+							<if test='searchItem.columnValue =="N"'>
+								AND (BSIS.STATUS = 0 OR BSIS.STATUS IS NULL)
+							</if>
+						</when>
+						<when test="searchItem.columnId == 'INSTT_IDX' and searchItem.columnValue == 'empty'">
+							AND BSIS.${searchItem.columnId} IS NULL 
+						</when>
+						<when test="searchItem.columnId == 'INSTT_IDX'">
+							AND BSIS.${searchItem.columnId} = #{searchItem.columnValue}
+						</when>
+						<otherwise>
+							AND BSC.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</otherwise>
+					</choose>
+				</foreach>
+			</where>
+			ORDER BY BSC.BSC_IDX DESC 
+		<include refid="COUNT_BOTTOM" />	
+	</select>
+	
+	<select id="selectBplList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+				BSC.*
+				, SUBSTR(BSK.BPL_NO, 1,10) AS BIZR_NO
+				, BSIS.ISSUE_DATE AS BSIS_ISSUE_DATE
+				, BSIS.STATUS AS BSIS_STATUS
+				, BSIS.RSLT_IDX AS BSIS_RSLT_IDX
+				, RSLT.RSLT_IDX AS RSLT_IDX 
+				, RSLT.STATUS AS QUSTNR_STATUS 
+            <include refid="editAuthListQuery"/>
+			FROM HRD_DGNS_BSC BSC
+			LEFT OUTER JOIN HRD_BSK BSK
+			ON BSC.BPL_NO = BSK.BPL_NO
+            LEFT OUTER JOIN HRD_DGNS_QUSTNR_RSLT RSLT
+			ON RSLT.BSC_IDX = BSC.BSC_IDX
+            LEFT OUTER JOIN HRD_DGNS_BSISCNSL BSIS
+			ON BSIS.RSLT_IDX = RSLT.RSLT_IDX
+			<where>
+				<foreach collection="searchList" item="searchItem" index="i">
+					<choose>
+						<when test="searchItem.columnId == 'ISSUE_DATE1'">
+							AND TO_CHAR(BSC.ISSUE_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+						</when>
+						<when test="searchItem.columnId == 'ISSUE_DATE2'">
+							AND TO_CHAR(BSC.ISSUE_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue}  
+						</when>
+						<when test="searchItem.columnId == 'BSIS_STATUS'">
+							<if test='searchItem.columnValue =="Y"'>
+								AND BSIS.STATUS = 1
+							</if>
+							<if test='searchItem.columnValue =="N"'>
+								AND (BSIS.STATUS = 0 OR BSIS.STATUS IS NULL)
+							</if>
+						</when>
+						<when test="searchItem.columnId == 'BPL_NO'">
+							AND BSC.BPL_NO IN ${searchItem.columnValue}
+						</when>
+						<otherwise>
+							AND BSC.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</otherwise>
+					</choose>
+				</foreach>
+				<if test="bplNo != null and bplNo != ''">
+					AND BSK.BPL_NO = ${bplNo}
+				</if>
+			</where>
+			ORDER BY BSC.BSC_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectBplCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP"/>	
+			SELECT 
+				BSC.*
+				, SUBSTR(BSK.BPL_NO, 1,10) AS BIZR_NO
+				, BSIS.ISSUE_DATE AS BSIS_ISSUE_DATE
+				, BSIS.STATUS AS BSIS_STATUS
+				, BSIS.RSLT_IDX AS BSIS_RSLT_IDX
+            <include refid="editAuthListQuery"/>
+			FROM HRD_DGNS_BSC BSC
+			LEFT OUTER JOIN HRD_BSK BSK
+			ON BSC.BPL_NO = BSK.BPL_NO
+            LEFT OUTER JOIN HRD_DGNS_QUSTNR_RSLT RSLT
+			ON RSLT.BSC_IDX = BSC.BSC_IDX
+            LEFT OUTER JOIN HRD_DGNS_BSISCNSL BSIS
+			ON BSIS.RSLT_IDX = RSLT.RSLT_IDX
+			<where>
+				<foreach collection="searchList" item="searchItem" index="i">
+					<choose>
+						<when test="searchItem.columnId == 'ISSUE_DATE1'">
+							AND TO_CHAR(BSC.ISSUE_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue} 
+						</when>
+						<when test="searchItem.columnId == 'ISSUE_DATE2'">
+							AND TO_CHAR(BSC.ISSUE_DATE, 'YYYY-MM-DD') ${searchItem.columnVFlag} #{searchItem.columnValue} 
+						</when>
+						<when test="searchItem.columnId == 'BIZR_NO'">
+							AND BIZR_NO ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</when>
+						<when test="searchItem.columnId == 'BSIS_STATUS'">
+							<if test='searchItem.columnValue =="Y"'>
+								AND BSIS.STATUS = 1
+							</if>
+							<if test='searchItem.columnValue =="N"'>
+								AND (BSIS.STATUS = 0 OR BSIS.STATUS IS NULL)
+							</if>
+						</when>
+						<when test="searchItem.columnId == 'BPL_NO'">
+							AND BSC.BPL_NO IN ${searchItem.columnValue}
+						</when>
+						<otherwise>
+							AND BSC.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</otherwise>
+					</choose>
+				</foreach>
+				<if test="bplNo != null and bplNo != ''">
+					AND BSK.BPL_NO = ${bplNo}
+				</if>
+			</where>
+			ORDER BY BSC.BSC_IDX DESC 
+		<include refid="COUNT_BOTTOM" />	
+	</select>
+	
+	<select id="bskList"  parameterType="java.util.HashMap" resultType="dataMap">
+	<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+		SELECT BSK.BPL_NM
+				    , BSK.BPL_NO
+				    , ZIP.INSTT_NAME
+				    , BSK.INDUTY_CD
+	    FROM HRD_BSK BSK,
+			(SELECT DISTINCT A.ZIP, B.INSTT_IDX, B.INSTT_NAME FROM INF_ZIP_GROUP A, HRD_COM_INSTT B WHERE A.INSTT_IDX = B.INSTT_IDX) ZIP
+		WHERE BSK.BPL_ZIP = ZIP.ZIP 
+				AND BSK.INDUTY_CD IS NOT NULL 
+				AND BSK.BPL_STATUS_CD = '1'
+			<if test="insttIdx != null and insttIdx == '1000000001'">
+				AND 1=1
+			</if>
+			<if test="insttIdx != null and insttIdx != '1000000001'">
+				AND BSK.INSTT_IDX = #{insttIdx}
+			</if>
+			<if test="searchText1 !=null and !''.equals(searchText1)">
+				AND BSK.BPL_NM LIKE '%' || #{searchText1} || '%'
+			</if>
+			<if test="searchText2 !=null and !''.equals(searchText2)">
+				AND BSK.BPL_NO LIKE  #{searchText2} || '%'
+			</if>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="bskCount"  parameterType="java.util.HashMap" resultType="java.lang.Integer">
+	<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+		SELECT COUNT(*)
+		FROM HRD_BSK BSK
+		WHERE 
+			BSK.INDUTY_CD IS NOT NULL 
+			AND BSK.BPL_STATUS_CD = '1'
+			<if test="insttIdx != null and insttIdx == '1000000001'">
+				AND 1=1
+			</if>
+			<if test="insttIdx != null and insttIdx != '1000000001'">
+				AND BSK.INSTT_IDX = #{insttIdx}
+			</if>
+			<if test="searchText1 !=null and !''.equals(searchText1)" >
+				AND BSK.BPL_NM LIKE '%' || #{searchText1} || '%'
+			</if>
+			<if test="searchText2 !=null and !''.equals(searchText2)">
+				AND BSK.BPL_NO LIKE  #{searchText2} || '%'
+			</if>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectBsc" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT ISSUE_NO, ISSUE_DATE, CORP_NAME,BPL_NO, CORP_LOCATION, INDUTY_NAME, INDUTY_CD, EMPINS_START_DATE, TOT_WORK_CNT,
+			DOCTOR_NAME, DOCTOR_DEPT_NAME, DOCTOR_OFCPS, DOCTOR_EMAIL, INSTT_NAME,
+	      	CORP_PIC_NAME, CORP_PIC_OFCPS, PKG_DGUARD.FN_DEC_TELNO(CORP_PIC_TELNO), CORP_PIC_EMAIL, DECODE(PRI_SUP_CD, 1, '대규모기업', '우선지원대상기업') SCALE_CD,
+            CASE
+                WHEN LENGTH(PKG_DGUARD.FN_DEC_TELNO(DOCTOR_TELNO)) = 10 THEN
+                    SUBSTR(PKG_DGUARD.FN_DEC_TELNO(DOCTOR_TELNO),1,2)||'-'||SUBSTR(PKG_DGUARD.FN_DEC_TELNO(DOCTOR_TELNO),3,3)||'-'||SUBSTR(PKG_DGUARD.FN_DEC_TELNO(DOCTOR_TELNO),6,4)
+                WHEN LENGTH(PKG_DGUARD.FN_DEC_TELNO(DOCTOR_TELNO)) = 11 THEN
+                    SUBSTR(PKG_DGUARD.FN_DEC_TELNO(DOCTOR_TELNO),1,3)||'-'||SUBSTR(PKG_DGUARD.FN_DEC_TELNO(DOCTOR_TELNO),4,4)||'-'||SUBSTR(PKG_DGUARD.FN_DEC_TELNO(DOCTOR_TELNO),8,4)
+                ELSE PKG_DGUARD.FN_DEC_TELNO(DOCTOR_TELNO)
+            END AS DOCTOR_TELNO
+        FROM HRD_DGNS_BSC
+		WHERE BSC_IDX = #{BSC_IDX}
+	</select>
+	
+	<select id="selectDoc" parameterType="String" resultType="map">
+		SELECT A.DOCTOR_IDX
+				    , A.MEMBER_IDX
+				    , A.INSTT_IDX
+				    , B.REGIMENT
+				    , A.DOCTOR_DEPT_NAME
+				    , A.DOCTOR_OFCPS
+				    , B.MEMBER_NAME
+				    , A.STATUS
+		FROM HRD_COM_DOCTOR A
+		    LEFT OUTER JOIN VIEW_HRD_DOCTOR B
+		    ON A.MEMBER_IDX = B.MEMBER_IDX
+		WHERE
+		    A.INSTT_IDX IS NOT NULL
+		    AND A.DOCTOR_IDX = B.DOCTOR_IDX
+		    AND A.MEMBER_IDX = #{memberIdx}
+	        AND B.USERTYPE_IDX >= 5
+	</select>
+	
+	<select id="selectFund" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			 FUND.*,
+			 ROUND(((FUND.SPT_PAY)/ FUND.FUND_LIMIT)*100,1) PERCENT
+		FROM 
+		<include refid="HRD_BSC_FUND_HST"/>  FUND
+		 WHERE FUND.BSC_IDX = #{BSC_IDX}
+	</select>
+
+	<select id="selectTr" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			 TR.*
+		FROM 
+		<include refid="HRD_BSC_TR_HST"/>  TR
+		 WHERE TR.BSC_IDX = #{BSC_IDX}
+	</select>
+
+	<select id="selectPrtbiz" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			 PRTBIZ.*
+		FROM 
+		<include refid="HRD_BSC_PRTBIZ"/>  PRTBIZ
+		 WHERE PRTBIZ.BSC_IDX = #{BSC_IDX}
+	</select>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="HRD_BSC"/> A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<select id="selectByBplNo" parameterType="String" resultType="HashMap">
+		SELECT 
+			BSC_IDX, 
+			ISSUE_DATE, 
+			CORP_PIC_NAME,
+			CORP_PIC_OFCPS,
+			PKG_DGUARD.FN_DEC_TELNO(CORP_PIC_TELNO) AS CORP_PIC_TELNO,
+			CORP_PIC_EMAIL,
+			COUNT(BSC_IDX) as count
+		FROM <include refid="HRD_BSC" />
+		WHERE BPL_NO = #{bplNo}
+		GROUP BY 
+			BSC_IDX, 
+			ISSUE_DATE,
+			CORP_PIC_NAME,
+			CORP_PIC_OFCPS,
+			CORP_PIC_TELNO,
+			CORP_PIC_EMAIL
+		ORDER BY ISSUE_DATE
+		FETCH FIRST 1 ROW ONLY
+	</select>
+	
+</mapper>            

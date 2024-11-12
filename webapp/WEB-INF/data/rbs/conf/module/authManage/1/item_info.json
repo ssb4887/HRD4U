@@ -1,0 +1,359 @@
+{
+	"item_info":{
+		"items":{
+			"authIdx":{
+				"column_id":"AUTH_IDX"
+				, "item_name":"권한그룹"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "memberIdx":{
+				"item_id":"memberIdx"
+				, "item_name":"성명"
+				, "column_id":"MEMBER_IDX"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":8
+				, "editor":1
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "onclick":"fn_memSearchSubmit(this)"
+			}
+		}, "list_order":[
+			"mbrId"
+			,"mbrName"
+			,"region"
+			,"authIdx"
+		]
+		, "view_order":[
+			"authIdx"
+		]
+		, "write_order":[
+			"memberIdx"
+			,"authIdx"
+		]
+		, "writeproc_order":[
+			"memberIdx"
+			,"authIdx"
+		]
+		, "modify_order":[
+			"memberIdx"
+			,"authIdx"
+		]
+		, "modifyproc_order":[
+		    "memberIdx"
+			,"authIdx"
+		]
+	, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 	"mbrId":{
+						"column_id":"MEMBER_ID"
+						, "item_name":"아이디"
+					}, "mbrName":{
+						"column_id":"MEMBER_NAME"
+						, "item_name":"이름"
+						, "use_full_value":1
+					}
+				}, "select_order":[
+				    "mbrId"
+				    , "mbrName"
+				]
+			},"key":{
+				"items":{
+						"authIdx":{
+						"item_id":"authIdx"
+						, "column_id":"C.AUTH_IDX"
+						, "item_name":"권한그룹"
+						, "format_type":0
+						, "object_type":2
+						, "option_type":5
+						, "default_item":1
+					}, "region":{
+						"item_id":"region"
+						, "column_id":"B.INSTT_IDX"
+						, "item_name":"소속기관"
+						, "format_type":0
+						, "object_type":2
+						, "option_type":6
+						, "default_item":1
+					}
+				}
+			}, "searchForm_order":[
+				"authIdx"
+				 , "keyField"
+			], "search_order":[
+				 "authIdx"
+				 , "keyField"
+			]
+		}
+	},"authGroupManage_item_info":{
+		"items":{
+		    "authName":{
+				"column_id":"AUTH_NAME"
+				, "item_name":"권한그룹명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "siteId":{
+				"column_id":"SITE_ID"
+				, "item_name":"분류"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":5
+				, "master_code":"USERTYPE"
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "usertype":{
+				"column_id":"USERTYPE_IDX"
+				, "item_name":"회원유형"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":5
+				, "master_code":"USER_CODE"
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},"menuAuth":{
+				"item_id":"menuAuth"
+				,"column_id":"M"
+				,"item_name":"메뉴권한"
+				,"item_name_ko":"메뉴권한"
+				,"required_write":0
+				,"required_modify":0
+				,"format_type":0
+				,"object_type":4
+				,"master_code":"USERAUTH"
+				, "default_item":1
+			}, "remarks":{
+				"column_id":"REMARKS"
+				, "item_name":"비고"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "editor":1
+				, "editor_utype":1
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "file":{ 
+				"column_id":"FILE"
+				, "item_name":"파일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}
+		}, "list_order":[
+			"siteId"
+			, "authName"
+			, "usertype"
+			, "menuAuth"
+			, "note"
+		]
+		, "view_order":[
+			"authName"
+			, "siteId"
+			, "usertype"
+			, "menuAuth"
+			, "note"
+			, "file"
+		]
+		, "write_order":[
+		    "authName"
+			, "siteId"
+			, "usertype"
+			, "menuAuth"
+			, "note"
+		]
+		, "writeproc_order":[
+			"authName"
+			, "siteId"
+			, "usertype"
+			, "menuAuth"
+			, "note"
+		]
+		, "modify_order":[
+			"authName"
+			, "siteId"
+			, "usertype"
+			, "menuAuth"
+			, "note"
+			, "file"
+		]
+		, "modifyproc_order":[
+		    "authName"
+			, "siteId"
+			, "usertype"
+			, "menuAuth"
+			, "note"
+			, "file"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "subject":{
+						"column_id":"AUTH_NAME"
+						, "item_name":"권한그룹명"
+					}
+				}, "select_order":[
+				    "subject"
+				]
+			},"key":{
+				"items":{
+					"site_id":{
+						"column_id":"SITE_ID"
+						, "item_name":"분류"
+						, "format_type":0
+						, "object_type":2
+						, "option_type":0
+						, "master_code":"USERTYPE"
+						, "style_width":120
+					},"authName":{
+						"column_id":"AUTH_NAME"
+						, "item_name":"권한그룹명"
+						, "format_type":0
+						, "object_type":2
+						, "option_type":5	
+						, "style_width":120
+					}
+				}
+			}, "searchForm_order":[
+				 "site_id"
+				 ,"authName"
+			], "search_order":[
+				 "site_id"
+				 ,"authName"
+			]
+		}
+	}, "memberAuth_item_info":{
+		"items":{
+		     "startDate":{
+				"item_id":"startDate"
+				, "column_id":"START_DATE"
+				,"format_type":15
+				,"item_name":"시작일"
+				,"item_name_de":"시작일"
+				,"item_name_en":"시작일"
+				,"item_name_es":"시작일"
+				,"item_name_fr":"시작일"
+				,"item_name_ja":"시작일"
+				,"item_name_ko":"시작일"
+				,"item_name_zh":"시작일"
+				,"maximum":0
+				,"minimum":0
+				,"modify_type":20
+				,"object_type":0
+				,"option_type":0
+				,"write_type":20
+				, "default_item":1
+			},"endDate":{
+				"item_id":"endDate"
+				, "column_id":"END_DATE"
+				,"format_type":15
+				,"item_name":"종료일"
+				,"item_name_de":"종료일"
+				,"item_name_en":"종료일"
+				,"item_name_es":"종료일"
+				,"item_name_fr":"종료일"
+				,"item_name_ja":"종료일"
+				,"item_name_ko":"종료일"
+				,"item_name_zh":"종료일"
+				,"maximum":0
+				,"minimum":0
+				,"modify_type":20
+				,"object_type":0
+				,"option_type":0
+				,"write_type":20
+				, "default_item":1
+			},"apply":{
+				"column_id":"APPLY_YN"
+				, "item_name":"적용여부"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":5
+				, "master_code":"APPLY_STATE"
+				, "default_value":"0"
+				, "write_type":20
+				, "modify_type":20
+				, "default_item":1
+			}
+		}, "list_order":[
+			"startDate"
+			, "endDate"
+			, "apply"
+		]
+		, "view_order":[
+			"startDate"
+			, "endDate"
+			, "apply"
+		]
+		, "write_order":[
+		    "startDate"
+			, "endDate"
+			, "apply"
+		]
+		, "writeproc_order":[
+			"startDate"
+			, "endDate"
+			, "apply"
+		]
+		, "modify_order":[
+			"startDate"
+			, "endDate"
+			, "apply"
+		]
+		, "modifyproc_order":[
+		   "startDate"
+			, "endDate"
+			, "apply"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "subject":{
+						"column_id":"AUTH_NAME"
+						, "item_name":"권한그룹"
+					}
+				}, "select_order":[
+				    "subject"
+				]
+			}, "searchForm_order":[
+				 "keyField"
+			], "search_order":[
+				 "keyField"
+			]
+		}
+	}
+}

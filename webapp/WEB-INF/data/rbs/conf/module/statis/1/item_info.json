@@ -1,0 +1,239 @@
+{
+	"item_info":{
+		"items":{
+		    "name":{
+				"column_id":"NAME"
+				, "item_name":"작성자"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "subject":{
+				"column_id":"SUBJECT"
+				, "item_name":"제목"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "contents":{
+				"column_id":"CONTENTS"
+				, "item_name":"내용"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "editor":1
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "file":{
+				"column_id":"FILE"
+				, "item_name":"파일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}
+		}, "list_order":[
+			"subject"
+			, "name"
+			, "contents"
+		]
+		, "view_order":[
+			"name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "write_order":[
+		    "name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "writeproc_order":[
+			"name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "modify_order":[
+			"name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "modifyproc_order":[
+		    "name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "subject":{
+						"column_id":"SUBJECT"
+						, "item_name":"제목"
+					},
+					 "contents":{
+						"column_id":"CONTENTS"
+						, "item_name":"내용"
+					}
+				}, "select_order":[
+				    "subject"
+					, "contents"
+				]
+			}, "key":{
+				"items":{
+					"year":{
+						"column_id":"YEAR"
+						, "item_name":"연도"
+						, "format_type": 19
+						, "use_privsec": 0
+						, "start_year": 2023
+						, "end_addcnt": 0
+						, "default_current": 1
+						, "object_type": 0
+						, "style_width":50
+					},
+					"month":{
+						"column_id":"instt"
+						, "item_name":"월"
+						, "format_type": 0
+						, "object_type": 4
+						, "option_type": 0
+						, "master_code":"MONTH"
+						, "default_item": 1
+					},
+					"instt":{
+						"column_id":"instt"
+						, "item_name":"소속기관"
+						, "format_type": 0
+						, "object_type": 2
+						, "option_type": 0
+						, "master_code":"ORG_CODE"
+						, "default_item": 1
+					}
+				}
+			}, "searchForm_order":[
+				"year"
+				,"instt"
+				,"month"
+			], "search_order":[
+				"year"
+				,"instt"
+				,"month"
+			]
+		},"corplist_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "subject":{
+						"column_id":"SUBJECT"
+						, "item_name":"제목"
+					},
+					 "contents":{
+						"column_id":"CONTENTS"
+						, "item_name":"내용"
+					}
+				}, "select_order":[
+				    "subject"
+					, "contents"
+				]
+			}, "key":{
+				"items":{
+					"year":{
+						"column_id":"YEAR"
+						, "item_name":"연도"
+						, "format_type": 19
+						, "use_privsec": 0
+						, "start_year": 2023
+						, "end_addcnt": 0
+						, "default_current": 1
+						, "object_type": 0
+						, "style_width":50
+					},
+					"month":{
+						"column_id":"instt"
+						, "item_name":"월"
+						, "format_type": 0
+						, "object_type": 4
+						, "option_type": 0
+						, "master_code":"MONTH"
+						, "default_item": 1
+					},
+					"instt":{
+						"column_id":"instt"
+						, "item_name":"소속기관"
+						, "format_type": 0
+						, "object_type": 2
+						, "option_type": 0
+						, "master_code":"ORG_CODE"
+						, "default_item": 1
+					},
+					"center":{
+						"column_id":"center"
+						, "item_name":"민간센터"
+						, "format_type": 0
+						, "object_type": 0
+						, "option_type": 0
+					},
+					"type":{
+						"column_id":"type"
+						, "item_name":"기업유형"
+						, "format_type": 0
+						, "object_type": 0
+						, "option_type": 0
+					},
+					"corp":{
+						"column_id":"corp"
+						, "item_name":"기업명"
+						, "format_type": 0
+						, "object_type": 0
+						, "option_type": 0
+					},
+					"bplNo":{
+						"column_id":"bplNo"
+						, "item_name":"사업장관리번호"
+						, "format_type": 0
+						, "object_type": 0
+						, "option_type": 0
+					}
+				}
+			}, "searchForm_order":[
+				 "corp"
+				 ,"type"
+				 ,"bplNo"
+				 ,"center"
+				 ,"year"
+				 ,"instt"
+				 ,"month"
+			], "search_order":[
+				 "corp"
+				 ,"type"
+				 ,"bplNo"
+				 ,"center"
+				 ,"year"
+				 ,"instt"
+				 ,"month"
+			]
+		}
+	}
+}

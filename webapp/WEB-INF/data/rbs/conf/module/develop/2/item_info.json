@@ -1,0 +1,431 @@
+{
+	"item_info":{
+		"items":{
+		    "totPay":{
+				"column_id":"SPLPC_AMT"
+				, "item_name":"총 지원금액"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":0
+				, "required_approve_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bankCd":{
+				"column_id":"BANK_CMMN_CD"
+				, "item_name":"은행"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"BANK_CODE"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "dpstrNm":{
+				"column_id":"DPSTR_NM"
+				, "item_name":"예금주명"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "acnutNo":{
+				"column_id":"ACNUTNO"
+				, "item_name":"계좌번호"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "remarks":{
+				"column_id":"REMARKS"
+				, "item_name":"비고"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "tpCd":{
+				"column_id":"TP_CD"
+				, "item_name":"훈련과정코드"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "tpNm":{
+				"column_id":"TP_NM"
+				, "item_name":"훈련과정명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "trOprtnDe":{
+				"column_id":"TR_OPRTN_DE"
+				, "item_name":"훈련실시일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "confmStatus":{
+				"column_id":"CONFM_STATUS"
+				, "item_name":"신청상태"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"CONFM_STATUS"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "file":{
+				"column_id":"FILE"
+				, "item_name":"파일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}
+		}, "list_order":[
+			"totPay"
+		]
+		, "view_order":[
+			"totPay"
+			, "bankCd"
+			, "dpstrNm"
+			, "acnutNo"
+			, "remarks"
+			, "file"
+		]
+		, "write_order":[
+		    "totPay"
+			, "bankCd"
+			, "dpstrNm"
+			, "acnutNo"
+			, "remarks"
+			, "file"
+		]
+		, "writeproc_order":[
+			"totPay"
+			, "bankCd"
+			, "dpstrNm"
+			, "remarks"
+			, "tpCd"
+			, "tpNm"
+			, "trOprtnDe"
+			, "file"
+		]
+		, "modify_order":[
+			"totPay"
+			, "bankCd"
+			, "dpstrNm"
+			, "acnutNo"
+			, "remarks"
+			, "file"
+		]
+		, "modifyproc_order":[
+		    "totPay"
+			, "bankCd"
+			, "dpstrNm"
+			, "remarks"
+			, "tpCd"
+			, "tpNm"
+			, "trOprtnDe"
+			, "file"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "tpNm":{
+						"column_id":"TP_NM"
+						, "item_name":"훈련과정명"
+					}
+				}, "select_order":[
+				    "tpNm"
+				]
+			}, "key":{
+				"items":{
+					"startYear":{
+						"column_id":"START_YEAR"
+						, "item_name":"사업 연도"
+						, "format_type":19
+						, "object_type":2
+						, "start_year":2020
+						, "style_width":100
+					}
+					, "cnslType":{
+						"column_id":"A.CNSL_TYPE"
+						, "item_name":"사업 유형"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CNSL_TYPE"
+					}
+					, "confmStatus":{
+						"column_id":"A.CONFM_STATUS"
+						, "item_name":"상태"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CONFM_STATUS"
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "startYear"
+				 , "cnslType"
+				 , "confmStatus"
+			], "search_order":[
+				 "keyField"
+				 , "cnslType"
+				 , "confmStatus"
+			]
+		}
+	}
+	, "developDct_item_info":{
+		"items":{
+		    "totPay":{
+				"column_id":"SPLPC_AMT"
+				, "item_name":"총 지원금액"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bankCd":{
+				"column_id":"BANK_CMMN_CD"
+				, "item_name":"은행"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"BANK_CODE"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "dpstrNm":{
+				"column_id":"DPSTR_NM"
+				, "item_name":"예금주명"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "acnutNo":{
+				"column_id":"ACNUTNO"
+				, "item_name":"계좌번호"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "remarks":{
+				"column_id":"REMARKS"
+				, "item_name":"비고"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "tpCd":{
+				"column_id":"TP_CD"
+				, "item_name":"훈련과정코드"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "tpNm":{
+				"column_id":"TP_NM"
+				, "item_name":"훈련과정명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "trOprtnDe":{
+				"column_id":"TR_OPRTN_DE"
+				, "item_name":"훈련실시일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "confmStatus":{
+				"column_id":"CONFM_STATUS"
+				, "item_name":"신청상태"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"CONFM_STATUS"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "file":{
+				"column_id":"FILE"
+				, "item_name":"파일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}, "doctorOpinion":{
+				"column_id":"DOCTOR_OPINION"
+				, "item_name":"주치의 의견"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"totPay"
+		]
+		, "view_order":[
+			"totPay"
+			, "bankCd"
+			, "dpstrNm"
+			, "acnutNo"
+			, "remarks"
+			, "file"
+		]
+		, "write_order":[
+		    "totPay"
+			, "bankCd"
+			, "dpstrNm"
+			, "acnutNo"
+			, "remarks"
+			, "file"
+		]
+		, "writeproc_order":[
+			"totPay"
+			, "tpCd"
+			, "tpNm"
+			, "trOprtnDe"
+		]
+		, "modify_order":[
+			"totPay"
+			, "bankCd"
+			, "dpstrNm"
+			, "acnutNo"
+			, "remarks"
+			, "file"
+		]
+		, "modifyproc_order":[
+		    "totPay"
+			, "tpCd"
+			, "tpNm"
+			, "trOprtnDe"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "tpNm":{
+						"column_id":"TP_NM"
+						, "item_name":"훈련과정명"
+					}
+				}, "select_order":[
+				    "tpNm"
+				]
+			}, "key":{
+				"items":{
+					"startYear":{
+						"column_id":"START_YEAR"
+						, "item_name":"사업 연도"
+						, "format_type":19
+						, "object_type":2
+						, "start_year":2020
+						, "style_width":100
+					}
+					, "cnslType":{
+						"column_id":"A.CNSL_TYPE"
+						, "item_name":"사업 유형"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CNSL_TYPE"
+					}
+					, "confmStatus":{
+						"column_id":"A.CONFM_STATUS"
+						, "item_name":"상태"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CONFM_STATUS"
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "startYear"
+				 , "cnslType"
+				 , "confmStatus"
+			], "search_order":[
+				 "keyField"
+				 , "cnslType"
+				 , "confmStatus"
+			]
+		}
+	}
+	
+}

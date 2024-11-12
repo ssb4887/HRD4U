@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. [KEY_IDX_COLUMN], [<include refid="ARACTPLN_TABLE_NAME"/>], [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.areaAct.areaActMapper">
+	<!-- 테이블명 -->
+	<sql id="ARACTPLN_TABLE_NAME"><trim>HRD_SPTJ_ARACTPLN</trim></sql>
+	<sql id="SCHDUL_TABLE_NAME"><trim>HRD_SPTJ_ARACTPLN_SCHDUL</trim></sql>
+	<sql id="ARACTPLN_BSK_TABLE_NAME"><trim>HRD_SPTJ_ARACTPLN_BSK</trim></sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(ARACTPLN_IDX), 0)</trim> + 1 MAXID
+		FROM   
+		<include refid="ARACTPLN_TABLE_NAME"/> A
+	</select>
+	
+	<select id="nextSn" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(ARACTPLN_Sn), 0)</trim> + 1 MAXID
+		FROM   
+		<include refid="ARACTPLN_BSK_TABLE_NAME"/> A
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.ARACTPLN_IDX), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		<include refid="ARACTPLN_TABLE_NAME"/> A 
+		WHERE A.ARACTPLN_IDX LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*, C.INSTT_NAME
+			<include refid="editAuthListQuery"/>
+			FROM 
+			<include refid="ARACTPLN_TABLE_NAME"/> A 
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.memberManage.memberManageMapper.HRD_DOCTOR_TABLE_NAME"/> B  
+			ON A.REGI_IDX = B.MEMBER_IDX
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.memberManage.memberManageMapper.HRD_COM_INSTT_TABLE_NAME"/> C
+			ON B.INSTT_IDX = C.INSTT_IDX
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND B.APPLY_YN = 'Y'
+			<choose>
+				<when test="dsetOrderField == null">
+					<bind name="defaultOrderStr" value="'A.ARACTPLN_IDX DESC'"/>
+				</when>
+				<otherwise>
+					<bind name="defaultOrderStr" value="_parameter.get('dsetOrderField')"/>
+				</otherwise>
+			</choose>
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectInsttList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*, B.POLICI_CN, C.CORP_DISTRB_CN, D.TR_CN, E.INSTT_NAME 
+			<include refid="editAuthListQuery"/>
+			FROM 
+			<include refid="rbs.modules.areaAct.areaActMultiMapper.MULTI_TABLE_NAME"/> A
+			LEFT OUTER JOIN 
+			<include refid="rbs.modules.areaAct.areaActMultiMapper.MULTI_POLICY_TABLE_NAME"/> B
+			ON A.ARACTPLN_IDX = B.ARACTPLN_IDX
+			AND A.INSTT_IDX = B.INSTT_IDX
+			LEFT OUTER JOIN 
+			<include refid="rbs.modules.areaAct.areaActMultiMapper.MULTI_BSNS_TABLE_NAME"/> C
+			ON A.ARACTPLN_IDX = C.ARACTPLN_IDX
+			AND A.INSTT_IDX = C.INSTT_IDX
+			LEFT OUTER JOIN 
+			<include refid="rbs.modules.areaAct.areaActMultiMapper.MULTI_TRNG_TABLE_NAME"/> D
+			ON A.ARACTPLN_IDX = D.ARACTPLN_IDX
+			AND A.INSTT_IDX = D.INSTT_IDX
+			LEFT OUTER JOIN 
+			HRD_COM_INSTT E
+			ON A.INSTT_IDX = E.INSTT_IDX
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<choose>
+				<when test="dsetOrderField == null">
+					<bind name="defaultOrderStr" value="'A.INSTT_IDX ASC'"/>
+				</when>
+				<otherwise>
+					<bind name="defaultOrderStr" value="_parameter.get('dsetOrderField')"/>
+				</otherwise>
+			</choose>
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectAccumList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT  FN_GET_CODE_NM('BSK_NMPR_SE', BSK_NMPR_SE) AS BSK_NMPR_SE_NM
+		      , SUM(CASE WHEN B.LCLAS = 'G' THEN BPL_CO ELSE 0 END) AS  INDUTY_NM1 <!-- G 도매 및 소매업 -->
+		      , SUM(CASE WHEN B.LCLAS = 'F' THEN BPL_CO ELSE 0 END) AS  INDUTY_NM2 <!-- F 건설업 -->
+		      , SUM(CASE WHEN B.LCLAS = 'C' THEN BPL_CO ELSE 0 END) AS  INDUTY_NM3 <!-- C 제조업 -->
+		      , SUM(CASE WHEN B.LCLAS = 'I' THEN BPL_CO ELSE 0 END) AS  INDUTY_NM4 <!-- I 숙박 및 음식점업 -->
+		      , SUM(CASE WHEN B.LCLAS = 'Q' THEN BPL_CO ELSE 0 END) AS  INDUTY_NM5 <!-- Q 보건업 및 사회복지 서비스업 -->
+		      , SUM(CASE WHEN B.LCLAS = 'L' THEN BPL_CO ELSE 0 END) AS  INDUTY_NM6 <!-- L 부동산업 -->
+		      , SUM(CASE WHEN B.LCLAS IS NULL THEN BPL_CO ELSE 0 END) AS  INDUTY_NM7 <!-- 기타 -->
+		      , A.INSTT_IDX
+		FROM HRD_BSK_STATS A
+		  LEFT JOIN (SELECT LCLAS, LCLAS_NM
+		             FROM TMP_INDUSTRY_LIMIT
+		             WHERE LCLAS IN ('G','F','C','I','Q','L') 
+		             GROUP BY LCLAS, LCLAS_NM ) B ON ( A.INDUTY_LCLAS_CD = B.LCLAS )
+		WHERE STDR_DE = TO_CHAR(ADD_MONTHS(TO_DATE(#{YEAR}, 'YYYY'),-12), 'YYYY') || '1231'
+		  AND BSK_STATS_SE = '01' 
+		GROUP BY BSK_NMPR_SE, INSTT_IDX
+		ORDER BY INSTT_IDX, BSK_NMPR_SE
+	</select>
+	
+	<select id="selectYearList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT  FN_GET_CODE_NM('BSK_NMPR_SE', BSK_NMPR_SE) AS BSK_NMPR_SE_NM
+		      , SUM(CASE WHEN STDR_DE  = TO_CHAR(ADD_MONTHS(TO_DATE(#{YEAR}, 'YYYY'),-36), 'YYYY') || '1231' THEN BPL_CO ELSE 0 END) AS YEAR3 <!-- 3년전 -->
+		      , SUM(CASE WHEN STDR_DE  = TO_CHAR(ADD_MONTHS(TO_DATE(#{YEAR}, 'YYYY'),-24), 'YYYY') || '1231' THEN BPL_CO ELSE 0 END) AS YEAR2 <!-- 2년전 -->
+		      , SUM(CASE WHEN STDR_DE  = TO_CHAR(ADD_MONTHS(TO_DATE(#{YEAR}, 'YYYY'),-12), 'YYYY') || '1231' THEN BPL_CO ELSE 0 END) AS YEAR1 <!-- 1년전 -->
+		      , A.INSTT_IDX
+		FROM HRD_BSK_STATS A
+		WHERE BSK_STATS_SE = '01' 
+		AND STDR_DE BETWEEN  TO_CHAR(ADD_MONTHS(TO_DATE(#{YEAR}, 'YYYY'),-36), 'YYYY') || '1231' AND TO_CHAR(ADD_MONTHS(TO_DATE(#{YEAR}, 'YYYY'),-12), 'YYYY') || '1231'
+		GROUP BY BSK_NMPR_SE, INSTT_IDX
+		ORDER BY INSTT_IDX, BSK_NMPR_SE
+	</select>
+	
+	<select id="selectInstt" parameterType="java.util.HashMap" resultType="String">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.INSTT_IDX
+			<include refid="editAuthListQuery"/>
+			FROM 
+			<include refid="rbs.modules.areaAct.areaActMultiMapper.MULTI_TABLE_NAME"/> A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<choose>
+				<when test="dsetOrderField == null">
+					<bind name="defaultOrderStr" value="'A.INSTT_IDX ASC'"/>
+				</when>
+				<otherwise>
+					<bind name="defaultOrderStr" value="_parameter.get('dsetOrderField')"/>
+				</otherwise>
+			</choose>
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			<include refid="ARACTPLN_TABLE_NAME"/> A 
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.memberManage.memberManageMapper.HRD_DOCTOR_TABLE_NAME"/> B  
+			ON A.REGI_IDX = B.MEMBER_IDX
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.memberManage.memberManageMapper.HRD_COM_INSTT_TABLE_NAME"/> C
+			ON B.INSTT_IDX = C.INSTT_IDX
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND B.APPLY_YN = 'Y'
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*
+			<include refid="editAuthListQuery"/>
+		FROM 
+		<include refid="ARACTPLN_TABLE_NAME"/> A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			<include refid="ARACTPLN_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.${columnItem}_SAVED_NAME, A.${columnItem}_ORIGIN_NAME
+			FROM 
+			<include refid="ARACTPLN_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE <include refid="ARACTPLN_TABLE_NAME"/> SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1 
+		WHERE ARACTPLN_IDX = #{KEY_IDX}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="ARACTPLN_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		A.* 
+		FROM 
+		<include refid="ARACTPLN_TABLE_NAME"/> A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<select id="selectBskData" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		(SELECT LCLAS_CO FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 1) LCLAS_CO_1,
+		(SELECT LCLAS_CO FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 2) LCLAS_CO_2, 
+		(SELECT LCLAS_CO FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 3) LCLAS_CO_3, 
+		(SELECT LCLAS_MDAT_CO FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 1) LCLAS_MDAT_CO_1, 
+		(SELECT LCLAS_MDAT_CO FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 2) LCLAS_MDAT_CO_2,
+		(SELECT LCLAS_MDAT_CO FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 3) LCLAS_MDAT_CO_3,
+		(SELECT GOAL_CN FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 1) GOAL_CN_1,
+		(SELECT GOAL_CN FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 2) GOAL_CN_2, 
+		(SELECT GOAL_CN FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 3) GOAL_CN_3, 
+		(SELECT DETAIL_CN FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 1) DETAIL_CN_1, 
+		(SELECT DETAIL_CN FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 2) DETAIL_CN_2,
+		(SELECT DETAIL_CN FROM <include refid="ARACTPLN_BSK_TABLE_NAME"/> <include refid="rbs.commonMapper.COM_SG_WHERE"/> AND LCLAS_CD = 3) DETAIL_CN_3
+		FROM 
+		DUAL
+	</select>
+	
+	<select id="selectRegi" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		TO_CHAR(TO_DATE(A.SCHDUL_START_DATE,'YYYYMMDD'),'YYYY-MM-DD') AS SCHDUL_START_DATE, TO_CHAR(TO_DATE(A.SCHDUL_END_DATE,'YYYYMMDD'),'YYYY-MM-DD') AS SCHDUL_END_DATE
+		FROM 
+		<include refid="SCHDUL_TABLE_NAME"/> A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="ARACTPLN_TABLE_NAME"/> (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<insert id="regiInsert" parameterType="java.util.HashMap">
+		MERGE INTO <include refid="SCHDUL_TABLE_NAME"/> A
+			USING DUAL
+			ON (A.SCHDUL_IDX = #{SCHDUL_IDX})
+			WHEN MATCHED THEN
+				UPDATE SET 
+					REGI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>,
+					LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>
+					<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+			WHEN NOT MATCHED THEN
+				INSERT (
+					<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+					, REGI_DATE, LAST_MODI_DATE, A.SCHDUL_IDX 
+				) VALUES (
+					<include refid="rbs.commonMapper.INSERT_VALUES"/>
+					, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>, #{SCHDUL_IDX}
+				)
+	</insert>
+	
+	<select id="regiDateChk" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="SCHDUL_TABLE_NAME"/> A
+		WHERE <include refid="rbs.commonDBMSMapper.currentDate"/> BETWEEN TO_DATE(SCHDUL_START_DATE, 'YYYY-MM-DD') AND TO_DATE(SCHDUL_END_DATE, 'YYYY-MM-DD')
+	</select>
+	
+	<update id="planUpdate" parameterType="java.util.HashMap">
+		UPDATE <include refid="ARACTPLN_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE <include refid="ARACTPLN_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.ARACTPLN_IDX,  A.LAST_MODI_NAME, A.LAST_MODI_ID, A.REGI_DATE, A.LAST_MODI_DATE 
+			FROM 
+			<include refid="ARACTPLN_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			ORDER BY A.ARACTPLN_IDX ASC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="ARACTPLN_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE <include refid="ARACTPLN_TABLE_NAME"/> SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE <include refid="ARACTPLN_TABLE_NAME"/> SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="ARACTPLN_TABLE_NAME"/>  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	
+	<!-- 지역활성화 계획서 작성시 업데이트 한다.-->
+	<update id="writePlan" parameterType="java.util.HashMap">
+		{call
+		        DECLARE
+		        v_CHG_IDX NUMBER;
+		        v_CLI_IDX NUMBER;
+		        v_PLAN_IDX NUMBER;
+		        BEGIN
+		            v_CLI_IDX := #{CLI_IDX};
+		            v_PLAN_IDX := #{PLAN_IDX};
+		        
+		            SELECT NVL(MAX(CHG_IDX),0) + 1
+		            INTO v_CHG_IDX 
+		            FROM HRD_CLI_PLAN_CHANGE
+		            WHERE 
+		                CLI_IDX = v_CLI_IDX
+		            AND PLAN_IDX = v_PLAN_IDX;
+		            
+		        /*HRD_SPTJ_ARACTPLN_INSTT_POLICY*/
+		        UPDATE <include refid="rbs.modules.areaAct.areaActMultiMapper.MULTI_TABLE_NAME"/> SET 
+				ISDELETE = '1'
+				WHERE ARACTPLN_IDX = #{KEY_IDX}
+				<include refid="rbs.commonMapper.UPDATE_SET"/>
+				<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+				AND ARACTPLN_IDX = #{KEY_IDX}
+				
+		        INSERT INTO HRD_CLI_PLAN_CHANGE
+		        select A.CLI_IDX,
+		        A.PLAN_IDX,
+		        v_CHG_IDX AS CHG_IDX,
+		        A.PLAN_NM,
+		        A.RSLT_CNSL_EXC_PLAN,
+		        A.HRD_PIC_ABLTDEVLP_PLAN,
+		        A.SLFTR_PLAN,
+		        A.SLFTR_STSFDG_EXAMIN_PLAN,
+		        A.SLFTR_STPRT_APLCDG_EXMN_PLN,
+		        A.FYER_TR_PLAN_TR_DTY,
+		        A.GVRN_SPORT_CRSE_CO,
+		        A.GVRN_UN_SPORT_CRSE_CO,
+		        A.CONFM_STATUS,
+		        A.DOCTOR_OPINION,
+		        A.ISDELETE,
+		        A.REGI_IDX,
+		        A.REGI_ID,
+		        A.REGI_NAME,
+		        A.REGI_DATE,
+		        A.REGI_IP,
+		        A.LAST_MODI_IDX,
+		        A.LAST_MODI_ID,
+		        A.LAST_MODI_NAME,
+		        A.LAST_MODI_DATE,
+		        A.LAST_MODI_IP 
+		        from hrd_cli_plan A
+		        WHERE A.CLI_IDX = v_CLI_IDX
+		        AND A.PLAN_IDX = v_PLAN_IDX;
+		        
+		        /*HRD_SPTJ_ARACTPLN_INSTT_BSNS*/
+		        INSERT INTO HRD_CLI_PLAN_CHANGE_TR_SUB
+		        SELECT A.CLI_IDX,
+		        A.PLAN_IDX,
+		        v_CHG_IDX AS CHG_IDX,
+		        A.TR_DTL_IDX,
+		        A.TR_MT,
+		        A.TR_TRGET,
+		        A.TR_CN,
+		        A.TR_MBY,
+		        A.TR_MTH,
+		        A.TRINSTT_NM,
+		        A.TR_NMPR,
+		        A.TRTM,
+		        A.GVRN_SPORT_YN,
+		        A.REMARKS,
+		        A.REGI_IDX,
+		        A.REGI_ID,
+		        A.REGI_NAME,
+		        A.REGI_DATE,
+		        A.REGI_IP,
+		        A.LAST_MODI_IDX,
+		        A.LAST_MODI_ID,
+		        A.LAST_MODI_NAME,
+		        A.LAST_MODI_DATE,
+		        A.LAST_MODI_IP
+		        FROM HRD_CLI_PLAN_TR_SUB A
+		        WHERE 
+		            CLI_IDX = v_CLI_IDX
+		        AND PLAN_IDX = v_PLAN_IDX;
+		        
+		        /*HRD_SPTJ_ARACTPLN_INSTT_TRNG*/
+		        INSERT INTO HRD_CLI_PLAN_CHANGE_SUB
+		        SELECT A.CLI_IDX,
+		        A.PLAN_IDX,
+		        v_CHG_IDX AS CHG_IDX,
+		        A.SPORT_ITEM_CD,
+		        A.ESSNTL_SE,
+		        A.REQST_YN,
+		        A.PLAN_CN,
+		        A.ISDELETE,
+		        A.REGI_IDX,
+		        A.REGI_ID,
+		        A.REGI_NAME,
+		        A.REGI_DATE,
+		        A.REGI_IP,
+		        A.LAST_MODI_IDX,
+		        A.LAST_MODI_ID,
+		        A.LAST_MODI_NAME,
+		        A.LAST_MODI_DATE,
+		        A.LAST_MODI_IP
+		        FROM HRD_CLI_PLAN_SUB A
+		        WHERE 
+		            CLI_IDX = v_CLI_IDX
+		        AND PLAN_IDX = v_PLAN_IDX;
+		        
+		        
+		        /*HRD_SPTJ_ARACTPLN_BSK*/
+		        INSERT INTO HRD_CLI_PLAN_CHANGE_KPI
+		        SELECT A.CLI_IDX,
+		        A.PLAN_IDX,
+		        v_CHG_IDX AS CHG_IDX,
+		        A.KPI_IDX,
+		        A.ESSNTL_SE,
+		        A.KPI_CN,
+		        A.KPI_GOAL,
+		        A.REGI_IDX,
+		        A.REGI_ID,
+		        A.REGI_NAME,
+		        A.REGI_DATE,
+		        A.REGI_IP,
+		        A.LAST_MODI_IDX,
+		        A.LAST_MODI_ID,
+		        A.LAST_MODI_NAME,
+		        A.LAST_MODI_DATE,
+		        A.LAST_MODI_IP
+		        FROM HRD_CLI_PLAN_KPI A
+		        WHERE 
+		            CLI_IDX = v_CLI_IDX
+		        AND PLAN_IDX = v_PLAN_IDX;
+		        
+		        
+		        COMMIT;
+		    END
+		}
+	</update>
+	
+</mapper>            

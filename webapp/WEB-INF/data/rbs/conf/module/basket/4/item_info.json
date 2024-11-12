@@ -1,0 +1,145 @@
+{
+	"item_info":{
+		"items":{
+			"insttIdx":{
+				"column_id":"INSTT_IDX"
+				, "item_name":"기관일련번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "insttName":{
+				"column_id":"INSTT_NAME"
+				, "item_name":"기관명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "hashtagCd":{
+				"column_id":"HASHTAG_CD"
+				, "item_name":"해시태그코드"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "hashtagNm":{
+				"column_id":"HASHTAG_NM"
+				, "item_name":"해시태그이름"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "regiDate":{
+				"column_id":"REGI_DATE"
+				, "item_name":"등록일자"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":5
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "date_type":1
+				, "default_item":1
+			}
+		}, "list_order":[
+			"insttIdx"
+			, "hashtagCd"
+			, "hashtagNm"
+			, "regiDate"
+			, "insttName"
+		]
+		, "view_order":[
+			"insttIdx"
+			, "hashtagCd"
+			, "hashtagNm"
+			, "regiDate"
+			, "insttName"
+		]
+		, "write_order":[
+		    "insttIdx"
+			, "hashtagCd"
+			, "hashtagNm"
+			, "regiDate"
+			, "insttName"
+		]
+		, "writeproc_order":[
+			"insttIdx"
+			, "hashtagCd"
+			, "hashtagNm"
+			, "regiDate"
+			, "insttName"
+		]
+		, "modify_order":[
+			"insttIdx"
+			, "hashtagCd"
+			, "hashtagNm"
+			, "regiDate"
+			, "insttName"
+		]
+		, "modifyproc_order":[
+		    "insttIdx"
+			, "hashtagCd"
+			, "hashtagNm"
+			, "regiDate"
+			, "insttName"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"insttIdx": {
+						"item_name":"기관일련번호"
+						,"column_id":"INSTT_IDX"
+					},
+					"insttName": {
+						"item_name":"기관명"
+						,"column_id":"INSTT_NAME"
+					},
+					"hashtagCd": {
+						"item_name":"해시태그코드"
+						,"column_id":"HASHTAG_CD"
+					},
+					"hashtagNm" : {
+						"item_name":"해시태그이름"
+						,"column_id":"HASHTAG_NM"
+					},
+					"regiDate" : {
+						"item_name":"등록일자"
+						,"column_id":"REGI_DATE"
+					}
+				}
+			},
+			"searchForm_order":[
+				"insttIdx"
+				, "insttName"
+				, "hashtagCd"
+				, "hashtagNm"
+				, "regiDate"
+			], "search_order":[
+				"insttIdx"
+				, "insttName"
+				, "hashtagCd"
+				, "hashtagNm"
+				, "regiDate"
+			], "searchAddOptn_order":[
+				"trRecord"
+			]
+		}
+	}
+}

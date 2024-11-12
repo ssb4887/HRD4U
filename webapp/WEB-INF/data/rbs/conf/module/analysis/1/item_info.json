@@ -1,0 +1,505 @@
+{
+	"item_info":{
+		"items":{
+			"devlopIdx":{
+				"column_id":"DEVLOP_IDX"
+				, "item_name":"개발식별색인"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"trCorpNm":{
+				"column_id":"TR_CORP_NM"
+				, "item_name":"훈련기업명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},"trneeNm":{
+				"column_id":"TRNEE_NM"
+				, "item_name":"훈련생명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "tpNm":{
+				"column_id":"TP_NM"
+				, "item_name":"훈련과정명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "ncsSclasCd":{
+				"column_id":"NCS_SCLAS_CD"
+				, "item_name":"NCS소분류"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "trPeriod":{
+				"column_id":"TR_PERIOD"
+				, "item_name":"훈련기간"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "trtm":{
+				"column_id":"TRTM"
+				, "item_name":"훈련시간"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "trMth":{
+				"column_id":"TR_MTH"
+				, "item_name":"훈련방법"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "trPurps":{
+				"column_id":"TR_PURPS"
+				, "item_name":"평가목적"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "trTme":{
+				"column_id":"TR_TME"
+				, "item_name":"훈련회차"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bizSe":{
+				"column_id":"BIZ_SE"
+				, "item_name":"훈련기관(기업)"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "trResultReprtSe":{
+				"column_id":"TR_RESULT_REPRT_SE"
+				, "item_name":"훈련결과보고서구분(기업)"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "status":{
+				"column_id":"STATUS"
+				, "item_name":"상태"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"CONFM_STATUS"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "edcCrse1":{
+				"column_id":"EDC_CRSE1"
+				, "item_name":"교육과정1"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "edcCrse2":{
+				"column_id":"EDC_CRSE2"
+				, "item_name":"교육과정2"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "edcCrse3":{
+				"column_id":"EDC_CRSE3"
+				, "item_name":"교육과정3"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "edcCrse4":{
+				"column_id":"EDC_CRSE4"
+				, "item_name":"교육과정4"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "edcCrse5":{
+				"column_id":"EDC_CRSE5"
+				, "item_name":"교육과정5"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "gnrlz":{
+				"column_id":"GNRLZ"
+				, "item_name":"종합"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "knwldgTchnlgyPickup1":{
+				"column_id":"KNWLDG_TCHNLGY_PICKUP1"
+				, "item_name":"지식기술습득1"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "knwldgTchnlgyPickup2":{
+				"column_id":"KNWLDG_TCHNLGY_PICKUP2"
+				, "item_name":"지식기술습득2"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "knwldgTchnlgyPickup3":{
+				"column_id":"KNWLDG_TCHNLGY_PICKUP3"
+				, "item_name":"지식기술습득3"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "knwldgTchnlgyPickup4":{
+				"column_id":"KNWLDG_TCHNLGY_PICKUP4"
+				, "item_name":"지식기술습득4"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "stoprtApplc1":{
+				"column_id":"STOPRT_APPLC1"
+				, "item_name":"현업적용1"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "stoprtApplc2":{
+				"column_id":"STOPRT_APPLC2"
+				, "item_name":"현업적용2"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "stoprtApplc3":{
+				"column_id":"STOPRT_APPLC3"
+				, "item_name":"현업적용3"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "stoprtApplc4":{
+				"column_id":"STOPRT_APPLC4"
+				, "item_name":"현업적용4"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bplNo":{
+				"column_id":"BPL_NO"
+				, "item_name":"사업장관리번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "brffcCd":{
+				"column_id":"BRFFC_CD"
+				, "item_name":"지부지사코드"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "tpCd":{
+				"column_id":"TP_CD"
+				, "item_name":"실시훈련과정코드"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+			}, "list_order":[
+			"devlopIdx"
+			, "trCorpNm"
+			, "tpNm"
+			, "bizSe"
+			, "trTme"
+			, "status"
+			, "bplNo"
+			, "trCorpNm"
+			, "tpCd"
+		]
+		, "view_order":[
+			"devlopIdx"
+			, "trCorpNm"
+			, "tpNm"
+			, "bizSe"
+			, "trTme"
+			, "status"
+			, "tpCd"
+		]
+		, "write_order":[
+			"devlopIdx"
+			, "trCorpNm"
+			, "tpNm"
+			, "bizSe"
+			, "trTme"
+			, "status"
+			, "tpCd"
+		]
+		, "writeproc_order":[
+			"devlopIdx"
+			, "trCorpNm"
+			, "tpNm"
+			, "trneeNm"
+			, "bizSe"
+			, "trResultReprtSe"
+			, "trTme"
+			, "status"
+			, "ncsSclasCd"
+			, "trPeriod"
+			, "trtm"
+			, "trMth"
+			, "trPurps"
+			, "edcCrse1"
+			, "edcCrse2"
+			, "edcCrse3"
+			, "edcCrse4"
+			, "edcCrse5"
+			, "gnrlz"
+			, "knwldgTchnlgyPickup1"
+			, "knwldgTchnlgyPickup2"
+			, "knwldgTchnlgyPickup3"
+			, "knwldgTchnlgyPickup4"
+			, "stoprtApplc1"
+			, "stoprtApplc2"
+			, "stoprtApplc3"
+			, "stoprtApplc4"
+			, "bplNo"
+			, "brffcCd"	
+			, "tpCd"
+		]
+		, "modify_order":[
+			"devlopIdx"
+			, "trCorpNm"
+			, "tpNm"
+			, "bizSe"
+			, "trTme"
+			, "status"		
+			, "tpCd"	
+		]
+		, "modifyproc_order":[
+			"devlopIdx"
+			, "trCorpNm"
+			, "tpNm"
+			, "trneeNm"
+			, "bizSe"
+			, "trTme"
+			, "status"
+			, "ncsSclasCd"
+			, "trPeriod"
+			, "trtm"
+			, "trMth"
+			, "trPurps"
+			, "edcCrse1"
+			, "edcCrse2"
+			, "edcCrse3"
+			, "edcCrse4"
+			, "edcCrse5"
+			, "gnrlz"
+			, "knwldgTchnlgyPickup1"
+			, "knwldgTchnlgyPickup2"
+			, "knwldgTchnlgyPickup3"
+			, "knwldgTchnlgyPickup4"
+			, "stoprtApplc1"
+			, "stoprtApplc2"
+			, "stoprtApplc3"
+			, "stoprtApplc4"
+			, "tpCd"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"devlopIdx": {
+						"item_name":"devlopIdx"
+						,"column_id":"DEVLOP_IDX"
+					},
+					"insttName": {
+						"item_name":"소속기관명"
+						,"column_id":"INSTT_NAME"
+					},
+					"tpNm": {
+						"item_name":"훈련과정명"
+						,"column_id":"TP_NM"
+					},
+					"trneeNm": {
+						"item_name":"훈련생명"
+						,"column_id":"TRNEE_NM"
+					},
+					"bizSe" : {
+						"item_name":"사업구분"
+						,"column_id":"BIZ_SE"
+					},
+					"trTme" : {
+						"item_name":"훈련회차"
+						,"column_id":"TR_TME"
+					},
+					"status" : {
+						"item_name":"상태"
+						,"column_id":"STATUS"
+					},
+					"bplNo" : {
+						"item_name":"사업장관리번호"
+						,"column_id":"BPL_NO"
+					},
+					"trCorpNm" : {
+						"item_name":"기업명"
+						,"column_id":"TR_CORP_NM"
+					},
+					"tpCd" : {
+						"item_name":"실시훈련과정코드"
+						,"column_id":"TP_CD"
+					}
+				}
+			},
+			"searchForm_order":[
+				"devlopIdx"
+				, "trCorpNm"
+				, "tpNm"
+				, "bizSe"
+				, "trTme"
+				, "status"	
+				, "bplNo"
+				, "trCorpNm"
+				, "tpCd"
+			], "search_order":[
+				"devlopIdx"
+				, "trCorpNm"
+				, "tpNm"
+				, "bizSe"
+				, "trTme"
+				, "status"	
+				, "bplNo"
+				, "trCorpNm"	
+				, "tpCd"			
+			], "searchAddOptn_order":[
+				"trRecord"
+			]
+		}
+	}
+}

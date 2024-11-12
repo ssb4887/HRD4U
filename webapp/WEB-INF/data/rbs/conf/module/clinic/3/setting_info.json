@@ -1,0 +1,31 @@
+{
+   "setting_info":{
+      "list_title":"샘플 목록",
+      "input_title":"샘플 등록",
+      "deleteList_title":"샘플 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"planIdx",
+      "idx_column":"PLAN_IDX",
+      "design":"plan",
+      "use_file":1,
+      "use_new":1
+   },
+      "clinicDct_setting_info":{
+      "list_title":"능력개발클리닉 계획 목록(관리자)",
+      "input_title":"능력개발클리닉 계획 등록(관리자)",
+      "deleteList_title":"능력개발클리닉 계획 삭제목록(관리자)",
+      "dset_input_npname": "IDX_VIEW",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"planIdx",
+      "idx_column":"PLAN_IDX",
+      "design":"plan",
+      "use_file":1,
+      "use_new":1
+   }
+}

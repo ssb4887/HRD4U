@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. [KEY_IDX_COLUMN], <include refid="AUTH_TABLE_NAME"/>, [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.authManage.authManageMapper">
+	<!-- 테이블명 -->
+	<sql id="AUTH_TABLE_NAME"><trim><include refid="rbs.commonMapper.TABLE_PRE_FLAG"/>AUTH</trim></sql>
+	<sql id="AUTH_MEMBER_TABLE_NAME"><trim><include refid="rbs.commonMapper.TABLE_PRE_FLAG"/>AUTH_MEMBER</trim></sql>
+	<sql id="AUTH_MENU_TABLE_NAME"><trim><include refid="rbs.commonMapper.TABLE_PRE_FLAG"/>AUTH_MENU</trim></sql>
+	<sql id="MENU_NAME"><trim><include refid="rbs.commonMapper.TABLE_PRE_FLAG"/>MENU_INFO</trim></sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(AUTH_MEMBER_IDX), 0)</trim> + 1 MAXID
+		FROM 
+		<include refid="AUTH_MEMBER_TABLE_NAME"/> A
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.AUTH_IDX), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		<include refid="AUTH_TABLE_NAME"/> A 
+		WHERE A.AUTH_IDX LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<!-- 권한 확인을 위해 auth_idx 가져오기 -->
+	<select id="selectAuthIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+			SELECT AUTH_IDX FROM 
+				<choose>
+					<when test="findAuth == 'member'">
+						<include refid="AUTH_MEMBER_TABLE_NAME"/> A 
+					</when>
+					<otherwise>
+						<include refid="AUTH_TABLE_NAME"/> A 
+					</otherwise>
+				</choose>
+				<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+				<if test="findAuth == 'member'">
+					AND SYSDATE BETWEEN TO_DATE(A.START_DATE) AND TO_DATE(A.END_DATE)
+				</if>
+				<if test="findAuth == 'auth'">
+					AND A.LAST_MODI_DATE = (SELECT MAX(LAST_MODI_DATE) 
+											FROM <include refid="AUTH_TABLE_NAME"/> B 
+											WHERE B.ISDELETE = '0' AND B.USERTYPE_IDX = #{USERTYPE_IDX})
+				</if>
+	</select>
+	
+	<!-- 메뉴,조회,등록,수정,삭제,파일에 대한 권한 가져오기 -->
+	<select id="selectAuthMenu" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT A.* FROM 
+			<include refid="AUTH_MENU_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			*										
+			FROM 
+			<include refid="AUTH_MEMBER_TABLE_NAME"/> A
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.member.memberTotMapper.VIEW_MEMBER_TABLE_NAME"/> B
+			ON A.MEMBER_IDX = B.MEMBER_IDX
+			LEFT OUTER JOIN
+			<include refid="AUTH_TABLE_NAME"/> C
+			ON A.AUTH_IDX = C.AUTH_IDX
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.memberManage.memberManageMapper.HRD_COM_INSTT_TABLE_NAME"/> D
+			ON B.INSTT_IDX = D.INSTT_IDX
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND A.APPLY_YN = 'Y'
+			AND C.ISDELETE = '0'
+			ORDER BY A.LAST_MODI_DATE DESC, A.AUTH_MEMBER_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	
+	<select id="selectCodeList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.AUTH_IDX AS OPTION_CODE,
+			A.AUTH_NAME AS OPTION_NAME								
+			FROM 
+			<include refid="AUTH_TABLE_NAME"/> A
+			WHERE A.ISDELETE = '0'
+			AND AUTH_IDX NOT IN (16)
+			ORDER BY A.AUTH_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectAuthGrant" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.AUTH_IDX, A.AUTH_NAME, A.SITE_ID, A.REGI_NAME, A.REGI_DATE, 
+			(
+				SELECT COUNT(1) CNT FROM 
+				<include refid="AUTH_TABLE_NAME"/> 
+				WHERE ISDELETE = '0'
+				AND SITE_ID = '1' 
+			) AS USR_COUNT,
+			(
+				SELECT COUNT(1) CNT FROM 
+				<include refid="AUTH_TABLE_NAME"/> 
+				WHERE ISDELETE = '0'
+				AND SITE_ID = '2' 
+			) AS DCT_COUNT,
+			( 
+				SELECT COUNT(1) CNT FROM
+				<include refid="AUTH_MEMBER_TABLE_NAME"/>
+				 WHERE ISDELETE = '0' 
+				 AND AUTH_IDX = A.AUTH_IDX 
+				 AND APPLY_YN = 'Y'
+			) AS AUTH_COUNT
+			<include refid="editAuthListQuery"/>
+			FROM 
+			<include refid="AUTH_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+			ORDER BY A.SITE_ID, A.AUTH_IDX
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectAuthList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.MENU_NAME, A.MENU_IDX, A.VER_IDX, A.MENU_NAME, A.SITE_ID, A.MENU_LEVEL, A.PARENT_MENU_IDX
+			<include refid="editAuthListQuery"/>
+			FROM 
+			<include refid="MENU_NAME"/> A 
+			
+			AND A.FLAG1 IS NULL
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+			ORDER BY SITE_ID, ORDER_IDX, MENU_LEVEL
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectAuthGroupList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT *
+			<include refid="editAuthListQuery"/>
+			FROM 
+			<include refid="AUTH_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+			AND AUTH_IDX NOT IN (16)
+			ORDER BY AUTH_IDX
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	
+	<!-- 권한 그룹을 가져온다.(not in 조건)-->
+	<select id="selectAuthGroupListWithInCondition" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT *
+			<include refid="editAuthListQuery"/>
+			FROM 
+			<include refid="AUTH_TABLE_NAME"/> A 
+			WHERE USERTYPE_IDX NOT IN (
+			<foreach collection="USERTYPE_IDX_LIST" item="userTypeIdxItem" index="i" separator=",">
+				${userTypeIdxItem}
+			</foreach>
+			)
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+			ORDER BY AUTH_IDX
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>	
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			<include refid="AUTH_MEMBER_TABLE_NAME"/> A
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.member.memberTotMapper.VIEW_MEMBER_TABLE_NAME"/> B
+			ON A.MEMBER_IDX = B.MEMBER_IDX
+			LEFT OUTER JOIN
+			<include refid="AUTH_TABLE_NAME"/> C
+			ON A.AUTH_IDX = C.AUTH_IDX
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.memberManage.memberManageMapper.HRD_COM_INSTT_TABLE_NAME"/> D
+			ON B.INSTT_IDX = D.INSTT_IDX
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND A.APPLY_YN = 'Y'
+			AND C.ISDELETE = '0'
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*
+			<include refid="editAuthListQuery"/>
+		FROM 
+		<include refid="AUTH_TABLE_NAME"/> A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			<include refid="AUTH_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.${columnItem}_SAVED_NAME, A.${columnItem}_ORIGIN_NAME
+			FROM 
+			<include refid="AUTH_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE <include refid="AUTH_TABLE_NAME"/> SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1 
+		WHERE AUTH_IDX = #{KEY_IDX}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="AUTH_MEMBER_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		A.* 
+		FROM 
+		<include refid="AUTH_MEMBER_TABLE_NAME"/> A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<select id="selectMember" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			*										
+			FROM 
+			<include refid="AUTH_MEMBER_TABLE_NAME"/> A
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.member.memberTotMapper.VIEW_MEMBER_TABLE_NAME"/> B
+			ON A.MEMBER_IDX = B.MEMBER_IDX
+			LEFT OUTER JOIN
+			<include refid="AUTH_TABLE_NAME"/> C
+			ON A.AUTH_IDX = C.AUTH_IDX
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND A.APPLY_YN = 'Y'
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="AUTH_MEMBER_TABLE_NAME"/> (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE <include refid="AUTH_MEMBER_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="updateAll" parameterType="java.util.HashMap">
+		UPDATE <include refid="AUTH_MEMBER_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		, AUTH_IDX = #{AUTH_IDX}
+		WHERE AUTH_MEMBER_IDX IN 
+		(
+			<foreach collection="MEMBER_LIST" item="dataItem" index="i" separator=",">
+				#{dataItem}
+			</foreach>
+		)
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.AUTH_IDX, A.LAST_MODI_NAME, A.LAST_MODI_ID, A.REGI_DATE, A.LAST_MODI_DATE 
+			FROM 
+			<include refid="AUTH_MEMBER_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			ORDER BY A.AUTH_IDX
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="AUTH_MEMBER_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+	</select>
+	
+	<update id="apply" parameterType="java.util.HashMap">
+		UPDATE <include refid="AUTH_MEMBER_TABLE_NAME"/> SET APPLY_YN = 'N', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE <include refid="AUTH_MEMBER_TABLE_NAME"/> SET ISDELETE = '1', APPLY_YN = 'N', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE <include refid="AUTH_MEMBER_TABLE_NAME"/> SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="AUTH_MEMBER_TABLE_NAME"/>  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	
+	<select id="selectMailList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT B.MOBILE_PHONE, B.MEMBER_NAME
+			FROM 
+			<include refid="AUTH_MEMBER_TABLE_NAME"/> A
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.member.memberTotMapper.VIEW_MEMBER_TABLE_NAME"/> B
+			ON A.MEMBER_IDX = B.MEMBER_IDX
+			WHERE A.MEMBER_IDX = #{MEMBER_IDX}
+			AND A.APPLY_YN = 'Y'
+	</select>
+	
+	<select id="selectMultiMailList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT B.MOBILE_PHONE, B.MEMBER_NAME
+			FROM 
+			<include refid="AUTH_MEMBER_TABLE_NAME"/> A
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.member.memberTotMapper.VIEW_MEMBER_TABLE_NAME"/> B
+			ON A.MEMBER_IDX = B.MEMBER_IDX
+			WHERE A.AUTH_MEMBER_IDX IN (
+			<foreach collection="AUTH_MEMBER_IDX" item="dataItem" index="i" separator=",">
+				${dataItem}
+			</foreach>
+			)
+	</select>
+	
+</mapper>            

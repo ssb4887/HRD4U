@@ -1,0 +1,19 @@
+2023-11-07 20:20:49,646 DEBUG [rbs.modules.contact.contactMapper.insertMl] ==>  Preparing: INSERT INTO RBS_C_ML_INFO ( SITE_ID, YEAR, MONTH, DAY, SESSION_ID, SESSION_IDX , MENU_IDX, MENU_URL, MANAGE_SITE_ID, MANAGE_MENU_IDX, ACCESS_IP, REGI_DATE , MEMBER_IDX, MEMBER_ID, MEMBER_NAME, ACCESS_INFO, SITE_NAME, MENU_NAME, MANAGE_SITE_NAME, MANAGE_MENU_NAME ) ( SELECT ?, TO_CHAR( SYSDATE , 'YYYY') , TO_CHAR( SYSDATE , 'MM') , TO_CHAR( SYSDATE , 'DD') , ?, NVL(MAX(SESSION_IDX), 0) + 1 , ?, ?, ?, ?, ?, SYSDATE , ?, ?, ?, ?, ?, ?, ?, ? FROM RBS_C_ML_INFO WHERE SITE_ID = ? AND YEAR = TO_CHAR( SYSDATE , 'YYYY') AND MONTH = TO_CHAR( SYSDATE , 'MM') AND DAY = TO_CHAR( SYSDATE , 'DD') AND SESSION_ID = ? )
+2023-11-07 20:20:49,647 DEBUG [rbs.modules.contact.contactMapper.insertMl] ==> Parameters: DCT(String), XdgpkFu1aaKK40CNyHbm0I1HzPLW8wmRNJR2nANDa5RnOdQUngFjAaQ4uRTgPydX.amV1c19kb21haW4vaHJkZG9jdG9yd2ViMQ==(String), 78(Integer), https://hrd4u.or.kr/hrddoctor/dct/memberManage/list.do?mId=78(String), 
+
+null, null, 192.168.35.214(String), null, null, null,    MEMBER_IDX, MEMBER_ID, MEMBER_NAME
+
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.183(String), HRD4U ?????? ??????(String), ????(String), null, null, DCT(String), XdgpkFu1aaKK40CNyHbm0I1HzPLW8wmRNJR2nANDa5RnOdQUngFjAaQ4uRTgPydX.amV1c19kb21haW4vaHJkZG9jdG9yd2ViMQ==(String)
+2023-11-07 20:20:49,650 DEBUG [rbs.modules.contact.contactMapper.insertMl] <==    Updates: 1
+PuTTY2023-11-07 20:20:49,652 DEBUG [rbs.modules.contact.contactMapper.insert] ==>  Preparing: CALL PRC_RBS_C_DCT(?, ?, ?, ?, ?, ?, TO_CHAR( SYSDATE , 'YYYY') , TO_CHAR( SYSDATE , 'MM') , TO_CHAR( SYSDATE , 'DD') , TO_CHAR( SYSDATE , 'HH24') )
+2023-11-07 20:20:49,652 DEBUG [rbs.modules.contact.contactMapper.insert] ==> Parameters: 78(Integer), XdgpkFu1aaKK40CNyHbm0I1HzPLW8wmRNJR2nANDa5RnOdQUngFjAaQ4uRTgPydX.amV1c19kb21haW4vaHJkZG9jdG9yd2ViMQ==(String), 192.168.35.214(String), null, null, null
+
+
+
+
+2023-11-07 20:22:33,537 DEBUG [rbs.modules.contact.contactMapper.insertMl] ==>  Preparing: INSERT INTO RBS_C_ML_INFO ( SITE_ID, YEAR, MONTH, DAY, SESSION_ID, SESSION_IDX , MENU_IDX, MENU_URL, MANAGE_SITE_ID, MANAGE_MENU_IDX, ACCESS_IP, REGI_DATE , MEMBER_IDX, MEMBER_ID, MEMBER_NAME, ACCESS_INFO, SITE_NAME, MENU_NAME, MANAGE_SITE_NAME, MANAGE_MENU_NAME ) ( SELECT ?, TO_CHAR( SYSDATE , 'YYYY') , TO_CHAR( SYSDATE , 'MM') , TO_CHAR( SYSDATE , 'DD') , ?, NVL(MAX(SESSION_IDX), 0) + 1 , ?, ?, ?, ?, ?, SYSDATE , ?, ?, ?, ?, ?, ?, ?, ? FROM RBS_C_ML_INFO WHERE SITE_ID = ? AND YEAR = TO_CHAR( SYSDATE , 'YYYY') AND MONTH = TO_CHAR( SYSDATE , 'MM') AND DAY = TO_CHAR( SYSDATE , 'DD') AND SESSION_ID = ? )
+2023-11-07 20:22:33,537 DEBUG [rbs.modules.contact.contactMapper.insertMl] ==> Parameters: DCT(String), gPcxlNkn56MbyyGiy580u1WpvAKtMaJcNp3qMuNYpOWGem76nqRJYKO6wLZxfUww.amV1c19kb21haW4vaHJkZG9jdG9yd2ViMQ==(String), 33(Integer), https://hrd4u.or.kr/hrddoctor/dct/board/list.do?mId=33(String), 
+
+null, null, 192.168.35.214(String), 1000158189(String), hrdk030(String), ??????(String), 
+
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.183(String), HRD4U ?????? ??????(String), ????(String), null, null, DCT(String), gPcxlNkn56MbyyGiy580u1WpvAKtMaJcNp3qMuNYpOWGem76nqRJYKO6wLZxfUww.amV1c19kb21haW4vaHJkZG9jdG9yd2ViMQ==(String)

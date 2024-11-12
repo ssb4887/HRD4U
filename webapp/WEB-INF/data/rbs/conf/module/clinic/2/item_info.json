@@ -1,0 +1,742 @@
+{
+	"item_info":{
+		"items":{
+			"chklstVer":{
+				"column_id":"CHKLST_VER"
+				, "item_name":"체크리스트버전"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"jdgmntabVer":{
+				"column_id":"JDGMNTAB_VER"
+				, "item_name":"심사표버전"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+		    "bplNo":{
+				"column_id":"BPL_NO"
+				, "item_name":"사업장관리번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "reperNm":{
+				"column_id":"REPER_NM"
+				, "item_name":"대표자명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "corpType":{
+				"column_id":"CORP_TYPE"
+				, "item_name":"기업유형"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":5
+				, "master_code":"CORP_TYPE"
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "totWorkCnt":{
+				"column_id":"TOT_WORK_CNT"
+				, "item_name":"상시근로자수(명)"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "is_exist":1
+ 			},
+		    "indutyCd":{
+				"column_id":"INDUTY_CD"
+				, "item_name":"업종코드"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "indutyNm":{
+				"column_id":"INDUTY_NM"
+				, "item_name":"업종명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "is_exist":1
+ 			},
+		    "bplAddr":{
+				"column_id":"BPL_ADDR"
+				, "item_name":"사업장주소"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "is_exist":1
+ 			},
+		    "picNm":{
+				"column_id":"PIC_NM"
+				, "item_name":"담당자명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "ofcps":{
+				"column_id":"OFCPS"
+				, "item_name":"직위"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 			 			 			 			 			 			 			 			
+		    "psitnDept":{
+				"column_id":"PSITN_DEPT"
+				, "item_name":"소속부서"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"telNo":{
+				"column_id":"TELNO"
+				, "item_name":"전화번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			} 			 			 			 			 			 			 			 			
+		    , "hffcCareer":{
+				"column_id":"HFFC_CAREER"
+				, "item_name":"재직경력"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 			 			 			 			 			 			 			 			
+		    "email":{
+				"column_id":"EMAIL"
+				, "item_name":"이메일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+			  "file":{
+				"column_id":"FILE"
+				, "item_name":"파일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}, "confmStatus":{
+				"column_id":"CONFM_STATUS"
+				, "item_name":"신청상태"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"CONFM_STATUS"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"bplNo"
+			, "confmStatus"
+		]
+		, "view_order":[
+			"bplNo"
+			, "chklstVer"
+			, "reperNm"
+			, "corpType"
+			, "totWorkCnt"
+			, "indutyNm"
+			, "bplAddr"
+			, "picNm"
+			, "ofcps"
+			, "psitnDept"
+			, "telNo"
+			, "hffcCareer"
+			, "email"
+			, "file"
+			, "confmStatus"
+		]
+		, "write_order":[
+		    "bplNo"
+			, "chklstVer"
+			, "jdgmntabVer"
+			, "reperNm"
+			, "corpType"
+			, "totWorkCnt"
+			, "indutyNm"
+			, "bplAddr"
+			, "picNm"
+			, "ofcps"
+			, "psitnDept"
+			, "telNo"
+			, "hffcCareer"
+			, "email"
+			, "file"
+		]
+		, "cli_insert_column_order":[
+			"bplNo"
+			, "chklstVer"
+			, "jdgmntabVer"
+		]
+		, "plan_insert_column_order":[
+			"reperNm"
+			, "corpType"
+			, "totWorkCnt"
+			, "indutyNm"
+			, "bplAddr"
+			, "picNm"
+			, "ofcps"
+			, "psitnDept"
+			, "telNo"
+			, "hffcCareer"
+			, "email"
+			, "file"
+		]
+		, "modify_order":[
+			"bplNo"
+			, "chklstVer"
+			, "jdgmntabVer"
+			, "reperNm"
+			, "corpType"
+			, "totWorkCnt"
+			, "indutyNm"
+			, "bplAddr"
+			, "picNm"
+			, "ofcps"
+			, "psitnDept"
+			, "telNo"
+			, "hffcCareer"
+			, "email"
+			, "file"
+			, "confmStatus"
+		]
+		, "cli_update_column_order":[
+		    "bplNo"
+			, "chklstVer"
+			, "jdgmntabVer"
+		]
+		, "plan_update_column_order":[
+			"reperNm"
+			, "corpType"
+			, "totWorkCnt"
+			, "indutyNm"
+			, "bplAddr"
+			, "picNm"
+			, "ofcps"
+			, "psitnDept"
+			, "telNo"
+			, "hffcCareer"
+			, "email"
+			, "file"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "subject":{
+						"column_id":"SUBJECT"
+						, "item_name":"제목"
+					},
+					 "contents":{
+						"column_id":"CONTENTS"
+						, "item_name":"내용"
+					}
+				}, "select_order":[
+				    "subject"
+					, "contents"
+				]
+			}, "searchForm_order":[
+				 "keyField"
+			], "search_order":[
+				 "keyField"
+			]
+		}
+	}, 
+	
+	
+	"clinicDct_item_info":{
+		"items":{
+		    "bplNo":{
+				"column_id":"BPL_NO"
+				, "item_name":"사업장관리번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "chklstVer":{
+				"column_id":"CHKLST_VER"
+				, "item_name":"체크리스트버전"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "jdgmntabVer":{
+				"column_id":"JDGMNTAB_VER"
+				, "item_name":"심사표버전"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "slctnResult":{
+				"column_id":"SLCTN_RESULT"
+				, "item_name":"선정결과"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+		    "reperNm":{
+				"column_id":"REPER_NM"
+				, "item_name":"대표자명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "corpType":{
+				"column_id":"CORP_TYPE"
+				, "item_name":"기업유형"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":5
+				, "master_code":"CORP_TYPE"
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "totWorkCnt":{
+				"column_id":"TOT_WORK_CNT"
+				, "item_name":"상시근로자수(명)"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "is_exist":1
+ 			},
+		    "indutyCd":{
+				"column_id":"INDUTY_CD"
+				, "item_name":"업종코드"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "indutyNm":{
+				"column_id":"INDUTY_NM"
+				, "item_name":"업종명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "is_exist":1
+ 			},
+		    "bplAddr":{
+				"column_id":"BPL_ADDR"
+				, "item_name":"사업장주소"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "is_exist":1
+ 			},
+		    "picNm":{
+				"column_id":"PIC_NM"
+				, "item_name":"담당자명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "ofcps":{
+				"column_id":"OFCPS"
+				, "item_name":"직위"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 			 			 			 			 			 			 			 			
+		    "psitnDept":{
+				"column_id":"PSITN_DEPT"
+				, "item_name":"소속부서"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"telNo":{
+				"column_id":"TELNO"
+				, "item_name":"전화번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			} 			 			 			 			 			 			 			 			
+		    , "hffcCareer":{
+				"column_id":"HFFC_CAREER"
+				, "item_name":"재직경력"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 			 			 			 			 			 			 			 			
+		    "email":{
+				"column_id":"EMAIL"
+				, "item_name":"이메일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+			  "file":{
+				"column_id":"FILE"
+				, "item_name":"파일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}, "confmStatus":{
+				"column_id":"CONFM_STATUS"
+				, "item_name":"신청상태"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"CONFM_STATUS"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "doctorOpinion":{
+				"column_id":"DOCTOR_OPINION"
+				, "item_name":"주치의 의견"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"bplNo"
+			, "confmStatus"
+		]
+		, "view_order":[
+			"bplNo"
+			, "chklstVer"
+			, "reperNm"
+			, "corpType"
+			, "totWorkCnt"
+			, "indutyNm"
+			, "bplAddr"
+			, "picNm"
+			, "ofcps"
+			, "psitnDept"
+			, "telNo"
+			, "hffcCareer"
+			, "email"
+			, "file"
+			, "confmStatus"
+			, "slctnResult"
+			, "doctorOpinion"
+		]
+		, "write_order":[
+		    "bplNo"
+			, "chklstVer"
+			, "jdgmntabVer"
+			, "reperNm"
+			, "corpType"
+			, "totWorkCnt"
+			, "indutyNm"
+			, "bplAddr"
+			, "picNm"
+			, "ofcps"
+			, "psitnDept"
+			, "telNo"
+			, "hffcCareer"
+			, "email"
+			, "file"
+			, "confmStatus"
+			, "slctnResult"
+			, "doctorOpinion"
+		]
+		, "write_proc_order":[
+			"bplNo"
+			, "chklstVer"
+			, "jdgmntabVer"
+		]
+		, "req_write_proc_order":[
+			"reperNm"
+			, "corpType"
+			, "totWorkCnt"
+			, "indutyNm"
+			, "bplAddr"
+			, "picNm"
+			, "ofcps"
+			, "psitnDept"
+			, "telNo"
+			, "hffcCareer"
+			, "email"
+			, "file"
+			, "slctnResult"
+		]
+		, "modify_order":[
+			"bplNo"
+			, "chklstVer"
+			, "jdgmntabVer"
+			, "reperNm"
+			, "corpType"
+			, "totWorkCnt"
+			, "indutyNm"
+			, "bplAddr"
+			, "picNm"
+			, "ofcps"
+			, "psitnDept"
+			, "telNo"
+			, "hffcCareer"
+			, "email"
+			, "file"
+			, "confmStatus"
+			, "slctnResult"
+			, "doctorOpinion"
+		]
+		, "modifyproc_order":[
+		    "bplNo"
+			, "chklstVer"
+			, "jdgmntabVer"
+		]
+		, "req_modifyproc_order":[
+			"reperNm"
+			, "corpType"
+			, "totWorkCnt"
+			, "indutyNm"
+			, "bplAddr"
+			, "picNm"
+			, "ofcps"
+			, "psitnDept"
+			, "telNo"
+			, "hffcCareer"
+			, "email"
+			, "file"
+			, "slctnResult"
+		]
+		, "status_modify_order":[
+			"confmStatus"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "bplNo":{
+						"column_id":"A.BPL_NO"
+						, "item_name":"사업장관리번호"
+						, "use_full_value":1 
+					},	"bplNm":{
+						"column_id":"(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = A.BPL_NO)"
+						, "item_name":"기업명"
+					}
+				}, "select_order":[
+				    "bplNo"
+					, "bplNm"
+				]
+			}, "key":{
+				"items":{
+					"year":{
+						"column_id":"YEAR"
+						, "item_name":"연차"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CLINIC_YEAR"
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "year"
+			], "search_order":[
+				 "keyField"
+			]
+		}
+		, "list_search_head":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "bplNo":{
+						"column_id":"A.BPL_NO"
+						, "item_name":"사업장관리번호"
+						, "use_full_value":1 
+					},	"bplNm":{
+						"column_id":"(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = A.BPL_NO)"
+						, "item_name":"기업명"
+					}
+				}, "select_order":[
+				    "bplNo"
+					, "bplNm"
+				]
+			}, "key":{
+				"items":{
+					"year":{
+						"column_id":"YEAR"
+						, "item_name":"연차"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CLINIC_YEAR"
+					},"cliInsttIdx":{
+						"column_id":"A.CLI_INSTT_IDX"
+						, "item_name":"지부지사"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"ORG_CODE"
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "year"
+				 , "cliInsttIdx"
+			], "search_order":[
+				 "keyField"
+				 , "cliInsttIdx"
+			]
+		}
+	}
+}

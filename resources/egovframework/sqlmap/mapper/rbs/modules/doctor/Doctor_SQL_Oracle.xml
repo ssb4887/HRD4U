@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. DOCTOR_IDX, <include refid="DOCTOR_TABLE_NAME"/>, [목록에 사용할 컬럼], A.DOCTOR_IDX, 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.doctor.doctorMapper">
+	<!-- 테이블명 -->
+	<sql id="DOCTOR_TABLE_NAME">HRD_COM_DOCTOR</sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(A.DOCTOR_IDX), 0)</trim> + 1 MAXID
+		FROM 
+		<include refid="DOCTOR_TABLE_NAME"/> A
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.DOCTOR_IDX), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		<include refid="DOCTOR_TABLE_NAME"/> A 
+		WHERE A.DOCTOR_IDX LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT
+			    INSTT_IDX, DOCTOR_IDX, LOGINID, HNAME, SIDO, INSTT_NAME, ISCHANGE,
+			    LISTAGG(GUNGU, ' / ') WITHIN GROUP(ORDER BY GUNGU) AS GUNGU,
+			    MEMBER_IDX
+			FROM
+			    (
+			        SELECT
+			            INSTT_IDX, DOCTOR_IDX, LOGINID, HNAME, SIDO, INSTT_NAME, ISCHANGE,
+			            FIRST_SIDO || ' ' || LISTAGG(GUNGU, ' ') WITHIN GROUP(ORDER BY GUNGU) AS GUNGU,
+			            MEMBER_IDX 
+			        FROM
+			            (
+			                SELECT
+			                    E.INSTT_IDX AS INSTT_IDX , A.DOCTOR_IDX AS DOCTOR_IDX, B.LOGINID AS LOGINID, B.HNAME AS HNAME,
+			                     CASE
+								            WHEN (B.SB_CD != E.BRFFC_CD) OR (A.STATUS = '3') THEN '1'
+								            ELSE '0'
+								        END
+								 AS ISCHANGE,
+			                    (
+			                        SELECT
+			                            CLASS_NAME
+			                        FROM
+			                            RBS_ICLASS_INFO
+			                        WHERE
+			                            MASTER_CODE = 'SIDO_SIGUNGU'
+			                            AND   CLASS_IDX = SUBSTR(E.LOCPLC_CD,0,2)
+			                    ) AS SIDO,
+			                    E.INSTT_NAME AS INSTT_NAME,
+			                    NVL2(C.BLOCK_CD, (
+			                        SELECT
+			                            CLASS_NAME
+			                        FROM
+			                            RBS_ICLASS_INFO
+			                        WHERE
+			                            MASTER_CODE = 'SIDO_SIGUNGU'
+			                            AND   CLASS_IDX = SUBSTR(C.BLOCK_CD,0,2)
+			                    ), '-') AS FIRST_SIDO,
+                                NVL2(C.BLOCK_CD, (
+			                        SELECT
+			                            CLASS_NAME
+			                        FROM
+			                            RBS_ICLASS_INFO
+			                        WHERE
+			                            MASTER_CODE = 'SIDO_SIGUNGU'
+			                            AND   CLASS_IDX = C.BLOCK_CD
+			                    ), '-') AS GUNGU,
+			                    A.MEMBER_IDX 
+			                FROM
+			                    HRD_COM_DOCTOR A,
+			                    HRDPORTAL.THR_USERINFO B,
+			                    HRD_COM_DOCTOR_BLOCK C,
+			                    HRD_COM_INSTT E
+			                WHERE
+			                    A.MEMBER_IDX = B.USERID
+			                    AND   A.ISDELETE = '0'
+			                    AND   A.APPLY_YN = 'Y'
+			                    AND   A.STATUS IN ('1', '3')
+			                    AND   A.DOCTOR_IDX = C.DOCTOR_IDX(+)
+			                    AND   E.INSTT_IDX = A.INSTT_IDX
+			                    <if test="INSTT_IDX != null">
+			                    	AND A.INSTT_IDX = #{INSTT_IDX}
+			                    </if>
+			                    <if test="KEY_FIELD != null">
+									<choose>
+										<when test='KEY_FIELD == "HNAME"'>
+											AND A.MEMBER_IDX IN
+											(
+												SELECT F.USERID
+												FROM HRDPORTAL.THR_USERINFO F
+												WHERE LOWER(REPLACE(HNAME, ' ', '')) LIKE #{KEY} 
+											)
+										</when>
+										<otherwise>
+											AND A.MEMBER_IDX IN
+											(
+												SELECT F.USERID
+												FROM HRDPORTAL.THR_USERINFO F
+												WHERE LOWER(REPLACE(LOGINID, ' ', '')) LIKE #{KEY} 
+											)
+										</otherwise>
+									</choose>
+								</if>
+			            )
+			        GROUP BY
+			            HNAME, DOCTOR_IDX, LOGINID, SIDO, INSTT_NAME, FIRST_SIDO, INSTT_IDX, ISCHANGE, MEMBER_IDX 
+			    )
+			GROUP BY
+			    DOCTOR_IDX, INSTT_IDX, LOGINID, HNAME, SIDO, INSTT_NAME, ISCHANGE, MEMBER_IDX 
+			ORDER BY
+				DOCTOR_IDX DESC
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+			SELECT COUNT(1) 
+			FROM
+			(
+				SELECT
+				    INSTT_IDX, DOCTOR_IDX, LOGINID, HNAME, SIDO, INSTT_NAME, ISCHANGE,
+				    LISTAGG(GUNGU, ' / ') WITHIN GROUP(ORDER BY GUNGU) AS GUNGU
+				FROM
+				    (
+				        SELECT
+				            INSTT_IDX, DOCTOR_IDX, LOGINID, HNAME, SIDO, INSTT_NAME, ISCHANGE,
+				            FIRST_SIDO || ' ' || LISTAGG(GUNGU, ' ') WITHIN GROUP(ORDER BY GUNGU) AS GUNGU
+				        FROM
+				            (
+				                SELECT
+				                    E.INSTT_IDX AS INSTT_IDX , A.DOCTOR_IDX AS DOCTOR_IDX, B.LOGINID AS LOGINID, B.HNAME AS HNAME, 
+				                    CASE
+								            WHEN (B.SB_CD != E.BRFFC_CD) OR (A.STATUS = '3') THEN '1'
+								            ELSE '0'
+								        END
+								    AS ISCHANGE,
+				                    (
+				                        SELECT
+				                            CLASS_NAME
+				                        FROM
+				                            RBS_ICLASS_INFO
+				                        WHERE
+				                            MASTER_CODE = 'SIDO_SIGUNGU'
+				                            AND   CLASS_IDX = SUBSTR(E.LOCPLC_CD,0,2)
+				                    ) AS SIDO,
+				                    E.INSTT_NAME AS INSTT_NAME,
+				                    NVL2(C.BLOCK_CD, (
+				                        SELECT
+				                            CLASS_NAME
+				                        FROM
+				                            RBS_ICLASS_INFO
+				                        WHERE
+				                            MASTER_CODE = 'SIDO_SIGUNGU'
+				                            AND   CLASS_IDX = SUBSTR(C.BLOCK_CD,0,2)
+				                    ), '-') AS FIRST_SIDO,
+	                                NVL2(C.BLOCK_CD, (
+				                        SELECT
+				                            CLASS_NAME
+				                        FROM
+				                            RBS_ICLASS_INFO
+				                        WHERE
+				                            MASTER_CODE = 'SIDO_SIGUNGU'
+				                            AND   CLASS_IDX = C.BLOCK_CD
+				                    ), '-') AS GUNGU
+				                FROM
+				                    HRD_COM_DOCTOR A,
+				                    HRDPORTAL.THR_USERINFO B,
+				                    HRD_COM_DOCTOR_BLOCK C,
+				                    HRD_COM_INSTT E
+				                WHERE
+				                    A.MEMBER_IDX = B.USERID
+				                    AND   A.ISDELETE = '0'
+				                    AND   A.APPLY_YN = 'Y'
+				                    AND   A.STATUS IN ('1', '3')
+				                    AND   A.DOCTOR_IDX = C.DOCTOR_IDX(+)
+				                    AND   E.INSTT_IDX = A.INSTT_IDX
+				                    <if test="INSTT_IDX != null">
+				                    	AND A.INSTT_IDX = #{INSTT_IDX}
+				                    </if>
+				                    <if test="KEY_FIELD != null">
+										<choose>
+											<when test='KEY_FIELD == "HNAME"'>
+												AND A.MEMBER_IDX IN
+												(
+													SELECT F.USERID
+													FROM HRDPORTAL.THR_USERINFO F
+													WHERE LOWER(REPLACE(HNAME, ' ', '')) LIKE #{KEY} 
+												)
+											</when>
+											<otherwise>
+												AND A.MEMBER_IDX IN
+												(
+													SELECT F.USERID
+													FROM HRDPORTAL.THR_USERINFO F
+													WHERE LOWER(REPLACE(LOGINID, ' ', '')) LIKE #{KEY} 
+												)
+											</otherwise>
+										</choose>
+									</if>
+				            )
+				        GROUP BY
+				            HNAME, DOCTOR_IDX, LOGINID, SIDO, INSTT_NAME, FIRST_SIDO, INSTT_IDX, ISCHANGE
+				    )
+				GROUP BY
+				    DOCTOR_IDX, LOGINID, HNAME, SIDO, INSTT_NAME, INSTT_IDX, ISCHANGE
+			)
+	</select>
+	
+	<select id="selectActList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT DISTINCT A.DOCTOR_IDX, A.MEMBER_IDX, B.MEMBER_NAME, A.INSTT_IDX, C.INSTT_NAME, APPLY_YN ,
+				(SELECT COUNT(1) CNT FROM HRD_COM_DOCTOR_CORP C WHERE C.DOCTOR_IDX = A.DOCTOR_IDX AND C.ISDELETE = '0')  AS CORP,
+				(SELECT COUNT(1) CNT FROM HRD_DGNS_BSC DA 
+				 LEFT JOIN HRD_DGNS_QUSTNR_RSLT DB ON DA.BSC_IDX=DB.BSC_IDX 
+				 LEFT JOIN HRD_DGNS_BSISCNSL DC ON DB.RSLT_IDX=DC.RSLT_IDX  WHERE DC.DOCTOR_IDX = A.DOCTOR_IDX AND DA.ISSUE_DATE IS NOT NULL AND DB.STATUS IS NOT NULL)  AS DGNS,
+				(SELECT COUNT(1) CNT FROM HRD_CLI E WHERE E.DOCTOR_IDX = A.DOCTOR_IDX AND E.ISDELETE = '0')  AS CLINIC,
+				(SELECT COUNT(1) CNT FROM HRD_CNSL_RSLT_ANALS F WHERE F.ISDELETE = '0' AND BRFFC_CD = (SELECT BRFFC_CD FROM HRD_COM_INSTT WHERE INSTT_IDX = A.INSTT_IDX))  AS ANALYSIS,
+				(SELECT COUNT(1) CNT FROM HRD_CNSL G WHERE G.CMPTNC_BRFFC_PIC_IDX = A.MEMBER_IDX AND G.ISDELETE = '0')  AS CONSULT,
+				(SELECT COUNT(1) CNT FROM HRD_SPTJ_EDC_MEMBER H WHERE H.MEMBER_IDX = A.MEMBER_IDX AND H.ISDELETE = '0')  AS EDU
+				FROM HRD_COM_DOCTOR A
+				LEFT OUTER JOIN VIEW_HRD_DOCTOR B ON A.MEMBER_IDX = B.MEMBER_IDX
+				LEFT OUTER JOIN HRD_COM_INSTT C ON A.INSTT_IDX = C.INSTT_IDX
+				WHERE (A.STATUS = '1' or A.STATUS = '3')
+				<if test="INSTT_IDX != null">
+                 	AND A.INSTT_IDX = #{INSTT_IDX}
+                 </if>
+                 <if test="KEY_FIELD != null">
+					<choose>
+						<when test='KEY_FIELD == "HNAME"'>
+							AND A.MEMBER_IDX IN
+							(
+								SELECT F.USERID
+								FROM HRDPORTAL.THR_USERINFO F
+								WHERE LOWER(REPLACE(HNAME, ' ', '')) LIKE #{KEY} 
+							)
+						</when>
+						<otherwise>
+							AND A.MEMBER_IDX IN
+							(
+								SELECT F.USERID
+								FROM HRDPORTAL.THR_USERINFO F
+								WHERE LOWER(REPLACE(LOGINID, ' ', '')) LIKE #{KEY} 
+							)
+						</otherwise>
+					</choose>
+				</if>
+				ORDER BY A.MEMBER_IDX
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectActCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+			SELECT COUNT(1) 
+			FROM
+			(
+				SELECT DISTINCT A.DOCTOR_IDX, A.MEMBER_IDX, B.MEMBER_NAME, C.INSTT_NAME, DOCTOR_YN ,
+				(SELECT COUNT(1) CNT FROM HRD_COM_DOCTOR_CORP C WHERE C.DOCTOR_IDX = A.DOCTOR_IDX)  AS CORP,
+				(SELECT COUNT(1) CNT FROM HRD_DGNS_BSC DA 
+				 LEFT JOIN HRD_DGNS_QUSTNR_RSLT DB ON DA.BSC_IDX=DB.BSC_IDX 
+				 LEFT JOIN HRD_DGNS_BSISCNSL DC ON DB.RSLT_IDX=DC.RSLT_IDX  WHERE DC.DOCTOR_IDX = A.DOCTOR_IDX AND DA.ISSUE_DATE IS NOT NULL AND DB.STATUS IS NOT NULL)  AS DGNS,
+				(SELECT COUNT(1) CNT FROM HRD_CLI E WHERE E.DOCTOR_IDX = A.DOCTOR_IDX AND ISDELETE = '0')  AS CLINIC,
+				(SELECT COUNT(1) CNT FROM HRD_CNSL_RSLT_ANALS F WHERE F.ISDELETE = '0' AND BRFFC_CD = (SELECT BRFFC_CD FROM HRD_COM_INSTT WHERE INSTT_IDX = A.INSTT_IDX))  AS ANALYSIS,
+				(SELECT COUNT(1) CNT FROM HRD_CNSL G WHERE G.CMPTNC_BRFFC_PIC_IDX = A.MEMBER_IDX AND G.ISDELETE = '0')  AS CONSULT,
+				(SELECT COUNT(1) CNT FROM HRD_SPTJ_EDC_MEMBER H WHERE H.MEMBER_IDX = A.MEMBER_IDX)  AS EDU
+				FROM HRD_COM_DOCTOR A
+				LEFT OUTER JOIN VIEW_HRD_DOCTOR B ON A.MEMBER_IDX = B.MEMBER_IDX
+				LEFT OUTER JOIN HRD_COM_INSTT C ON A.INSTT_IDX = C.INSTT_IDX
+				WHERE (A.STATUS = '1' or A.STATUS = '3')
+				<if test="INSTT_IDX != null">
+                 	AND A.INSTT_IDX = #{INSTT_IDX}
+                 </if>
+                 <if test="KEY_FIELD != null">
+					<choose>
+						<when test='KEY_FIELD == "HNAME"'>
+							AND A.MEMBER_IDX IN
+							(
+								SELECT F.USERID
+								FROM HRDPORTAL.THR_USERINFO F
+								WHERE LOWER(REPLACE(HNAME, ' ', '')) LIKE #{KEY} 
+							)
+						</when>
+						<otherwise>
+							AND A.MEMBER_IDX IN
+							(
+								SELECT F.USERID
+								FROM HRDPORTAL.THR_USERINFO F
+								WHERE LOWER(REPLACE(LOGINID, ' ', '')) LIKE #{KEY} 
+							)
+						</otherwise>
+					</choose>
+				</if>
+			)
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			B.USERID,
+			B.HNAME, 
+			B.LOGINID, 
+			NVL(B.EMAIL,'-') AS EMAIL,
+			CASE 
+				WHEN TRIM('('||B.ZIPCODE || ') ' || B.ADDRESS || ' ' || B.ADDRESSDTL) = '()' THEN '-'
+			    ELSE '('||B.ZIPCODE || ') ' || B.ADDRESS || ' ' || B.ADDRESSDTL
+			    END AS ADDRESS,
+			C.INSTT_IDX, C.INSTT_NAME,
+			D.DOCTOR_OFCPS, D.DOCTOR_DEPT_NAME, D.DOCTOR_IDX, D.CLSF_CD,
+			PKG_DGUARD.FN_DEC_TELNO(D.DOCTOR_TELNO) AS DOCTOR_TELNO,
+			CASE
+		            WHEN (B.SB_CD != C.BRFFC_CD) OR (D.STATUS = '3') THEN '1'
+		            ELSE '0'
+		        END
+		    AS ISCHANGE
+			FROM HRDPORTAL.THR_USERINFO B, HRD_COM_INSTT C, <include refid="DOCTOR_TABLE_NAME"/> D
+			WHERE 
+			  C.BRFFC_CD = B.SB_CD
+           	  AND B.USERID = D.MEMBER_IDX
+           	  AND D.INSTT_IDX = C.INSTT_IDX
+			  AND D.DOCTOR_IDX = #{DOCTOR_IDX}
+			  AND D.ISDELETE = '0'
+	</select>
+	
+	<select id="selectIsChange" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+		        CASE
+		            WHEN A.SB_CD != C.BRFFC_CD THEN C.INSTT_IDX
+		            ELSE B.INSTT_IDX
+		        END
+		    AS INSTT_IDX,
+		    	CASE
+		            WHEN (A.SB_CD != C.BRFFC_CD) OR (B.STATUS = '3')  THEN '1'
+		            ELSE '0'
+		        END
+		    AS ISCHANGE
+		FROM
+		    HRDPORTAL.THR_USERINFO A
+		    INNER JOIN <include refid="DOCTOR_TABLE_NAME"/> B ON A.USERID = B.MEMBER_IDX
+		    LEFT JOIN HRD_COM_INSTT C ON B.INSTT_IDX = C.INSTT_IDX
+		WHERE
+		    B.DOCTOR_IDX = #{DOCTOR_IDX}
+		    AND B.ISDELETE = '0'
+	</select>
+	
+	<select id="selectMemberList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			B.USERID,
+			B.HNAME, 
+			B.LOGINID, 
+			NVL(B.MTEL,'-') AS PHONE,
+			NVL(B.EMAIL,'-') AS EMAIL,
+			CASE 
+				WHEN TRIM('('||B.ZIPCODE || ') ' || B.ADDRESS || ' ' || B.ADDRESSDTL) = '()' THEN '-'
+			    ELSE '('||B.ZIPCODE || ') ' || B.ADDRESS || ' ' || B.ADDRESSDTL
+			    END AS ADDRESS,
+			C.INSTT_IDX 
+			FROM HRDPORTAL.THR_USERINFO B, HRDPORTAL.THR_USERINFOAUTH A, HRD_COM_INSTT C
+			WHERE A.USERID = B.USERID
+			AND B.USERID NOT IN (SELECT D.MEMBER_IDX FROM <include refid="DOCTOR_TABLE_NAME"/> D WHERE D.ISDELETE = '0')
+			AND A.EDU_AUTH_GR_CD = 'BR'
+			AND B.LOGINID NOT LIKE 'hrdk0%'
+			AND B.SB_CD IS NOT NULL
+			AND C.BRFFC_CD = B.SB_CD
+			AND B.SB_CD != '1000000001'
+			<choose>
+				<when test="MEMBER_IDX != null">
+					AND A.USERID = #{MEMBER_IDX}
+				</when>
+				<otherwise>
+					AND B.HNAME LIKE #{HNAME}
+				</otherwise>
+			</choose>
+	</select>
+	
+	<select id="selectCountMember" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		(
+			SELECT 
+				B.HNAME, 
+				B.LOGINID, 
+				NVL(B.MTEL,'-') AS PHONE,
+				NVL(B.EMAIL,'-') AS EMAIL,
+				CASE 
+					WHEN TRIM('('||B.ZIPCODE || ') ' || B.ADDRESS || ' ' || B.ADDRESSDTL) = '()' THEN '-'
+				    ELSE '('||B.ZIPCODE || ') ' || B.ADDRESS || ' ' || B.ADDRESSDTL
+				    END AS ADDRESS,
+				C.INSTT_IDX 
+				FROM HRDPORTAL.THR_USERINFO B, HRDPORTAL.THR_USERINFOAUTH A, HRD_COM_INSTT C
+				WHERE A.USERID = B.USERID
+				AND B.USERID NOT IN (SELECT D.MEMBER_IDX FROM <include refid="DOCTOR_TABLE_NAME"/> D WHERE D.ISDELETE = '0')
+				AND A.EDU_AUTH_GR_CD = 'BR'
+				AND B.LOGINID NOT LIKE 'hrdk0%'
+				AND B.SB_CD IS NOT NULL
+				AND C.BRFFC_CD = B.SB_CD
+				AND B.SB_CD != '1000000001'
+				AND B.HNAME LIKE #{HNAME}
+		)
+	</select>
+	
+	<select id="selectBlockList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.INSTT_IDX,
+			A.BLOCK_CD,
+			(
+				SELECT C.CLASS_NAME
+				FROM RBS_ICLASS_INFO C 
+				WHERE SUBSTR(A.BLOCK_CD,0,2) = C.CLASS_IDX
+				AND C.MASTER_CODE = 'SIDO_SIGUNGU'
+			) AS SIDO ,
+			SUBSTR(A.BLOCK_CD,0,2) AS PARENT_IDX,
+			C.INSTT_NAME,
+			B.CLASS_NAME 
+		FROM 
+			HRD_COM_INSTT_BLOCK A,
+			RBS_ICLASS_INFO B,
+			HRD_COM_INSTT C
+		WHERE 
+			A.INSTT_IDX = #{INSTT_IDX}
+			AND A.INSTT_IDX = C.INSTT_IDX
+			AND A.BLOCK_CD = B.CLASS_IDX 
+			AND MASTER_CODE = 'SIDO_SIGUNGU'
+			AND C.ISDELETE = '0'
+			AND A.ISDELETE = '0'
+		ORDER BY 
+			A.BLOCK_CD
+	</select>
+	
+	<select id="selectDoctorList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+		    A.BLOCK_CD,
+		    COUNT(B.DOCTOR_IDX) AS DOCTOR_COUNT
+		FROM
+		    HRD_COM_INSTT_BLOCK A
+		    LEFT JOIN HRD_COM_DOCTOR_BLOCK B ON A.BLOCK_CD = B.BLOCK_CD
+		WHERE
+		    A.INSTT_IDX = #{INSTT_IDX}
+		GROUP BY
+		    A.BLOCK_CD,
+		    B.BLOCK_CD
+		ORDER BY 
+			A.BLOCK_CD
+	</select>
+	
+	<select id="selectInsttList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+				INSTT_IDX AS OPTION_CODE, 
+				INSTT_NAME AS OPTION_NAME
+			FROM 
+				HRD_COM_INSTT
+			WHERE
+				ISDELETE = '0'
+	</select>
+	
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			<include refid="DOCTOR_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.${columnItem}_SAVED_NAME, A.${columnItem}_ORIGIN_NAME
+			FROM 
+			<include refid="DOCTOR_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE <include refid="DOCTOR_TABLE_NAME"/> SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1 
+		WHERE DOCTOR_IDX = #{DOCTOR_IDX}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="DOCTOR_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			B.USERID,
+			B.HNAME, 
+			B.LOGINID, 
+			NVL(B.MTEL,'-') AS PHONE,
+			NVL(B.EMAIL,'-') AS EMAIL,
+			CASE 
+				WHEN TRIM('('||B.ZIPCODE || ') ' || B.ADDRESS || ' ' || B.ADDRESSDTL) = '()' THEN '-'
+			    ELSE '('||B.ZIPCODE || ') ' || B.ADDRESS || ' ' || B.ADDRESSDTL
+			    END AS ADDRESS,
+			C.INSTT_IDX, C.INSTT_NAME,
+			D.DOCTOR_OFCPS, D.DOCTOR_DEPT_NAME, D.CLSF_CD,
+			PKG_DGUARD.FN_DEC_TELNO(D.DOCTOR_TELNO) AS DOCTOR_TELNO
+		FROM 
+			HRDPORTAL.THR_USERINFO B, HRD_COM_INSTT C, <include refid="DOCTOR_TABLE_NAME"/> D
+		WHERE 
+			C.BRFFC_CD = B.SB_CD
+           	AND B.USERID = D.MEMBER_IDX
+           	AND D.INSTT_IDX = C.INSTT_IDX
+			AND D.DOCTOR_IDX = #{DOCTOR_IDX}
+			AND D.ISDELETE = '0'
+	</select>
+	
+	<select id="selectReqMngList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT * 
+			FROM 
+				HRD_COM_DOCTOR_RQISIT
+			WHERE 
+				ISDELETE = '0'
+			ORDER BY DOCTOR_RQISIT_IDX
+	</select>
+	
+	<select id="selectReqList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT * 
+			FROM 
+				HRD_COM_DOCTOR_RQISIT_ANSWER
+			WHERE 
+				ISDELETE = '0'
+				AND DOCTOR_IDX = #{DOCTOR_IDX}
+			ORDER BY DOCTOR_RQISIT_IDX
+	</select>
+	
+	<insert id="insertReq" parameterType="java.util.HashMap">
+		INSERT INTO HRD_COM_DOCTOR_RQISIT_ANSWER (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="DOCTOR_TABLE_NAME"/> (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE <include refid="DOCTOR_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="updateReq" parameterType="java.util.HashMap">
+		UPDATE HRD_COM_DOCTOR_RQISIT_ANSWER SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*
+			FROM 
+			<include refid="DOCTOR_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			ORDER BY A.DOCTOR_IDX
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="DOCTOR_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE <include refid="DOCTOR_TABLE_NAME"/> SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="deleteReq" parameterType="java.util.HashMap">
+		UPDATE HRD_COM_DOCTOR_RQISIT_ANSWER SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE <include refid="DOCTOR_TABLE_NAME"/> SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="DOCTOR_TABLE_NAME"/>  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	
+	<delete id="cdeleteReq" parameterType="java.util.HashMap">
+		DELETE FROM HRD_COM_DOCTOR_RQISIT_ANSWER
+		WHERE DOCTOR_IDX = #{DOCTOR_IDX}
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	
+</mapper>            

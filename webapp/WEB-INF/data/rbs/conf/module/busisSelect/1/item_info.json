@@ -1,0 +1,216 @@
+{
+	"item_info":{
+		"items":{
+			"bplNm":{
+				"item_id": "bplNm"
+				, "column_id":"BPL_NM"
+				, "item_name":"기업명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+	    	}, "bplNo":{
+				"item_id": "bplNo"
+				, "column_id":"BPL_NO"
+				, "item_name":"사업장관리번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+	    	}, "bizrNo":{
+				"item_id": "bizrNo"
+				, "column_id":"BIZR_NO"
+				, "item_name":"사업자등록번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "insttIdx":{
+				"item_id": "insttIdx"
+				, "column_id":"INSTT_IDX"
+				, "item_name":"소속기관"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":5
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "indutyCd":{
+				"item_id": "indutyCd"
+				, "column_id":"INDUTY_CD"
+				, "item_name":"업종분류"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":5
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "headbplCd":{
+				"item_id": "headbplCd"
+				, "column_id":"HEADBPL_CD"
+				, "item_name":"본사구분"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "support_items":{
+		    "sptjName":{
+				"item_id": "sptjName"
+				, "column_id":"SPTJ_NAME"
+				, "item_name":"서식그룹명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "regiDate":{
+				"item_id": "regiDate"
+				, "column_id":"REGI_DATE"
+				, "item_name":"등록일"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":5
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"bplNm"
+			, "bplNo"
+			, "bizrNo"
+			, "insttIdx"
+			, "indutyCd"
+			, "headbplCd"
+		]
+		, "view_order":[
+			"bplNm"
+			, "bplNo"
+			, "bizrNo"
+			, "insttIdx"
+			, "indutyCd"
+			, "headbplCd"
+		]
+		, "write_order":[
+			"bplNm"
+			, "bplNo"
+			, "bizrNo"
+			, "insttIdx"
+			, "indutyCd"
+			, "headbplCd"
+		]
+		, "writeproc_order":[
+			"bplNm"
+			, "bplNo"
+			, "bizrNo"
+			, "insttIdx"
+			, "indutyCd"
+			, "headbplCd"
+		]
+		, "modify_order":[
+			"bplNm"
+			, "bplNo"
+			, "bizrNo"
+			, "insttIdx"
+			, "indutyCd"
+			, "headbplCd"
+		]
+		, "modifyproc_order":[
+			"bplNm"
+			, "bplNo"
+			, "bizrNo"
+			, "insttIdx"
+			, "indutyCd"
+			, "headbplCd"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"bplNm": {
+						"item_name":"기업명"
+						,"column_id":"BPL_NM"
+					}, "bplNo": {
+						"item_name":"사업장관리번호"
+						,"column_id":"BPL_NO"
+					}, "bizrNo": {
+						"item_name":"사업자등록번호"
+						,"column_id":"BIZR_NO"
+					}, "insttIdx":{
+						"column_id":"INSTT_IDX"
+						, "item_name":"소속기관"
+						, "format_type":0
+						, "object_type":2
+					}, "indutyCd": {
+						"column_id":"INDUTY_CD"
+						, "item_name":"업종"
+						, "format_type":0
+						, "object_type":2
+					}, "headbplCd": {
+						"column_id":"HEADBPL_CD"
+						, "item_name":"본사구분"
+						, "format_type":0
+						, "object_type":2
+					}
+				}
+			},
+			 "searchForm_order":[
+				"bplNm"
+				, "bplNo"
+				, "bizrNo"
+				, "insttIdx"
+				, "indutyCd"
+				, "headbplCd"
+			], "search_order":[
+				"bplNm"
+				, "bplNo"
+				, "bizrNo"
+				, "insttIdx"
+				, "indutyCd"
+				, "headbplCd"
+			]
+		}, "support_list_search":{
+			"key" : {
+				"items": {
+					"sptjName": {
+						"item_name":"서식그룹명"
+						,"column_id":"SPTJ_NAME"
+					},
+					"regiDate": {
+						"item_name":"등록일"
+						,"column_id":"REGI_DATE"
+						, "format_type":15
+						, "object_type":0
+					}
+				}
+			},
+			 "searchForm_order":[
+				"sptjName"
+				, "regiDate"
+			], "search_order":[
+				"sptjName"
+				, "regiDate"
+			]
+		}
+	} 
+}

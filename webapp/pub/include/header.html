@@ -1,0 +1,76 @@
+<div class="header" id="header">
+    <!-- gnb wrapper -->
+    <div class="gnb-wrapper">
+        <div class="gnb-area">
+
+            <div class="right-gnb-list">
+                <ul>
+                    <li>
+                        <a href="#">
+                            로그인                
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- //gnb wrapper -->
+
+    <div class="header-wrapper">
+        <div class="bg"></div>
+        <div class="header-area">
+            <h1>
+                <a href="../main/index.html">
+                    <img src="/pub/img/common/logo01_white.svg" alt="" />
+
+                    <strong>
+                        기업직업훈련 지원시스템
+                    </strong>
+                </a>
+            </h1>
+
+            <div class="top-menu-wrapper">
+                <jsp:include page="/pub/include/menu.html" />
+            </div>
+
+            <div class="right-btns">
+                <button type="button" class="btn-totalmenu">
+                    <span class="menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 모바일 전체메뉴 -->
+<div class="mask-totalmenu"></div>
+<div class="totalmenu-wrapper">
+    <div class="mobile-gnb-wrapper">
+        <ul class="gnb-menu">
+            <li>
+                <a href="#">
+                    <img src="../img/icon/icon_rock.png" alt="" />
+                    <strong>
+                        로그아웃
+                    </strong>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+
+    <div class="totalmenu-area">
+        <jsp:include page="/pub/include/menu.html" />
+    </div>
+
+
+    <button type="button" class="btn-mobile-close">
+        <img src="../img/common/btn_totalmenu_close_mobile.png"alt="전체메뉴 닫기"/>
+    </button>
+</div>
+<!-- //모바일 전체메뉴 -->

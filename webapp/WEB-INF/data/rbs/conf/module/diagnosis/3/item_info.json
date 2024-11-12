@@ -1,0 +1,158 @@
+{
+	"item_info":{
+		"items":{
+		    "issueNo":{
+				"item_id": "issueNo"
+				, "column_id":"ISSUE_NO"
+				, "item_name":"발급번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "corpName":{
+				"item_id": "corpName"
+				,"column_id":"CORP_NAME"
+				, "item_name":"기업명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bizrNo":{
+				"item_id": "bizrNo"
+				,"column_id":"BIZR_NO"
+				, "item_name":"사업자등록번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bplNo":{
+				"item_id": "bplNo"
+				, "column_id":"BPL_NO"
+				, "item_name":"사업장관리번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "issueDate":{
+				"item_id": "issueDate"
+				, "column_id":"ISSUE_DATE"
+				, "item_name":"HRD기초진단"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":5
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bsisIssueDate":{
+				"item_id": "bsisIssueDate"
+				, "column_id":"BSIS_ISSUE_DATE"
+				, "item_name":"기업HRD이음컨설팅"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":5
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"issueNo"
+			, "corpName"
+			, "bizrNo"
+			, "bplNo"
+		]
+		, "view_order":[
+			"issueNo"
+			, "corpName"
+			, "bizrNo"
+			, "bplNo"
+		]
+		, "write_order":[
+			"issueNo"
+			, "corpName"
+			, "bizrNo"
+			, "bplNo"
+		]
+		, "writeproc_order":[
+			"issueNo"
+			, "corpName"
+			, "bizrNo"
+			, "bplNo"
+		]
+		, "modify_order":[
+			"issueNo"
+			, "corpName"
+			, "bizrNo"
+			, "bplNo"
+		]
+		, "modifyproc_order":[
+			"issueNo"
+			, "corpName"
+			, "bizrNo"
+			, "bplNo"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"issueNo": {
+						"item_name":"발급번호"
+						,"column_id":"ISSUE_NO"
+					},
+					"corpName": {
+						"item_name":"기업명"
+						,"column_id":"CORP_NAME"
+					},
+					"bizrNo": {
+						"item_name":"사업자등록번호"
+						,"column_id":"BIZR_NO"
+					},
+					"bplNo" : {
+						"item_name":"사업장관리번호"
+						,"column_id":"BPL_NO"
+					},
+					"issueDate" : {
+						"item_name":"진단일"
+						,"column_id":"ISSUE_DATE"
+						, "format_type":5
+						, "object_type":0
+					},
+					"hrdBsiscnslYn" : {
+						"item_name":"HRD컨설팅 여부"
+						,"column_id":"HRD_BSISCNSL_YN"
+						, "format_type":0
+						, "object_type":2
+					},
+				}
+			},
+			 "searchForm_order":[
+				"issueNo"
+				, "corpName"
+				, "bizrNo"
+				, "bplNo"
+				, "issueDate"
+				,"hrdBsiscnslYn"
+			], "search_order":[
+				"issueNo"
+				, "corpName"
+				, "bizrNo"
+				, "bplNo"
+				, "issueDate"
+				,"hrdBsiscnslYn"
+			]
+		}
+	}
+}

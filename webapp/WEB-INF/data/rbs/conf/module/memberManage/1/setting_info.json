@@ -1,0 +1,42 @@
+{
+   "setting_info":{
+      "list_title":"회원 목록",
+      "input_title":"회원 등록",
+      "deleteList_title":"회원 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"memberIdx",
+      "idx_column":"MEMBER_IDX",
+      "design":"default",
+      "use_file":1,
+      "use_new":1
+   }
+   ,"authGroupManage_setting_info":{
+      "list_title":"그룹권한 목록",
+      "input_title":"그룹권한 등록",
+      "deleteList_title":"그룹권한 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"authIdx",
+      "idx_column":"AUTH_IDX",
+      "design":"default",
+      "use_file":1,
+      "use_new":1
+   }
+   , "memberManage_setting_info": {
+		"list_title":"직원별 권한 목록"
+		, "input_title":"직원별 권한 등록"
+		, "deleteList_title":"직원별 권한 삭제목록"
+		, "dset_list_block":10
+		, "dset_list_count":20
+		, "use_paging":1
+		, "page_name":"page"
+		, "idx_name":"authIdx"
+		, "idx_column":"AUTH_IDX"
+		
+	}
+}

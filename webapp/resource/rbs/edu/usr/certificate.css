@@ -1,0 +1,182 @@
+@charset "utf-8";
+/* reset */
+
+
+html, body {
+	height: 100%;
+}
+
+body {
+	text-align: center;
+	width: 100%;
+	font-size: 75%;
+	font-family: 'KoPub Batang','궁서체', KoPub Batang, Gungsuh, serif !important;
+	color: #727577;
+	list-style: none;
+	line-height: 1.7em;
+	border: 0px solid blue;
+	outline: 0;
+}
+
+/* 스킵네비게이션 */
+.skip-navigation a {
+	display: block;
+	height: 1px;
+	width: 1px;
+	margin: 0 -1px -1px 0;
+	padding: 0;
+	overflow: hidden;
+	font-size:0; line-height:0;
+}
+
+.skip-navigation a:hover,
+.skip-navigation a:active,
+.skip-navigation a:focus {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 20px;
+	line-height: 19px;
+	vertical-align: middle;
+	font-size: 14px;
+	font-weight: bold;
+	text-align: center;
+	background: #000;
+	color: #fff;
+	z-index: 1000
+}
+
+
+.blind, caption {
+	visibility: hidden;
+	overflow: hidden;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 0;
+	height: 0;
+	font-size: 0;
+	line-height: 0
+}
+
+
+/* total */
+.wrapper {
+	position: relative;
+	display: block;
+	width: 700px;
+	height: 990px;;
+	margin: 0 auto;
+	padding: 0;
+	text-align: left;
+	font-size: 1em;
+	color: #2f3031;
+}
+
+.wrapper .bg-image {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 700px;
+}
+.wrapper h1 {
+	position: absolute;
+	top: 216px;
+	left: 0;
+	width: 100%;
+	height: 49px;
+	text-align: center;
+}
+.wrapper h1 img {
+	display: inline-block;
+	vertical-align: bottom;
+}
+
+.wrapper h2 {
+	position: absolute;
+	top: 143px;
+	left: 102px;
+	font-size: 16px;
+	font-weight: bold;
+	font-family: 'KoPub Batang','궁서체', KoPub Batang, Gungsuh, serif !important;
+}
+
+.wrapper .user-info-box {
+	position: absolute;
+	top: 345px;
+	left: 50%;
+	width: 500px;
+	margin-left: -250px;
+	text-align: center;
+}
+
+.wrapper .user-info-box dl {
+	position: relative;
+	font-size: 18px;
+	line-height: 28px;
+	margin-bottom: 10px;
+	padding-left: 135px;
+	font-weight: bold;
+	text-align: left;
+	color: #424242
+}
+
+.wrapper .user-info-box dl:last-child {
+	margin-bottom: 0;
+}
+
+.wrapper .user-info-box dl dt {
+	position: absolute;
+	top: 0;
+	left: 40px;
+	font-family: 'KoPub Batang','궁서체', KoPub Batang, Gungsuh, serif !important;
+}
+
+.wrapper .user-info-box dl dd {
+	position: relative;
+	padding-left: 16px;
+	font-family: 'KoPub Batang','궁서체', KoPub Batang, Gungsuh, serif !important;
+	word-break: keep-all;
+}
+
+.wrapper .user-info-box dl dd:before {
+	position: absolute;
+	top: 0;
+	left: 0;
+	content: ":";
+}
+
+.wrapper .user-info-box .word01 {
+	padding-top: 48px;
+	color: #424242;
+	font-size: 24px;
+	line-height: 40px;
+	font-family: 'KoPub Batang','궁서체', KoPub Batang, Gungsuh, serif !important;
+	font-weight: bold;
+}
+
+
+.certificate-date {
+	margin-top: 15px;
+	font-size: 24px;
+	line-height: 40px;
+	font-weight: bold;
+	width: 100%;
+	text-align: center;
+	color: #424242;
+	font-family: 'KoPub Batang','궁서체', KoPub Batang, Gungsuh, serif !important;
+}
+
+.logo {
+	position: absolute;
+	bottom: 95px;
+	left: 0;
+	width: 100%;
+}
+
+.logo img {
+	display: block;
+	margin: 0 auto;
+	width: 265px;
+}

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rbs.modules.supportForm.supportFormMapper">
+	<!-- 테이블명 -->
+	<sql id="HRD_SPTJ">HRD_SPTJ</sql>
+	<sql id="HRD_SPTJ_SPTJADMSFM">HRD_SPTJ_SPTJADMSFM</sql>
+	<sql id="HRD_SPTJ_ADMSFM">HRD_SPTJ_ADMSFM</sql>
+	<sql id="HRD_SPTJ_ADMSFM_FILE">HRD_SPTJ_ADMSFM_FILE</sql>
+	<sql id="HRD_DGNS_PRTBIZ">HRD_DGNS_PRTBIZ</sql>
+
+	<sql id="COUNT_TOP"><trim>SELECT COUNT(rn) FROM( SELECT rownum rn, TB.* FROM (</trim></sql>
+	<sql id="COUNT_BOTTOM"><trim>) TB )</trim></sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX([KEY_IDX_COLUMN]), 0)</trim> + 1 MAXID
+		FROM  HRD_SPTJ A
+	</select>
+	
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT SPTJADMSFM.SPTJ_IDX
+			    , SPTJ.SPTJ_NAME
+			    , SPTJ.USE_YN
+			    , SPTJ.TMPR_SAVE_YN
+			    , COUNT(DISTINCT SPTJADMSFM.ADMSFM_IDX) AS ADMSFMCOUNT
+			    , SPTJ.REGI_DATE
+			    , SPTJ.REGI_NAME
+			<include refid="editAuthListQuery"/>
+			FROM HRD_SPTJ SPTJ
+			JOIN HRD_SPTJ_SPTJADMSFM SPTJADMSFM
+			ON SPTJ.SPTJ_IDX = SPTJADMSFM.SPTJ_IDX
+			WHERE SPTJ.ISDELETE = '0'
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'USE_YN'">
+						<if test='searchItem.columnValue =="Y"'>
+							AND SPTJ.USE_YN = 'Y'
+						</if>
+						<if test='searchItem.columnValue =="N"'>
+							AND (SPTJ.USE_YN = 'N' OR SPTJ.USE_YN IS NULL)
+						</if>
+					</when>
+					<otherwise>
+						AND SPTJ.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</otherwise>
+				</choose>
+			</foreach>
+			GROUP BY SPTJADMSFM.SPTJ_IDX, SPTJ.TMPR_SAVE_YN, SPTJ.SPTJ_NAME, SPTJ.USE_YN, SPTJ.REGI_DATE, SPTJ.REGI_NAME
+			ORDER BY SPTJ_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP"/>	
+			SELECT SPTJADMSFM.SPTJ_IDX
+			    , SPTJ.SPTJ_NAME
+			    , SPTJ.USE_YN
+			    , SPTJ.TMPR_SAVE_YN
+			    , COUNT(DISTINCT SPTJADMSFM.ADMSFM_IDX) AS ADMSFMCOUNT
+			    , SPTJ.REGI_DATE
+   			    , SPTJ.REGI_NAME
+			FROM HRD_SPTJ SPTJ
+			JOIN HRD_SPTJ_SPTJADMSFM SPTJADMSFM
+			ON SPTJ.SPTJ_IDX = SPTJADMSFM.SPTJ_IDX
+			WHERE SPTJ.ISDELETE = '0'
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'USE_YN'">
+						<if test='searchItem.columnValue =="Y"'>
+							AND SPTJ.USE_YN = 'Y'
+						</if>
+						<if test='searchItem.columnValue =="N"'>
+							AND (SPTJ.USE_YN = 'N' OR SPTJ.USE_YN IS NULL)
+						</if>
+					</when>
+					<otherwise>
+						AND SPTJ.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</otherwise>
+				</choose>
+			</foreach>
+			GROUP BY SPTJADMSFM.SPTJ_IDX, SPTJ.TMPR_SAVE_YN, SPTJ.SPTJ_NAME, SPTJ.USE_YN, SPTJ.REGI_DATE, SPTJ.REGI_NAME
+		<include refid="COUNT_BOTTOM" />	
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT SPTJ.SPTJ_IDX
+		    , SPTJ.SPTJ_NAME
+		    , SPTJ.USE_YN
+		<include refid="editAuthListQuery"/>
+		FROM HRD_SPTJ SPTJ
+		WHERE SPTJ.ISDELETE = 0
+			AND SPTJ.SPTJ_IDX  = #{sptjIdx}
+		ORDER BY SPTJ.SPTJ_IDX DESC
+	</select>
+	
+	<!-- 방문기업서식 조회 쿼리 -->
+	<select id="selectFormList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT SPTJ.ADMSFM_IDX
+						, SPTJ.ADMSFM_VER
+				        , SPTJ.ADMSFM_NM
+				        , SPTJ.JOB_TYPE
+				        , SPTJ.SGNTR,
+				CASE
+			        WHEN PRTBIZ.PRTBIZ_IDX = 1 THEN 'S-OJT'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 2 THEN '일학습병행'   
+			        WHEN PRTBIZ.PRTBIZ_IDX = 4 THEN '사업주훈련'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 6 THEN '컨소시엄'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 7 THEN '공통'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 8 THEN '대부'
+			    ELSE '기타'
+		    END AS PRTBIZ_TITLE
+        <include refid="editAuthListQuery"/>
+		FROM  HRD_SPTJ_ADMSFM SPTJ
+			LEFT OUTER JOIN HRD_DGNS_PRTBIZ PRTBIZ
+			ON SPTJ.PRTBIZ_IDX = PRTBIZ.PRTBIZ_IDX
+		WHERE SPTJ.ISDELETE = '0'
+        	AND SPTJ.USE_YN = 'Y'
+        	AND SPTJ.DCSN_YN = 'Y'
+		<if test="prtbizIdx != null and prtbizIdx != ''">
+        	AND PRTBIZ.PRTBIZ_IDX = #{prtbizIdx}
+        </if>
+		<if test="jobType != null and jobType != ''">
+        	AND SPTJ.JOB_TYPE = #{jobType}
+        </if>
+		<if test="sgntr != null and sgntr != ''">
+			AND SPTJ.SGNTR = #{sgntr}
+        </if>
+   		<if test="admsfmNm != null and !''.equals(admsfmNm)">
+			AND SPTJ.ADMSFM_NM LIKE '%' || #{admsfmNm} || '%'
+        </if>
+		ORDER BY SPTJ.ADMSFM_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+
+	<select id="selectFormCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP"/>	
+		SELECT SPTJ.ADMSFM_IDX
+					, SPTJ.ADMSFM_VER
+			        , SPTJ.ADMSFM_NM
+			        , PRTBIZ.PRTBIZ_IDX
+			        , SPTJ.JOB_TYPE
+			        , SPTJ.SGNTR
+		<include refid="editAuthListQuery"/>
+		FROM  HRD_SPTJ_ADMSFM SPTJ
+			LEFT OUTER JOIN HRD_DGNS_PRTBIZ PRTBIZ
+			ON SPTJ.PRTBIZ_IDX = PRTBIZ.PRTBIZ_IDX
+		WHERE SPTJ.ISDELETE = '0'
+        AND SPTJ.USE_YN = 'Y'
+        AND SPTJ.DCSN_YN = 'Y'
+   		<if test="prtbizIdx != null and prtbizIdx != ''">
+        	AND PRTBIZ.PRTBIZ_IDX = #{prtbizIdx}
+        </if>
+		<if test="jobType != null and jobType != ''">
+        	AND SPTJ.JOB_TYPE = #{jobType}
+        </if>
+		<if test="sgntr != null and sgntr != ''">
+			AND SPTJ.SGNTR = #{sgntr}
+        </if>
+   		<if test="admsfmNm != null and !''.equals(admsfmNm)">
+			AND SPTJ.ADMSFM_NM LIKE '%' || #{admsfmNm} || '%'
+        </if>
+		ORDER BY SPTJ.ADMSFM_IDX DESC
+		<include refid="COUNT_BOTTOM" />	
+	</select>
+	<!-- 방문기업서식 쿼리 -->
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+	<selectKey keyProperty="sptjIdx" resultType="Integer" order="BEFORE">
+		SELECT SPTJ_SEQ.NEXTVAL FROM DUAL
+	</selectKey>
+		INSERT INTO HRD_SPTJ (SPTJ_IDX, SPTJ_NAME, TMPR_SAVE_YN, DCSN_YN, USE_YN, REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES (#{sptjIdx}, #{sptjNm},#{tmprSaveYn}, #{dcsnYn}, #{useYn}, #{regiIdx}, #{regiId}, #{regiName}, sysdate, #{regiIp})
+	</insert>	
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE HRD_SPTJ 
+		SET SPTJ_NAME = #{sptjNm}
+			, TMPR_SAVE_YN = #{tmprSaveYn}
+			, DCSN_YN = #{dcsnYn}
+			, USE_YN = #{useYn}
+			, LAST_MODI_IDX = #{lastModiIdx}
+			, LAST_MODI_ID = #{lastModiId}
+			, LAST_MODI_NAME = #{lastModiName}
+			, LAST_MODI_DATE = sysdate
+			, LAST_MODI_IP = #{lastModiIp}
+		WHERE SPTJ_IDX = #{sptjIdx}
+	</update>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE HRD_SPTJ
+		SET ISDELETE = '1'
+			, LAST_MODI_IDX = #{lastModiIdx}
+			, LAST_MODI_ID = #{lastModiId}
+			, LAST_MODI_NAME = #{lastModiName}
+			, LAST_MODI_DATE = sysdate
+			, LAST_MODI_IP = #{lastModiIp}
+		WHERE SPTJ_IDX = #{sptjIdx}
+	</update>
+
+	<insert id="insertFormIdx" parameterType="java.util.HashMap">
+		INSERT INTO HRD_SPTJ_SPTJADMSFM(SPTJ_IDX, ADMSFM_IDX)
+		VALUES(#{sptjIdx}, #{admsfmIdx})
+	</insert>
+	
+	<delete id="deleteFormIdx">
+		DELETE FROM HRD_SPTJ_SPTJADMSFM
+		WHERE SPTJ_IDX = #{sptjIdx}
+			AND	ADMSFM_IDX = #{admsfmIdx}
+	</delete>
+	
+	<select id="getFormIdx"  parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT SPTJADMSFM.SPTJ_IDX
+					, SPTJADMSFM.ADMSFM_IDX
+					, SPTJ.ADMSFM_NM
+		FROM HRD_SPTJ_SPTJADMSFM SPTJADMSFM
+			JOIN HRD_SPTJ_ADMSFM SPTJ
+			ON SPTJADMSFM.ADMSFM_IDX = SPTJ.ADMSFM_IDX
+		WHERE SPTJ_IDX = #{sptjIdx}
+	</select>
+</mapper>            

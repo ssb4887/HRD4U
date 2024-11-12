@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. [KEY_IDX_COLUMN], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.areaAct.areaActMultiMapper">
+	<!-- 테이블명 -->
+	<sql id="MULTI_TABLE_NAME"><trim>HRD_SPTJ_ARACTPLN_INSTT</trim></sql>
+	<sql id="MULTI_POLICY_TABLE_NAME"><trim>HRD_SPTJ_ARACTPLN_INSTT_POLICY</trim></sql>
+	<sql id="MULTI_BSNS_TABLE_NAME"><trim>HRD_SPTJ_ARACTPLN_INSTT_BSNS</trim></sql>
+	<sql id="MULTI_TRNG_TABLE_NAME"><trim>HRD_SPTJ_ARACTPLN_INSTT_TRNG</trim></sql>
+	<sql id="MULTI_BSK_TABLE_NAME"><trim>HRD_SPTJ_ARACTPLN_BSK</trim></sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.ARACTPLN_IDX, TO_CHAR(A.INSTT_IDX) AS INSTT_IDX, A.SMRIZE_INSTT_YN, A.ITEM_ID, B.INSTT_NAME
+			FROM 
+			<include refid="MULTI_TABLE_NAME"/> A 
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.memberManage.memberManageMapper.HRD_COM_INSTT_TABLE_NAME"/> B
+			ON A.INSTT_IDX = B.INSTT_IDX
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			ORDER BY A.ARACTPLN_IDX, A.INSTT_IDX
+	</select>
+	
+	<select id="selectBsk" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			(SELECT COUNT(1) CNT FROM HRD_BSK_CL_ATMC_LCLAS WHERE LCLAS_CD = 1) generalAuto, 
+			(SELECT COUNT(1) CNT FROM HRD_BSK_CL_ATMC_LCLAS WHERE LCLAS_CD = 2) excavationAuto, 
+			(SELECT COUNT(1) CNT FROM HRD_BSK_CL_ATMC_LCLAS WHERE LCLAS_CD = 3) trainingAuto, 
+			(SELECT COUNT(1) CNT FROM HRD_BSK_CL_PASSIV_LCLAS WHERE LCLAS_CD = 1) generalPassive, 
+			(SELECT COUNT(1) CNT FROM HRD_BSK_CL_PASSIV_LCLAS WHERE LCLAS_CD = 2) excavationPassive, 
+			(SELECT COUNT(1) CNT FROM HRD_BSK_CL_PASSIV_LCLAS WHERE LCLAS_CD = 3) trainingPassive
+			FROM DUAL
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			<include refid="MULTI_TABLE_NAME"/> A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<select id="bskCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			<include refid="MULTI_TABLE_NAME"/> A
+			<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.*
+			FROM 
+			<include refid="MULTI_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="MULTI_TABLE_NAME"/> (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, ARACTPLN_IDX, SMRIZE_INSTT_YN
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, #{KEY_IDX} , #{SMRIZE}
+		)
+	</insert>
+	
+	
+	<insert id="bskInsert" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="MULTI_BSK_TABLE_NAME"/> (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+		)
+	</insert>
+	
+	<insert id="policyInsert" parameterType="java.util.HashMap">
+		MERGE INTO <include refid="MULTI_POLICY_TABLE_NAME"/> A
+			USING DUAL
+			ON (A.ARACTPLN_IDX = #{KEY_IDX} AND A.INSTT_IDX = #{INSTT_IDX})
+			WHEN MATCHED THEN
+				UPDATE SET 
+					ISDELETE = '0'
+			WHEN NOT MATCHED THEN
+				INSERT (
+					 ARACTPLN_IDX, INSTT_IDX
+				) VALUES (
+					 #{KEY_IDX}, #{INSTT_IDX}
+				)
+	</insert>
+	
+	<insert id="bsnsInsert" parameterType="java.util.HashMap">
+		MERGE INTO <include refid="MULTI_BSNS_TABLE_NAME"/> A
+			USING DUAL
+			ON (A.ARACTPLN_IDX = #{KEY_IDX} AND A.INSTT_IDX = #{INSTT_IDX})
+			WHEN MATCHED THEN
+				UPDATE SET 
+					ISDELETE = '0'
+			WHEN NOT MATCHED THEN
+				INSERT (
+					 ARACTPLN_IDX, INSTT_IDX
+				) VALUES (
+					 #{KEY_IDX}, #{INSTT_IDX}
+				)
+	</insert>
+	
+	<insert id="trngInsert" parameterType="java.util.HashMap">
+		MERGE INTO <include refid="MULTI_TRNG_TABLE_NAME"/> A
+			USING DUAL
+			ON (A.ARACTPLN_IDX = #{KEY_IDX} AND A.INSTT_IDX = #{INSTT_IDX})
+			WHEN MATCHED THEN
+				UPDATE SET 
+					ISDELETE = '0'
+			WHEN NOT MATCHED THEN
+				INSERT (
+					 ARACTPLN_IDX, INSTT_IDX
+				) VALUES (
+					 #{KEY_IDX}, #{INSTT_IDX}
+				)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE <include refid="MULTI_TABLE_NAME"/> SET 
+		<include refid="rbs.commonMapper.UPDATE_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+		AND ARACTPLN_IDX = #{KEY_IDX}
+	</update>
+	
+	<update id="bskUpdate" parameterType="java.util.HashMap">
+		UPDATE <include refid="MULTI_BSK_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>, REGI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>,  
+		<include refid="rbs.commonMapper.UPDATE_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+		AND LCLAS_CD = #{LCLAS_CD}
+	</update>
+	
+	<update id="policyUpdate" parameterType="java.util.HashMap">
+		UPDATE <include refid="MULTI_POLICY_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>, REGI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>,
+		<include refid="rbs.commonMapper.UPDATE_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+		AND INSTT_IDX = #{INSTT_IDX}
+	</update>
+	
+	<update id="distriUpdate" parameterType="java.util.HashMap">
+		UPDATE <include refid="MULTI_BSNS_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>, REGI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>, 
+		<include refid="rbs.commonMapper.UPDATE_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+		AND INSTT_IDX = #{INSTT_IDX}
+	</update>
+	
+	<update id="trainingUpdate" parameterType="java.util.HashMap">
+		UPDATE <include refid="MULTI_TRNG_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>, REGI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>,
+		<include refid="rbs.commonMapper.UPDATE_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+		AND INSTT_IDX = #{INSTT_IDX}
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="MULTI_TABLE_NAME"/>  
+		WHERE ARACTPLN_IDX = #{KEY_IDX}
+		<include refid="rbs.commonMapper.COM_LK_WHERE"/>
+	</delete>
+	
+	<delete id="mulDelete" parameterType="java.util.HashMap">
+		UPDATE <include refid="MULTI_TABLE_NAME"/> SET 
+		ISDELETE = '1', SMRIZE_INSTT_YN = 'N'
+		WHERE ARACTPLN_IDX = #{KEY_IDX}
+	</delete>
+	
+	<delete id="bsnsDelete" parameterType="java.util.HashMap">
+		UPDATE <include refid="MULTI_BSNS_TABLE_NAME"/> SET 
+		ISDELETE = '1'
+		WHERE ARACTPLN_IDX = #{KEY_IDX}
+	</delete>
+	
+	<delete id="policyDelete" parameterType="java.util.HashMap">
+		UPDATE <include refid="MULTI_POLICY_TABLE_NAME"/> SET 
+		ISDELETE = '1'
+		WHERE ARACTPLN_IDX = #{KEY_IDX}
+	</delete>
+	
+	<delete id="trngDelete" parameterType="java.util.HashMap">
+		UPDATE <include refid="MULTI_TRNG_TABLE_NAME"/> SET 
+		ISDELETE = '1'
+		WHERE ARACTPLN_IDX = #{KEY_IDX}
+	</delete>
+	
+	<insert id="mulInsert" parameterType="java.util.HashMap">
+		MERGE INTO <include refid="MULTI_TABLE_NAME"/> A
+			USING DUAL
+			ON (A.ARACTPLN_IDX = #{KEY_IDX} AND A.INSTT_IDX = #{INSTT_IDX})
+			WHEN MATCHED THEN
+				UPDATE SET 
+					ISDELETE = '0'
+				 <if test='SMRIZE == "Y"'>
+				 , SMRIZE_INSTT_YN = 'Y'
+				 </if>
+			WHEN NOT MATCHED THEN
+				INSERT (
+					<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+					, ARACTPLN_IDX, SMRIZE_INSTT_YN
+				) VALUES (
+					<include refid="rbs.commonMapper.INSERT_VALUES"/>
+					, #{KEY_IDX} , #{SMRIZE}
+				)
+	</insert>
+</mapper>            

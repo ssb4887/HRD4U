@@ -1,0 +1,429 @@
+{
+	"item_info":{
+		"items":{
+			"cnslIdx":{
+				"column_id":"CNSL_IDX"
+				, "item_name":"컨설팅식별색인"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "sportType":{
+				"column_id":"SPORT_TYPE"
+				, "item_name":"지원유형"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "mtgWeekExplsn1":{
+				"column_id":"MTG_WEEK_EXPLSN1"
+				, "item_name":"회의주제명1"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":100
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "mtgCn1":{
+				"column_id":"MTG_CN1"
+				, "item_name":"회의내용1"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":1000
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "mtgWeekExplsn2":{
+				"column_id":"MTG_WEEK_EXPLSN2"
+				, "item_name":"회의주제명2"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":100
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "mtgCn2":{
+				"column_id":"MTG_CN2"
+				, "item_name":"회의내용2"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":1000
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "excOdr":{
+				"column_id":"EXC_ODR"
+				, "item_name":"수행차수"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":3
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "operMthd":{
+				"column_id":"OPER_MTHD"
+				, "item_name":"운영방식"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},"mtgStartDt":{
+				"column_id":"MTG_START_DT"
+				, "item_name":"회의시작일시"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":5
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "mtgEndDt":{
+				"column_id":"MTG_END_DT"
+				, "item_name":"회의종료일시"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":5
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bplNm":{
+				"column_id":"BPL_NM"
+				, "item_name":"사업장명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "excMth":{
+				"column_id":"EXC_MTH"
+				, "item_name":"수행방법"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "pmNm":{
+				"column_id":"PM_NM"
+				, "item_name":"PM명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "cnExpert":{
+				"column_id":"CN_EXPERT"
+				, "item_name":"내용전문가"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "corpInnerExpert":{
+				"column_id":"CORP_INNER_EXPERT"
+				, "item_name":"기업내부전문가"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "spntPic":{
+				"column_id":"SPNT_PIC"
+				, "item_name":"지원기관담당자"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "photo":{
+				"column_id":"PHOTO"
+				, "item_name":"회의사진"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}, "status":{
+				"column_id":"STATUS"
+				, "item_name":"상태"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+			
+		}, "list_order":[
+			"cnslIdx"
+			, "sportType"
+			, "mtgStartDt"
+			, "mtgEndDt"
+			, "mtgWeekExplsn1"
+			, "mtgCn1"
+			, "mtgWeekExplsn2"
+			, "mtgCn2"
+			, "excOdr"
+			, "operMthd"
+			, "bplNm"
+			, "excMth"
+			, "pmNm"
+			, "cnExpert"
+			, "corpInnerExpert"
+			, "spntPic"		
+			, "photo"
+		]
+		, "view_order":[
+			"cnslIdx"
+			, "sportType"
+			, "mtgStartDt"
+			, "mtgEndDt"
+			, "mtgWeekExplsn1"
+			, "mtgCn1"
+			, "mtgWeekExplsn2"
+			, "mtgCn2"
+			, "excOdr"
+			, "operMthd"
+			, "bplNm"
+			, "excMth"
+			, "pmNm"
+			, "cnExpert"
+			, "corpInnerExpert"
+			, "spntPic"		
+			, "photo"
+			, "status"
+		]
+		, "write_order":[
+			"cnslIdx"
+			, "sportType"
+			, "mtgWeekExplsn1"
+			, "mtgCn1"
+			, "mtgWeekExplsn2"
+			, "mtgCn2"
+			, "excOdr"
+			, "operMthd"
+			, "bplNm"
+			, "excMth"
+			, "pmNm"
+			, "cnExpert"
+			, "corpInnerExpert"
+			, "spntPic"		
+			, "photo"
+			, "status"
+		]
+		, "writeproc_order":[
+			"cnslIdx"
+			, "sportType"
+			, "mtgWeekExplsn1"
+			, "mtgCn1"
+			, "mtgWeekExplsn2"
+			, "mtgCn2"
+			, "excOdr"
+			, "operMthd"
+			, "bplNm"
+			, "excMth"
+			, "pmNm"
+			, "cnExpert"
+			, "corpInnerExpert"
+			, "spntPic"		
+			, "photo"
+			, "status"
+		]
+		, "modify_order":[
+			"mtgWeekExplsn1"
+			, "mtgCn1"
+			, "mtgWeekExplsn2"
+			, "mtgCn2"
+			, "excOdr"
+			, "operMthd"
+			, "bplNm"
+			, "excMth"
+			, "pmNm"
+			, "cnExpert"
+			, "corpInnerExpert"
+			, "spntPic"		
+			, "photo"
+			, "status"
+		]
+		, "modifyproc_order":[
+			"mtgWeekExplsn1"
+			, "mtgCn1"
+			, "mtgWeekExplsn2"
+			, "mtgCn2"
+			, "excOdr"
+			, "operMthd"
+			, "bplNm"
+			, "excMth"
+			, "pmNm"
+			, "cnExpert"
+			, "corpInnerExpert"
+			, "spntPic"		
+			, "photo"
+			, "status"
+		]
+		, "list_search":{
+			"key" : {
+				"items": {
+					"cnslIdx": {
+						"item_name":"컨설팅 일련번호"
+						,"column_id":"CNSL_IDX"
+					},
+					"sportType" : {
+						"item_name":"지원유형"
+						,"column_id":"SPORT_TYPE"
+					},
+					"mtgStartDt": {
+						"item_name":"회의시작일시"
+						,"column_id":"MTG_START_DT"
+					},
+					"mtgEndDt": {
+						"item_name":"회의종료일시"
+						,"column_id":"MTG_END_DT"
+					},
+					"mtgWeekExplsn1" : {
+						"item_name":"회의주제명1"
+						,"column_id":"MTG_WEEK_EXPLSN1"
+					},
+					"mtgCn1" : {
+						"item_name":"회의내용1"
+						,"column_id":"MTG_CN1"
+					},
+					"mtgWeekExplsn2" : {
+						"item_name":"회의주제명2"
+						,"column_id":"MTG_WEEK_EXPLSN2"
+					},
+					"mtgCn2" : {
+						"item_name":"회의내용2"
+						,"column_id":"MTG_CN2"
+					},
+					"excOdr" : {
+						"item_name":"EXC_ODR"
+						,"column_id":"수행차수"
+					},
+					"operMthd" : {
+						"item_name":"운영방식"
+						,"column_id":"OPER_MTHD"
+					},
+					"bplNm" : {
+						"item_name":"사업장명"
+						,"column_id":"BPL_NM"
+					},
+					"excMth" : {
+						"item_name":"수행방법"
+						,"column_id":"EXC_MTH"
+					},
+					"pmNm" : {
+						"item_name":"PM명"
+						,"column_id":"PM_NM"
+					},
+					"cnExpert" : {
+						"item_name":"내용전문가"
+						,"column_id":"CN_EXPERT"
+					},
+					"corpInnerExpert" : {
+						"item_name":"기업내부전문가"
+						,"column_id":"CORP_INNER_EXPERT"
+					},
+					"spntPic" : {
+						"item_name":"지원기관담당자"
+						,"column_id":"SPNT_PIC"
+					},
+					"photo" : {
+						"item_name":"회의사진"
+						,"column_id":"PHOTO"
+					},
+					"status" : {
+						"item_name":"상태"
+						,"column_id":"STATUS"
+					}
+				}
+			},
+			"searchForm_order":[
+				"cnslIdx"
+				, "sportType"
+				, "mtgStartDt"
+				, "mtgEndDt"
+				, "mtgWeekExplsn1"
+				, "mtgCn1"
+				, "mtgWeekExplsn2"
+				, "mtgCn2"
+				, "excOdr"
+				, "operMthd"
+				, "bplNm"
+				, "excMth"
+				, "pmNm"
+				, "cnExpert"
+				, "corpInnerExpert"
+				, "spntPic"		
+				, "photo"
+				, "status"
+			], "search_order":[
+				"cnslIdx"
+				, "sportType"
+				, "mtgStartDt"
+				, "mtgEndDt"
+				, "mtgWeekExplsn1"
+				, "mtgCn1"
+				, "mtgWeekExplsn2"
+				, "mtgCn2"
+				, "excOdr"
+				, "operMthd"
+				, "bplNm"
+				, "excMth"
+				, "pmNm"
+				, "cnExpert"
+				, "corpInnerExpert"
+				, "spntPic"		
+				, "photo"
+				, "status"
+			], "searchAddOptn_order":[
+				"trRecord"
+			]
+		}
+	}
+}

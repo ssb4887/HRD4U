@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. [KEY_IDX_COLUMN], [<include refid="ANALYSIS_TABLE_NAME"/>], [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.analysis.analysisMapper">
+	<!-- 테이블명 -->
+	<sql id="ANALYSIS_TABLE_NAME">
+		<trim>HRD_CNSL_RSLT_ANALS</trim>
+	</sql>
+	<sql id="DEV_TABLE_NAME">
+		<trim>HRD_DEVLOP</trim>
+	</sql>
+	<sql id="TP_TABLE_NAME">
+		<trim>HRD_DEVLOP_TP</trim>
+	</sql>
+	<sql id="REPORT_TABLE_NAME">
+		<trim>HRD_CNSL_REPORT</trim>
+	</sql>
+	<sql id="REPORT_TP_TABLE_NAME">
+		<trim>HRD_CNSL_REPORT_TP</trim>
+	</sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(RSLT_ANALS_IDX), 0)</trim> + 1 MAXID
+		FROM 
+		<include refid="ANALYSIS_TABLE_NAME"/> A
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.[KEY_IDX_COLUMN]), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		[<include refid="ANALYSIS_TABLE_NAME"/>] A 
+		WHERE A.[KEY_IDX_COLUMN] LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE APPLY_YN = 'Y' AND BPL_NO = A.BPL_NO) ) AS INSTT_NAME,
+			A.*
+			<include refid="editAuthListQuery"/>
+			FROM 
+			<include refid="ANALYSIS_TABLE_NAME"/> 
+			A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<if test="brffcCd != null">
+				<if test="brffcCd != '1000000001' and insttIdx == '' and insttIdx == null">
+					AND BRFFC_CD = #{brffcCd}
+				</if>
+				<if test="insttIdx != '' and insttIdx != null">
+					AND BRFFC_CD = (SELECT BRFFC_CD FROM HRD_COM_INSTT WHERE INSTT_IDX = #{insttIdx})
+				</if>
+			</if>
+			<if test="siteId != 'dct'">
+				AND BPL_NO = #{bplNo}
+			</if>
+			<if test="trCorpNm != '' and trCorpNm != null">
+				AND TR_CORP_NM LIKE '%' || #{trCorpNm} || '%'
+			</if>
+			<if test="schBplNo != '' and schBplNo != null">
+				AND BPL_NO LIKE '%' || #{schBplNo} || '%'
+			</if>
+			<choose>
+				<when test="dsetOrderField == null">
+					<bind name="defaultOrderStr" value="'A.RSLT_ANALS_IDX'"/>
+				</when>
+				<otherwise>
+					<bind name="defaultOrderStr" value="_parameter.get('dsetOrderField')"/>
+				</otherwise>
+			</choose>
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			<include refid="ANALYSIS_TABLE_NAME"/> A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<if test="brffcCd != null">
+				<if test="brffcCd != '1000000001' and insttIdx == '' and insttIdx == null">
+					AND BRFFC_CD = #{brffcCd}
+				</if>
+				<if test="insttIdx != '' and insttIdx != null">
+					AND BRFFC_CD = (SELECT BRFFC_CD FROM HRD_COM_INSTT WHERE INSTT_IDX = #{insttIdx})
+				</if>
+			</if>
+			<if test="siteId != 'dct'">
+				AND BPL_NO = #{bplNo}
+			</if>
+			<if test="trCorpNm != '' and trCorpNm != null">
+				AND TR_CORP_NM LIKE '%' || #{trCorpNm} || '%'
+			</if>
+			<if test="schBplNo != '' and schBplNo != null">
+				AND BPL_NO LIKE '%' || #{schBplNo} || '%'
+			</if>
+	</select>
+	
+	<select id="selectDevList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT
+				(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE APPLY_YN = 'Y' AND BPL_NO = DEV.BPL_NO)) AS INSTT_NAME,
+				(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = DEV.BPL_NO) AS BPL_NM,
+			    TP.TP_NM,
+	            TP.TRINSTT_NM,
+	            (SELECT ADD_MONTHS(DEV.LAST_MODI_DATE,1) FROM DUAL) AS CHK_REAL,
+	            DEV.LAST_MODI_DATE,
+	            DEV.CONFM_STATUS,
+	            DEV.BPL_NO,
+	            DEV.DEVLOP_IDX,
+	            NULL AS CNSL_IDX,
+	            NULL AS REPORT_TIME,
+	            NULL AS CNSL_TYPE
+			<include refid="editAuthListQuery"/>
+				FROM 
+			<include refid="TP_TABLE_NAME"/> TP
+				LEFT OUTER JOIN <include refid="DEV_TABLE_NAME"/> DEV 
+				ON TP.DEVLOP_IDX = DEV.DEVLOP_IDX
+				WHERE
+					DEV.ISDELETE = '0'
+				AND 
+					DEV.CONFM_STATUS = 55
+				<if test="brffcCd != null">
+					<if test="brffcCd != '1000000001'">
+						AND TP.BRFFC_CD = #{insttIdx}
+					</if>
+				</if>
+				<if test="schBplNo != '' and schBplNo != null">
+					AND DEV.BPL_NO LIKE '%' || #{schBplNo} || '%'
+				</if>
+				<if test="siteId != 'dct'">
+					AND DEV.BPL_NO = #{bplNo}
+				</if>
+				<if test="insttIdx != '' and insttIdx != null">
+					AND TP.BRFFC_CD = #{insttIdx}
+				</if>
+				UNION ALL
+					SELECT
+			        *
+			        FROM 
+			        (
+			        SELECT
+						(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE APPLY_YN = 'Y' AND BPL_NO = CNSL.BPL_NO) ) AS INSTT_NAME,
+						(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = CNSL.BPL_NO) AS BPL_NM,
+			            T.TP_NM,
+			            T.TRINSTT_NM,
+			            (SELECT ADD_MONTHS(R.LAST_MODI_DATE,1) FROM DUAL) AS CHK_REAL,
+			            T.LAST_MODI_DATE,
+			            R.CONFM_STATUS,
+			            R.BPL_NO,
+			            NULL,
+            			R.CNSL_IDX,
+            			R.LAST_MODI_DATE AS REPORT_TIME,
+            			(SELECT CNSL_TYPE FROM HRD_CNSL WHERE CNSL_IDX = R.CNSL_IDX) AS CNSL_TYPE
+			            FROM HRD_CNSL_REPORT R
+			            LEFT OUTER JOIN HRD_CNSL_REPORT_TP T ON T.CNSL_IDX = R.CNSL_IDX
+			            LEFT OUTER JOIN HRD_CNSL CNSL ON R.CNSL_IDX = CNSL.CNSL_IDX
+			            WHERE 
+			            	R.CONFM_STATUS = 55
+			            	<if test="brffcCd != null">
+								<if test="brffcCd != '1000000001'">
+									AND T.BRFFC_CD = #{brffcCd}
+								</if>
+							</if>
+							<if test="schBplNo != '' and schBplNo != null">
+								AND R.BPL_NO LIKE '%' || #{schBplNo} || '%'
+							</if>
+							<if test="insttIdx != '' and insttIdx != null">
+								AND CNSL.CMPTNC_BRFFC_IDX = #{insttIdx}
+							</if>
+							<if test="siteId != 'dct'">
+								AND R.BPL_NO = #{bplNo}
+							</if>
+			       ) 
+			<include refid="rbs.commonMapper.COM_ORDER"/>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectDevCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(*) CNT
+			FROM 
+			(
+			    (
+			        SELECT
+			            (SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE APPLY_YN = 'Y' AND BPL_NO = DEV.BPL_NO)) AS INSTT_NAME,
+			            (SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = DEV.BPL_NO) AS BPL_NM,
+			            TP.TP_NM,
+			            TP.TRINSTT_NM,
+			            (SELECT ADD_MONTHS(DEV.LAST_MODI_DATE,1) FROM DUAL) AS CHK_REAL,
+			            DEV.LAST_MODI_DATE,
+			            DEV.CONFM_STATUS
+			            FROM HRD_DEVLOP_TP TP
+			            LEFT OUTER JOIN HRD_DEVLOP DEV
+			        		ON TP.DEVLOP_IDX = DEV.DEVLOP_IDX
+			                WHERE DEV.ISDELETE = '0' AND 
+			                DEV.CONFM_STATUS = 55
+					<if test="brffcCd != null">
+						<if test="brffcCd != '1000000001'">
+							AND TP.BRFFC_CD = #{insttIdx}
+						</if>
+					</if>
+					<if test="siteId != 'dct'">
+						AND DEV.BPL_NO = #{bplNo}
+					</if>
+					<if test="schBplNo != '' and schBplNo != null">
+						AND DEV.BPL_NO LIKE '%' || #{schBplNo} || '%'
+					</if>
+					<if test="insttIdx != '' and insttIdx != null">
+						AND TP.BRFFC_CD = #{insttIdx}
+					</if>
+				)
+				UNION ALL
+					SELECT
+			        *
+			        FROM (
+			        SELECT
+						(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE APPLY_YN = 'Y' AND BPL_NO = CNSL.BPL_NO) ) AS INSTT_NAME,
+						(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = CNSL.BPL_NO) AS BPL_NM,
+			            T.TP_NM,
+			            T.TRINSTT_NM,
+			            (SELECT ADD_MONTHS(R.LAST_MODI_DATE,1) FROM DUAL) AS CHK_REAL,
+			            T.LAST_MODI_DATE,
+			            R.CONFM_STATUS
+			            FROM HRD_CNSL_REPORT R
+			            LEFT OUTER JOIN HRD_CNSL_REPORT_TP T ON T.CNSL_IDX = R.CNSL_IDX
+			            LEFT OUTER JOIN HRD_CNSL CNSL ON R.CNSL_IDX = CNSL.CNSL_IDX
+			            WHERE R.CONFM_STATUS = 55
+			            <if test="brffcCd != null">
+							<if test="brffcCd != '1000000001'">
+								AND CNSL.CMPTNC_BRFFC_IDX = #{insttIdx}
+							</if>
+						</if>
+						<if test="siteId != 'dct'">
+							AND R.BPL_NO = #{bplNo}
+						</if>
+						<if test="schBplNo != '' and schBplNo != null">
+							AND CNSL.BPL_NO LIKE '%' || #{schBplNo} || '%'
+						</if>
+						<if test="insttIdx != '' and insttIdx != null">
+							AND CNSL.CMPTNC_BRFFC_IDX = #{insttIdx}
+						</if>
+			       )
+				)
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*
+			<if test="targetTable == 'HRD_CNSL_REPORT_TP'">
+				,(SELECT CORP_NM FROM HRD_CNSL WHERE CNSL_IDX = A.CNSL_IDX) AS BPL_NM
+			</if>
+			<include refid="editAuthListQuery"/>
+		FROM 
+			${targetTable} A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<if test="targetTable == 'HRD_CNSL_REPORT_TP'">
+			AND CNSL_IDX = #{cnslIdx}
+		</if>
+		<if test="targetTable == 'HRD_CNSL_REPORT'">
+			AND CNSL_IDX = #{cnslIdx}
+		</if>
+	</select>
+	
+	<select id="selectDevView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			DEV.LAST_MODI_DATE,
+			(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = #{bplNo}) AS BPL_NM,
+			(SELECT TP_DEVLOP_SE FROM HRD_DEVLOP WHERE DEVLOP_IDX = A.DEVLOP_IDX) AS TP_DEVLOP_SE,
+			A.*
+			<include refid="editAuthListQuery"/>
+		FROM 
+			<include refid="TP_TABLE_NAME"/> A 
+			LEFT OUTER JOIN HRD_DEVLOP DEV
+        		ON A.DEVLOP_IDX = DEV.DEVLOP_IDX
+		WHERE
+			A.DEVLOP_IDX = #{devlopIdx}
+		AND
+			DEV.CONFM_STATUS = 55
+	</select>
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			<include refid="ANALYSIS_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.${columnItem}_SAVED_NAME, A.${columnItem}_ORIGIN_NAME
+			FROM 
+			<include refid="ANALYSIS_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE <include refid="ANALYSIS_TABLE_NAME"/> SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1 
+		WHERE [KEY_IDX_COLUMN] = #{KEY_IDX}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="ANALYSIS_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		A.* 
+		FROM 
+		<include refid="ANALYSIS_TABLE_NAME"/> A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="ANALYSIS_TABLE_NAME"/> (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE, CNSL_IDX
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>
+			, #{cnslIdx}
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE <include refid="ANALYSIS_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.[KEY_IDX_COLUMN], [목록에 사용할 컬럼], A.LAST_MODI_NAME, A.LAST_MODI_ID, A.REGI_DATE, A.LAST_MODI_DATE 
+			FROM 
+			<include refid="ANALYSIS_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			ORDER BY [기본정렬쿼리]
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="ANALYSIS_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE <include refid="ANALYSIS_TABLE_NAME"/> SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE <include refid="ANALYSIS_TABLE_NAME"/> SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="ANALYSIS_TABLE_NAME"/>  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	
+	<select id="getDevelope" parameterType="String" resultType="int">
+		SELECT
+			DEVLOP_IDX
+		FROM
+			HRD_DEVLOP
+		WHERE
+			BPL_NO = #{bplNo}
+	</select>
+	
+	<select id="getBrffcCd" parameterType="String" resultType="String">
+		SELECT
+			BRFFC_CD
+		FROM
+			HRD_COM_INSTT
+		WHERE
+			INSTT_IDX = (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE BPL_NO = #{bplNo} AND APPLY_YN = 'Y')
+	</select>
+	
+	<select id="chkDevelope" parameterType="map" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			HRD_CNSL_RSLT_ANALS
+		WHERE
+		<if test="targetTable == 'HRD_DEVLOP_TP'">
+			DEVLOP_IDX = #{devlopIdx}
+		</if>
+		<if test="targetTable == 'HRD_CNSL_REPORT_TP'">
+			CNSL_IDX = #{cnslIdx}
+		</if>
+		<if test="targetTable == 'HRD_CNSL_REPORT'">
+			CNSL_IDX = #{cnslIdx}
+		</if>
+			AND
+				TR_RESULT_REPRT_SE = #{trResultReprtSe}
+			AND
+				ISDELETE = 0
+	</select>
+	
+		<!-- 성과분석삭제 -->
+	<update id="deleteData" parameterType="rbs.modules.analysis.dto.AnalysisVO">
+		UPDATE HRD_CNSL_RSLT_ANALS
+		SET
+		ISDELETE = '1',
+		LAST_MODI_IDX = #{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME = #{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE
+		RSLT_ANALS_IDX = #{rsltAnalsIdx}
+	</update>
+	
+	<select id="subjectFind" parameterType="map" resultType="hashMap">
+		SELECT
+			DISTINCT
+			TP_CD,
+			TR_MBY,
+			TP_NM, 
+			TP_TME,
+			TR_START_DATE,
+			TR_END_DATE
+		FROM
+			HRD_BSK_BPR
+		WHERE 
+			BPL_NO = #{bplNo}
+		AND
+ 			TR_START_DATE LIKE '23%'
+ 		AND
+ 			TOT_TR_CT > 0
+ 		AND 
+			(TR_MBY='자체' OR TR_MBY='자체+위탁')
+		ORDER BY TR_START_DATE ASC
+	</select>
+</mapper>            

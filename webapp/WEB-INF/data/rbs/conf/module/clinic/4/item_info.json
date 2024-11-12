@@ -1,0 +1,422 @@
+{
+	"item_info":{
+		"items":{
+		    "actCd":{
+				"column_id":"ACMSLT_ACT_CD"
+				, "item_name":"실적활동코드"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "actType":{
+				"column_id":"ACMSLT_TYPE"
+				, "item_name":"실적타입"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":5
+				, "write_type":0
+				, "modify_type":0
+				, "master_code":"ACT_TYPE"
+				, "default_item":1
+			}, "startDate":{
+				"column_id":"ACMSLT_START_DT"
+				, "item_name":"실적시작일시"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":22
+				, "date_type":1
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "endDate":{
+				"column_id":"ACMSLT_END_DT"
+				, "item_name":"실적종료일시"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":22
+				, "date_type":1
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "place":{
+				"column_id":"ACMSLT_PLACE"
+				, "item_name":"실적장소"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "cn":{
+				"column_id":"ACMSLT_CN"
+				, "item_name":"능력개발활동 내역"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "sportAmt":{
+				"column_id":"ACMSLT_SPORT_AMT"
+				, "item_name":"실적지원액"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "sportYn":{
+				"column_id":"ACEXP_SPORT_YN"
+				, "item_name":"실비지원여부"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "photo":{
+				"column_id":"PHOTO"
+				, "item_name":"증빙사진"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}, "bill":{
+				"column_id":"BILL"
+				, "item_name":"증빙내역"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}
+		}, "list_order":[
+			"actCd"
+			, "actType"
+		]
+		, "view_order":[
+			"actCd"
+			, "actType"
+			, "startDate"
+			, "endDate"
+			, "place"
+			, "cn"
+			, "sportAmt"
+			, "sportYn"
+			, "photo"
+			, "bill"
+		]
+		, "write_order":[
+		    "actCd"
+			, "actType"
+			, "startDate"
+			, "endDate"
+			, "place"
+			, "cn"
+			, "sportAmt"
+			, "sportYn"
+			, "photo"
+			, "bill"
+		]
+		, "writeproc_order":[
+			"actCd"
+			, "actType"
+			, "place"
+			, "cn"
+			, "sportAmt"
+			, "sportYn"
+			, "photo"
+			, "bill"
+		]
+		, "modify_order":[
+			"actCd"
+			, "actType"
+			, "startDate"
+			, "endDate"
+			, "place"
+			, "cn"
+			, "sportAmt"
+			, "sportYn"
+			, "photo"
+			, "bill"
+		]
+		, "modifyproc_order":[
+		    "actCd"
+			, "actType"
+			, "place"
+			, "cn"
+			, "sportAmt"
+			, "sportYn"
+			, "photo"
+			, "bill"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "subject":{
+						"column_id":"SUBJECT"
+						, "item_name":"제목"
+					},
+					 "contents":{
+						"column_id":"CONTENTS"
+						, "item_name":"내용"
+					}
+				}, "select_order":[
+				    "subject"
+					, "contents"
+				]
+			}, "searchForm_order":[
+				 "keyField"
+			], "search_order":[
+				 "keyField"
+			]
+		}
+	},
+		
+	"clinicDct_item_info":{
+		"items":{
+		    "actCd":{
+				"column_id":"ACMSLT_ACT_CD"
+				, "item_name":"실적활동명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "actType":{
+				"column_id":"ACMSLT_TYPE"
+				, "item_name":"실적타입"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":5
+				, "write_type":0
+				, "modify_type":0
+				, "master_code":"ACT_TYPE"
+				, "default_item":1
+			}, "startDate":{
+				"column_id":"ACMSLT_START_DT"
+				, "item_name":"실적시작일시"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":22
+				, "date_type":1
+				, "object_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "endDate":{
+				"column_id":"ACMSLT_END_DT"
+				, "item_name":"실적종료일시"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":22
+				, "date_type":1
+				, "object_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "place":{
+				"column_id":"ACMSLT_PLACE"
+				, "item_name":"실적장소"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "cn":{
+				"column_id":"ACMSLT_CN"
+				, "item_name":"실적내용"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "sportAmt":{
+				"column_id":"ACMSLT_SPORT_AMT"
+				, "item_name":"실적지원액"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "sportYn":{
+				"column_id":"ACEXP_SPORT_YN"
+				, "item_name":"실비지원여부"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "photo":{
+				"column_id":"PHOTO"
+				, "item_name":"증빙사진"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}, "bill":{
+				"column_id":"BILL"
+				, "item_name":"증빙내역"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}
+		}, "list_order":[
+			"actCd"
+			, "actType"
+		]
+		, "view_order":[
+			"actCd"
+			, "actType"
+			, "startDate"
+			, "endDate"
+			, "place"
+			, "cn"
+			, "sportAmt"
+			, "sportYn"
+			, "photo"
+			, "bill"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "bplNo":{
+						"column_id":"B.BPL_NO"
+						, "item_name":"사업장관리번호"
+						, "use_full_value":1 
+					}, 
+				 "bplNm":{
+						"column_id":"(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = B.BPL_NO)"
+						, "item_name":"기업명"
+					}
+				}, "select_order":[
+				    "bplNo"
+					, "bplNm"
+				]
+			}, "key":{
+				"items":{
+					"actType":{
+						"column_id":"A.ACMSLT_TYPE"
+						, "item_name":"활동"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"ACT_TYPE"
+					},
+					"year":{
+						"column_id":"YEAR"
+						, "item_name":"연차"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CLINIC_YEAR"
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "actType"
+				 , "year"
+			], "search_order":[
+				 "keyField"
+				 , "actType"
+			]
+		}
+		, "list_search_head":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "bplNo":{
+						"column_id":"B.BPL_NO"
+						, "item_name":"사업장관리번호"
+						, "use_full_value":1 
+					}, 
+				 "bplNm":{
+						"column_id":"(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = B.BPL_NO)"
+						, "item_name":"기업명"
+					}
+				}, "select_order":[
+				    "bplNo"
+					, "bplNm"
+				]
+			}, "key":{
+				"items":{
+					"actType":{
+						"column_id":"A.ACMSLT_TYPE"
+						, "item_name":"활동"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"ACT_TYPE"
+					},"year":{
+						"column_id":"YEAR"
+						, "item_name":"연차"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CLINIC_YEAR"
+					},"cliInsttIdx":{
+						"column_id":"B.CLI_INSTT_IDX"
+						, "item_name":"지부지사"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"ORG_CODE"
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "cliInsttIdx"
+				 , "actType"
+				 , "year"
+			], "search_order":[
+				 "keyField"
+				 , "actType"
+				 , "cliInsttIdx"
+			]
+		}
+	}
+}

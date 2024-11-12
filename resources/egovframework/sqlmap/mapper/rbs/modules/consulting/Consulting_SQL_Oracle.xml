@@ -1,0 +1,2796 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 1. [KEY_IDX_COLUMN], [<include refid="CONSULTING_TABLE_NAME"/>], [목록에 
+	사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용 2. 그 외 필요에 따라 쿼리 수정하여 사용 -->
+<mapper namespace="rbs.modules.consulting.consultingMapper">
+	<!-- 테이블명 -->
+	<sql id="CONSULTING_TABLE_NAME">
+		<trim>HRD_CNSL</trim>
+	</sql>
+	<sql id="DIARY_TABLE_NAME">
+		<trim>HRD_CNSL_DIARY</trim>
+	</sql>
+	<sql id="VIEW_TABLE_NAME">
+		<trim>VIEW_TB_HRP_ENTRST_ROLE</trim>
+	</sql>
+	<sql id="INSTT_TABLE_NAME">
+		<trim>HRD_COM_INSTT</trim>
+	</sql>
+	<sql id="EVL_TABLE_NAME">
+		<trim>HRD_CNSL_HRP_EVL</trim>
+	</sql>
+	<sql id="APPLY_TABLE_NAME">
+		<trim>HRD_CNSL_APPLY</trim>
+	</sql>
+	<sql id="BSK_TABLE_NAME">
+		<trim>HRD_BSK</trim>
+	</sql>
+	<sql id="MEMBER_TABLE_NAME">
+		<trim>VIEW_HRD_DOCTOR</trim>
+	</sql>
+
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT
+		<trim>
+			<include refid="rbs.commonDBMSMapper.nullFn" />
+			<if test="targetTable == 'diary'">
+				(MAX(DIARY_IDX), 0)
+			</if>
+			<if test="targetTable == 'apply'">
+				(MAX(APPLY_IDX), 0)
+			</if>
+		</trim>
+		+ 1 MAXID
+		FROM
+			<if test="targetTable == 'diary'">
+				<include refid="DIARY_TABLE_NAME" />
+			</if>
+			<if test="targetTable == 'apply'">
+				<include refid="APPLY_TABLE_NAME" />
+			</if>
+		A
+	</select>
+
+
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 <select id="nextId" parameterType="java.util.HashMap" 
+		resultType="java.lang.String"> SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> 
+		|| LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.[KEY_IDX_COLUMN]), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> 
+		|| '0'), 7)) + 1, 4, '0') MAXID FROM [<include refid="CONSULTING_TABLE_NAME"/>] 
+		A WHERE A.[KEY_IDX_COLUMN] LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> 
+		|| '%' </select> -->
+	<!-- 수정/삭제 권한 : 등록자 -->
+	<!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+			, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE
+			'0' END AS
+			AUTH_MNG
+		</if>
+	</sql>
+
+	<!-- 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+			AND A.REGI_IDX = #{AUTH_MEMBER_IDX}
+		</if>
+	</sql>
+
+	<select id="selectList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.CNSL_IDX,
+		A.BSC_IDX,
+		A.BSISCNSL_IDX,
+		A.BPL_NO,
+		A.CNSL_TYPE,
+		A.CNSL_TME,
+		A.CNSL_START_DATE,
+		A.CNSL_END_DATE,
+		A.CORP_NM,
+		A.REPER_NM,
+		A.BIZR_NO,
+		A.INDUTY_NM,
+		A.ZIP,
+		A.BPL_ADDR,
+		A.BPL_ADDR_DTL,
+		PKG_DGUARD.FN_DEC_TELNO(A.TELNO) AS TELNO,
+		A.TOT_WORK_CNT,
+		A.TR_OPRTN_REGION_ZIP,
+		A.TR_OPRTN_REGION_ADDR,
+		A.TR_OPRTN_REGION_ADDR_DTL,
+		A.RECOMEND_INSTT_NM,
+		A.CNSL_DEMAND_MATTER,
+		A.CORP_PIC_NM,
+		A.CORP_PIC_OFCPS,
+		PKG_DGUARD.FN_DEC_TELNO(A.CORP_PIC_TELNO) AS CORP_PIC_TELNO,
+		A.CORP_PIC_EMAIL,
+		A.SPNT_NM,
+		PKG_DGUARD.FN_DEC_TELNO(A.SPNT_TELNO) AS SPNT_TELNO,
+		A.CMPTNC_BRFFC_IDX,
+		A.CMPTNC_BRFFC_PIC_IDX,
+		A.DTY_CL,
+		A.MAIN_KWRD1,
+		A.MAIN_KWRD2,
+		A.MAIN_KWRD3,
+		A.CONFM_STATUS,
+		A.ISDELETE,
+		A.REGI_IDX,
+		A.REGI_ID,
+		A.REGI_NAME,
+		A.REGI_DATE,
+		A.REGI_IP,
+		A.LAST_MODI_IDX,
+		A.LAST_MODI_ID,
+		A.LAST_MODI_NAME,
+		A.LAST_MODI_DATE,
+		A.LAST_MODI_IP
+		FROM HRD_CNSL A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<if test="fnIdx eq '1'.toString()"> <!-- list.do -->
+			AND A.BPL_NO = #{bplNo}
+			AND A.CONFM_STATUS IN
+			('5','10','20','30','35','40')
+		</if>
+		<if test="fnIdx eq '2'.toString()"> <!-- applyList.do -->
+			<choose>
+				<when test="siteId eq 'dct'.toString()">
+					<!-- AND A.CMPTNC_BRFFC_PIC_IDX = #{memberIdx} -->
+					
+					AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx})
+					
+					AND A.CONFM_STATUS IN ('10','30','35')
+					AND A.CNSL_TYPE IN ('1', '2','3')
+				</when>
+				<when test="siteId eq 'web'.toString()">
+					AND A.BPL_NO IN (SELECT BPL_NO FROM HRD_SPTJ_AGREM
+					WHERE MEMBER_IDX = #{memberIdx})
+					AND A.SPNT_NM = (SELECT PRVTCNTR_NO
+					FROM HRD_COM_PRVTCNTR WHERE
+					MEMBER_IDX = #{memberIdx})
+					AND
+					A.CNSL_TYPE IN ('4', '5', '6')
+					AND A.CONFM_STATUS IN
+					('10','30','35')
+				</when>
+			</choose>
+		</if>
+
+		<if
+			test="(startDate != null and startDate != '') and (endDate != null and endDate != '')">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+		AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+		<if test="startDate neq '' and endDate eq ''">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')]]>
+		</if>
+		<if test="startDate eq '' and endDate neq ''">
+		<![CDATA[AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+		ORDER BY
+		A.REGI_DATE DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<select id="selectCnslListAll" parameterType="java.util.HashMap"
+		resultMap="Cnsl">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.CNSL_IDX,
+		A.BSC_IDX,
+		A.BSISCNSL_IDX,
+		A.BPL_NO,
+		A.CNSL_TYPE,
+		A.CNSL_TME,
+		A.CNSL_START_DATE,
+		A.CNSL_END_DATE,
+		A.CORP_NM,
+		A.REPER_NM,
+		A.BIZR_NO,
+		A.INDUTY_NM,
+		A.ZIP,
+		A.BPL_ADDR,
+		A.BPL_ADDR_DTL,
+		PKG_DGUARD.FN_DEC_TELNO(A.TELNO) AS TELNO,
+		A.TOT_WORK_CNT,
+		A.TR_OPRTN_REGION_ZIP,
+		A.TR_OPRTN_REGION_ADDR,
+		A.TR_OPRTN_REGION_ADDR_DTL,
+		A.RECOMEND_INSTT_NM,
+		A.CNSL_DEMAND_MATTER,
+		A.CORP_PIC_NM,
+		A.CORP_PIC_OFCPS,
+		PKG_DGUARD.FN_DEC_TELNO(A.CORP_PIC_TELNO) AS CORP_PIC_TELNO,
+		A.CORP_PIC_EMAIL,
+		A.SPNT_NM,
+		PKG_DGUARD.FN_DEC_TELNO(A.SPNT_TELNO) AS SPNT_TELNO,
+		A.CMPTNC_BRFFC_IDX,
+		A.CMPTNC_BRFFC_PIC_IDX,
+		A.DTY_CL,
+		A.MAIN_KWRD1,
+		A.MAIN_KWRD2,
+		A.MAIN_KWRD3,
+		A.CONFM_STATUS,
+		A.ISDELETE,
+		A.REGI_IDX,
+		A.REGI_ID,
+		A.REGI_NAME,
+		A.REGI_DATE,
+		A.REGI_IP,
+		A.LAST_MODI_IDX,
+		A.LAST_MODI_ID,
+		A.LAST_MODI_NAME,
+		A.LAST_MODI_DATE,
+		A.LAST_MODI_IP,
+		(SELECT COUNT(1) FROM
+		HRD_CNSL 
+		WHERE BPL_NO = A.BPL_NO AND CNSL_TYPE IN ('4','5','6')
+		AND CONFM_STATUS IN ('53','55', '70', '72', '75')
+		AND EXTRACT(YEAR FROM
+		REGI_DATE) = EXTRACT(YEAR FROM A.REGI_DATE)
+		) AS LIMIT_COUNT,
+		E.CONFM_STATUS AS REPRT_STATUS
+		FROM HRD_CNSL A
+		LEFT JOIN
+		HRD_CNSL_REPORT E ON A.CNSL_IDX = E.CNSL_IDX AND E.ISDELETE = '0'
+		<if test="siteId eq 'dct'.toString() and userTypeIdx eq 30">
+			LEFT JOIN HRD_CNSL_CHANGE B ON A.CNSL_IDX = B.CNSL_IDX
+			AND B.CHG_IDX =
+			(SELECT MAX(CHG_IDX) FROM HRD_CNSL_CHANGE WHERE CNSL_IDX =
+			A.CNSL_IDX)
+		</if>
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<if test="searchBplNo != null and searchBplNo != ''">
+			AND A.BPL_NO LIKE '%' || #{searchBplNo} || '%'
+
+		</if>
+		
+		<if test="searchConfmStatus != null and searchConfmStatus != ''">
+			AND A.CONFM_STATUS LIKE '%' || #{searchConfmStatus} || '%'
+
+		</if>
+
+		<choose>
+			<when test="siteId eq 'web'.toString()">
+				<!-- 기업회원/컨설턴트/민간센터 분기 -->
+				<choose>
+					<when test="userTypeIdx eq 5">
+						AND A.BPL_NO = #{bplNo}
+						AND A.CONFM_STATUS IN ('53', '55','70','72', '75')
+					</when>
+					<when test="userTypeIdx eq 10">
+						AND A.CNSL_IDX IN (SELECT CNSL_IDX FROM HRD_CNSL_TEAM WHERE
+						MEMBER_IDX = #{memberIdx})
+						AND A.CONFM_STATUS IN ('53', '55','70','72', '75')
+					</when>
+					<when test="userTypeIdx eq 20">
+						AND A.SPNT_NM = (SELECT PRVTCNTR_NO FROM HRD_COM_PRVTCNTR WHERE
+						MEMBER_IDX = #{memberIdx})
+						AND A.CNSL_TYPE IN ('4','5','6')
+						AND A.CONFM_STATUS IN ('40','53', '55','70','72', '75')
+					</when>
+				</choose>
+
+				
+			</when>
+			<when test="siteId eq 'dct'.toString()">
+				<choose>
+					<when test="userTypeIdx eq 30">
+						AND ((A.CONFM_STATUS != '80' AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND B.CNSL_IDX IS NULL)
+						OR (A.CONFM_STATUS != '80' AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND B.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}))
+						OR (A.CONFM_STATUS != '80' AND B.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND A.CMPTNC_BRFFC_IDX != (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx})))
+<!-- 						AND ((A.CONFM_STATUS != '80' AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND B.CNSL_IDX IS NULL)
+						OR (A.CONFM_STATUS != '80' AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND B.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}))
+						OR (A.CONFM_STATUS != '80' AND B.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND A.CMPTNC_BRFFC_IDX != (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}))) -->
+						AND A.CONFM_STATUS IN ('40', '53','55','70','72','75')
+						AND A.CNSL_TYPE IN ('1', '2', '3')
+					</when>
+
+					<when test="userTypeIdx eq 55 or userTypeIdx eq 40">
+						AND A.CONFM_STATUS IN ('40', '53', '55','70','72','75')
+					</when>
+				</choose>
+			</when>
+		</choose>
+
+		<if test="searchMemberIdx != null and searchMemberIdx != ''">
+			AND A.CMPTNC_BRFFC_PIC_IDX = #{searchMemberIdx}
+		</if>
+
+
+		<if
+			test="(startDate != null and startDate != '') and (endDate != null and endDate != '')">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+		AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+		<if test="startDate neq '' and endDate eq ''">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')]]>
+		</if>
+		<if test="startDate eq '' and endDate neq ''">
+		<![CDATA[AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+		ORDER BY A.REGI_DATE DESC
+			<if test="useExcel == null">
+			<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+		</if>
+		<if test="useExcel != null">
+			) TB )
+		</if>
+	</select>
+
+	<select id="selectCnslListAllCount"
+		parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM HRD_CNSL A
+		LEFT JOIN
+		HRD_CNSL_REPORT E ON A.CNSL_IDX = E.CNSL_IDX AND E.ISDELETE = '0'
+		
+		<if test="siteId eq 'dct'.toString() and userTypeIdx eq 30">
+			LEFT JOIN HRD_CNSL_CHANGE B ON A.CNSL_IDX = B.CNSL_IDX
+			AND B.CHG_IDX =
+			(SELECT MAX(CHG_IDX) FROM HRD_CNSL_CHANGE WHERE CNSL_IDX =
+			A.CNSL_IDX)
+		</if>
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<if test="searchBplNo != null and searchBplNo != ''">
+			AND A.BPL_NO LIKE '%' || #{searchBplNo} || '%'
+
+		</if>
+		
+		<if test="searchConfmStatus != null and searchConfmStatus != ''">
+			AND A.CONFM_STATUS LIKE '%' || #{searchConfmStatus} || '%'
+
+		</if>
+
+		<choose>
+			<when test="siteId eq 'web'.toString()">
+				<!-- 기업회원/컨설턴트/민간센터 분기 -->
+				<choose>
+					<when test="userTypeIdx eq 5">
+						AND A.BPL_NO = #{bplNo}
+						AND A.CONFM_STATUS IN ('53', '55','70','72', '75')
+					</when>
+					<when test="userTypeIdx eq 10">
+						AND A.CNSL_IDX IN (SELECT CNSL_IDX FROM HRD_CNSL_TEAM WHERE
+						MEMBER_IDX = #{memberIdx})
+						AND A.CONFM_STATUS IN ('53', '55','70','72', '75')
+					</when>
+					<when test="userTypeIdx eq 20">
+						AND A.SPNT_NM = (SELECT PRVTCNTR_NO FROM HRD_COM_PRVTCNTR WHERE
+						MEMBER_IDX = #{memberIdx})
+						AND A.CNSL_TYPE IN ('4','5','6')
+						AND A.CONFM_STATUS IN ('40','53', '55','70','72', '75')
+					</when>
+				</choose>
+
+				
+			</when>
+			<when test="siteId eq 'dct'.toString()">
+				<choose>
+					<when test="userTypeIdx eq 30">
+					    AND ((A.CONFM_STATUS != '80' AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND B.CNSL_IDX IS NULL)
+						OR (A.CONFM_STATUS != '80' AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND B.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}))
+						OR (A.CONFM_STATUS != '80' AND B.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND A.CMPTNC_BRFFC_IDX != (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx})))
+						
+<!-- 						AND ((A.CONFM_STATUS != '80' AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND B.CNSL_IDX IS NULL)
+						OR (A.CONFM_STATUS != '80' AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND B.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}))
+						OR (A.CONFM_STATUS != '80' AND B.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}) AND A.CMPTNC_BRFFC_IDX != (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx}))) -->
+						AND A.CONFM_STATUS IN ('40','53', '55','70','72','75')
+						AND A.CNSL_TYPE IN ('1', '2', '3')
+					</when>
+
+					<when test="userTypeIdx eq 55 or userTypeIdx eq 40">
+						AND A.CONFM_STATUS IN ('40', '53', '55','70','72','75')
+					</when>
+				</choose>
+			</when>
+		</choose>
+
+		<if test="searchMemberIdx != null and searchMemberIdx != ''">
+			AND A.CMPTNC_BRFFC_PIC_IDX = #{searchMemberIdx}
+		</if>
+
+
+		<if
+			test="(startDate != null and startDate != '') and (endDate != null and endDate != '')">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+		AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+		<if test="startDate neq '' and endDate eq ''">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')]]>
+		</if>
+		<if test="startDate eq '' and endDate neq ''">
+		<![CDATA[AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+	</select>
+
+
+	<select id="selectCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="CONSULTING_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<if test="fnIdx eq '1'.toString()"> <!-- list.do -->
+			AND A.BPL_NO = #{bplNo}
+			AND A.CONFM_STATUS IN
+			('5','10','20','30','35','40')
+		</if>
+		<if test="fnIdx eq '2'.toString()"> <!-- applyList.do -->
+			<choose>
+				<when test="siteId eq 'dct'.toString()">
+		<!-- 			AND A.CMPTNC_BRFFC_PIC_IDX = #{memberIdx} -->
+					AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx})
+					AND
+					A.CONFM_STATUS IN ('10','30','35')
+					AND A.CNSL_TYPE IN ('1', '2',
+					'3')
+				</when>
+				<when test="siteId eq 'web'.toString()">
+					AND A.BPL_NO IN (SELECT BPL_NO FROM HRD_SPTJ_AGREM
+					WHERE MEMBER_IDX = #{memberIdx})
+					AND A.SPNT_NM = (SELECT PRVTCNTR_NO
+					FROM HRD_COM_PRVTCNTR WHERE
+					MEMBER_IDX = #{memberIdx})
+					AND
+					A.CNSL_TYPE IN ('4', '5', '6')
+					AND A.CONFM_STATUS IN
+					('10','30','35')
+				</when>
+			</choose>
+		</if>
+		<if
+			test="(startDate != null and startDate != '') and (endDate != null and endDate != '')">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+		AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+		<if test="startDate neq '' and endDate eq ''">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')]]>
+		</if>
+		<if test="startDate eq '' and endDate neq ''">
+		<![CDATA[AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+
+	</select>
+
+	<select id="selectChangeList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.CNSL_IDX,
+		A.CHG_IDX,
+		A.BSC_IDX,
+		A.BSISCNSL_IDX,
+		A.BPL_NO,
+		A.CNSL_TYPE,
+		A.CNSL_TME,
+		A.CNSL_START_DATE,
+		A.CNSL_END_DATE,
+		A.CORP_NM,
+		A.REPER_NM,
+		A.BIZR_NO,
+		A.INDUTY_NM,
+		A.ZIP,
+		A.BPL_ADDR,
+		A.BPL_ADDR_DTL,
+		PKG_DGUARD.FN_DEC_TELNO(A.TELNO) AS TELNO,
+		A.TOT_WORK_CNT,
+		A.TR_OPRTN_REGION_ZIP,
+		A.TR_OPRTN_REGION_ADDR,
+		A.TR_OPRTN_REGION_ADDR_DTL,
+		A.RECOMEND_INSTT_NM,
+		A.CNSL_DEMAND_MATTER,
+		A.CORP_PIC_NM,
+		A.CORP_PIC_OFCPS,
+		PKG_DGUARD.FN_DEC_TELNO(A.CORP_PIC_TELNO) AS CORP_PIC_TELNO,
+		A.CORP_PIC_EMAIL,
+		A.SPNT_NM,
+		PKG_DGUARD.FN_DEC_TELNO(A.SPNT_TELNO) AS SPNT_TELNO,
+		A.CMPTNC_BRFFC_IDX,
+		A.CMPTNC_BRFFC_PIC_IDX,
+		A.DTY_CL,
+		A.MAIN_KWRD1,
+		A.MAIN_KWRD2,
+		A.MAIN_KWRD3,
+		A.CONFM_STATUS,
+		A.ISDELETE,
+		A.REGI_IDX,
+		A.REGI_ID,
+		A.REGI_NAME,
+		A.REGI_DATE,
+		A.REGI_IP,
+		A.LAST_MODI_IDX,
+		A.LAST_MODI_ID,
+		A.LAST_MODI_NAME,
+		A.LAST_MODI_DATE,
+		A.LAST_MODI_IP
+		FROM HRD_CNSL_CHANGE A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<if test="fnIdx eq '6'.toString()">
+			AND (A.CONFM_STATUS = '70')
+		</if>
+
+		<if
+			test="(startDate != null and startDate != '') and (endDate != null and endDate != '')">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+		AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+		<if test="startDate neq '' and endDate eq ''">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')]]>
+		</if>
+		<if test="startDate eq '' and endDate neq ''">
+		<![CDATA[AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+
+
+		ORDER BY
+		A.REGI_DATE DESC
+
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+
+	</select>
+
+	<select id="selectChangeCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		HRD_CNSL_CHANGE
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<if test="fnIdx eq '6'.toString()">
+			AND (A.CONFM_STATUS = '70')
+		</if>
+
+		<if
+			test="(startDate != null and startDate != '') and (endDate != null and endDate != '')">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+		AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+		<if test="startDate neq '' and endDate eq ''">
+		<![CDATA[ AND A.REGI_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')]]>
+		</if>
+		<if test="startDate eq '' and endDate neq ''">
+		<![CDATA[AND A.REGI_DATE <= TO_DATE(#{endDate}, 'YYYY-MM-DD') ]]>
+		</if>
+
+	</select>
+
+
+
+	<select id="selectView" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.*
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="DIARY_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+	</select>
+	<select id="selectFileList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		<foreach collection="columnList" item="columnItem" index="i"
+			separator=",">
+			${columnItem}
+		</foreach>
+		FROM
+		<include refid="CONSULTING_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.${columnItem}_SAVED_NAME, A.${columnItem}_ORIGIN_NAME
+		FROM
+		<include refid="CONSULTING_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+	</select>
+
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="CONSULTING_TABLE_NAME" />
+		SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1
+		WHERE
+		[KEY_IDX_COLUMN] = #{KEY_IDX}
+	</update>
+
+	<select id="authCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="CONSULTING_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<include refid="editAuthWhereQuery" />
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		(SELECT MTG_START_DT FROM HRD_CNSL_DIARY WHERE DIARY_IDX =
+		A.DIARY_IDX) AS MTG_START_DT,
+		A.*
+		FROM
+		<if test="fnIdx == 5">
+			<include refid="EVL_TABLE_NAME" />
+		</if>
+		<if test="fnIdx == 7">
+			<include refid="DIARY_TABLE_NAME" />
+		</if>
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<include refid="editAuthWhereQuery" />
+	</select>
+
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO
+		<include refid="DIARY_TABLE_NAME" />
+		(
+		<include refid="rbs.commonMapper.INSERT_COLUMNS" />
+		, REGI_DATE, LAST_MODI_DATE, MTG_START_DT, MTG_END_DT
+		) VALUES (
+		<include refid="rbs.commonMapper.INSERT_VALUES" />
+		,
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		,
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		, TO_DATE(#{mtgStartDt}, 'YYYY-MM-DD HH24:MI:SS')
+		,
+		TO_DATE(#{mtgEndDt}, 'YYYY-MM-DD HH24:MI:SS')
+		)
+	</insert>
+
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="DIARY_TABLE_NAME" />
+		SET LAST_MODI_DATE =
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		, MTG_START_DT = TO_DATE(#{mtgStartDt}, 'YYYY-MM-DD HH24:MI:SS')
+		,
+		MTG_END_DT = TO_DATE(#{mtgEndDt}, 'YYYY-MM-DD HH24:MI:SS')
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</update>
+
+	<select id="deleteList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.[KEY_IDX_COLUMN], [목록에 사용할 컬럼], A.LAST_MODI_NAME,
+		A.LAST_MODI_ID, A.REGI_DATE,
+		A.LAST_MODI_DATE
+		FROM
+		<include refid="CONSULTING_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE" />
+		ORDER BY [기본정렬쿼리]
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<select id="deleteCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="CONSULTING_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE" />
+	</select>
+
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="DIARY_TABLE_NAME" />
+		SET ISDELETE = '1', LAST_MODI_DATE =
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</update>
+
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="CONSULTING_TABLE_NAME" />
+		SET ISDELETE = '0', LAST_MODI_DATE =
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</update>
+
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM
+		<include refid="CONSULTING_TABLE_NAME" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</delete>
+
+	<!-- sw.jang -->
+	<resultMap id="ReportFile"
+		type="rbs.modules.report.dto.ReportFileDTO">
+		<id property="cnslIdx" column="CNSL_IDX" />
+		<id property="reprtIdx" column="REPRT_IDX" />
+		<id property="fleIdx" column="FLE_IDX" />
+		<result property="itemId" column="ITEM_ID" />
+		<result property="fileSavedName" column="FILE_SAVED_NAME" />
+		<result property="fileOriginName" column="FILE_ORIGIN_NAME" />
+		<result property="fileSize" column="FILE_SIZE" />
+		<result property="isdelete" column="ISDELETE" />
+		<result property="regiIdx" column="REGI_IDX" />
+		<result property="regiId" column="REGI_ID" />
+		<result property="regiName" column="REGI_NAME" />
+		<result property="regiDate" column="REGI_DATE" />
+		<result property="regiIp" column="REGI_IP" />
+		<result property="lastModiIdx" column="LAST_MODI_IDX" />
+		<result property="lastModiId" column="LAST_MODI_ID" />
+		<result property="lastModiName" column="LAST_MODI_NAME" />
+		<result property="lastModiDate" column="LAST_MODI_DATE" />
+		<result property="lastModiIp" column="LAST_MODI_IP" />
+	</resultMap>
+
+	<resultMap id="Report" type="rbs.modules.report.dto.Report">
+		<id property="cnslIdx" column="CNSL_IDX" />
+		<id property="reprtIdx" column="REPRT_IDX" />
+		<result property="confmStatus" column="REPRT_STATUS" />
+		<result property="isdelete" column="ISDELETE" />
+		<result property="isdelete" column="ISDELETE" />
+		<result property="regiIdx" column="REGI_IDX" />
+		<result property="regiId" column="REGI_ID" />
+		<result property="regiName" column="REGI_NAME" />
+		<result property="regiDate" column="REGI_DATE" />
+		<result property="regiIp" column="REGI_IP" />
+		<result property="lastModiIdx" column="LAST_MODI_IDX" />
+		<result property="lastModiId" column="LAST_MODI_ID" />
+		<result property="lastModiName" column="LAST_MODI_NAME" />
+		<result property="lastModiDate" column="LAST_MODI_DATE" />
+		<result property="lastModiIp" column="LAST_MODI_IP" />
+		<result property="reprtCn" column="REPRT_CN" />
+		<collection property="files" resultMap="ReportFile" />
+	</resultMap>
+
+	<resultMap id="CnslTeamMember"
+		type="rbs.modules.consulting.dto.CnslTeamMemberDTO">
+		<result property="teamIdx" column="TEAM_IDX" />
+		<result property="teamOrderIdx" column="TEAM_ORDER_IDX" />
+		<result property="memberIdx" column="MEMBER_IDX" />
+		<result property="loginId" column="LOGIN_ID" />
+		<result property="rspnberYn" column="RSPNBER_YN" />
+		<result property="innerExtrlCd" column="INNER_EXTRL_CD" />
+		<result property="mberName" column="MBER_NAME" />
+		<result property="mberPsitn" column="MBER_PSITN" />
+		<result property="mberOfcps" column="MBER_OFCPS" />
+		<result property="mberTelno" column="MBER_TELNO" />
+	</resultMap>
+
+	<resultMap id="CnslTeam"
+		type="rbs.modules.consulting.dto.CnslTeamDTO">
+		<id property="cnslIdx" column="CNSL_IDX" />
+		<id property="chgIdx" column="CHG_IDX" />
+		<result property="confmStatus" column="CONFM_STATUS" />
+		<result property="isdelete" column="ISDELETE" />
+		<result property="regiIdx" column="REGI_IDX" />
+		<result property="regiId" column="REGI_ID" />
+		<result property="regiName" column="REGI_NAME" />
+		<result property="regiDate" column="REGI_DATE" />
+		<result property="regiIp" column="REGI_IP" />
+		<result property="lastModiIdx" column="LAST_MODI_IDX" />
+		<result property="lastModiId" column="LAST_MODI_ID" />
+		<result property="lastModiName" column="LAST_MODI_NAME" />
+		<result property="lastModiDate" column="LAST_MODI_DATE" />
+		<result property="lastModiIp" column="LAST_MODI_IP" />
+		<collection property="members" resultMap="CnslTeamMember" />
+	</resultMap>
+
+	<resultMap id="CnslFile"
+		type="rbs.modules.consulting.dto.CnslFileDTO">
+		<id property="cnslIdx" column="CNSL_IDX" />
+		<id property="fleIdx" column="FLE_IDX" />
+		<id property="itemId" column="ITEM_ID" />
+		<result property="fileSavedName" column="FILE_SAVED_NAME" />
+		<result property="fileOriginName" column="FILE_ORIGIN_NAME" />
+		<result property="fileSize" column="FILE_SIZE" />
+		<result property="fileText" column="FILE_TEXT" />
+		<result property="dwnCnt" column="DWN_CNT" />
+		<result property="orderIdx" column="ORDER_IDX" />
+		<result property="isdelete" column="ISDELETE" />
+		<result property="regiIdx" column="REGI_IDX" />
+		<result property="regiId" column="REGI_ID" />
+		<result property="regiName" column="REGI_NAME" />
+		<result property="regiDate" column="REGI_DATE" />
+		<result property="regiIp" column="REGI_IP" />
+		<result property="lastModiIdx" column="LAST_MODI_IDX" />
+		<result property="lastModiId" column="LAST_MODI_ID" />
+		<result property="lastModiName" column="LAST_MODI_NAME" />
+		<result property="lastModiDate" column="LAST_MODI_DATE" />
+		<result property="lastModiIp" column="LAST_MODI_IP" />
+	</resultMap>
+
+
+	<resultMap id="Cnsl" type="rbs.modules.consulting.dto.Cnsl">
+		<id property="cnslIdx" column="CNSL_IDX" />
+		<result property="chgIdx" column="CHG_IDX" />
+		<result property="bscIdx" column="BSC_IDX" />
+		<result property="bsiscnslIdx" column="BSISCNSL_IDX" />
+		<result property="bplNo" column="BPL_NO" />
+		<result property="cnslType" column="CNSL_TYPE" />
+		<result property="cnslTme" column="CNSL_TME" />
+		<result property="cnslStartDate" column="CNSL_START_DATE" />
+		<result property="cnslEndDate" column="CNSL_END_DATE" />
+		<result property="corpNm" column="CORP_NM" />
+		<result property="reperNm" column="REPER_NM" />
+		<result property="bizrNo" column="BIZR_NO" />
+		<result property="zip" column="ZIP" />
+		<result property="bplAddr" column="BPL_ADDR" />
+		<result property="bplAddrDtl" column="BPL_ADDR_DTL" />
+		<result property="telno" column="TELNO" />
+		<result property="totWorkCnt" column="TOT_WORK_CNT" />
+		<result property="trOprtnRegionZip"
+			column="TR_OPRTN_REGION_ZIP" />
+		<result property="trOprtnRegionAddr"
+			column="TR_OPRTN_REGION_ADDR" />
+		<result property="trOprtnRegionAddrDtl"
+			column="TR_OPRTN_REGION_ADDR_DTL" />
+		<result property="recomendInsttNm" column="RECOMEND_INSTT_NM" />
+		<result property="cnslDemandMatter" column="CNSL_DEMAND_MATTER" />
+		<result property="corpPicNm" column="CORP_PIC_NM" />
+		<result property="corpPicOfcps" column="CORP_PIC_OFCPS" />
+		<result property="corpPicTelno" column="CORP_PIC_TELNO" />
+		<result property="corpPicEmail" column="CORP_PIC_EMAIL" />
+		<result property="spnt" column="SPNT" />
+		<result property="spntNm" column="SPNT_NM" />
+		<result property="spntTelno" column="SPNT_TELNO" />
+		<result property="cmptncBrffcIdx" column="CMPTNC_BRFFC_IDX" />
+		<result property="cmptncBrffcNm" column="CMPTNC_BRFFC_NM" />
+		<result property="cmptncBrffcPicIdx"
+			column="CMPTNC_BRFFC_PIC_IDX" />
+		<result property="cmptncBrffcPicTelno"
+			column="CMPTNC_BRFFC_PIC_TELNO" />
+		<result property="dtyCl" column="DTY_CL" />
+		<result property="dtyClNm" column="DTY_CL_NM" />
+		<result property="mainKwrd1" column="MAIN_KWRD1" />
+		<result property="mainKwrd2" column="MAIN_KWRD2" />
+		<result property="mainKwrd3" column="MAIN_KWRD3" />
+		<result property="confmStatus" column="CONFM_STATUS" />
+		<result property="isdelete" column="ISDELETE" />
+		<result property="regiIdx" column="REGI_IDX" />
+		<result property="regiId" column="REGI_ID" />
+		<result property="regiName" column="REGI_NAME" />
+		<result property="regiDate" column="REGI_DATE" />
+		<result property="regiIp" column="REGI_IP" />
+		<result property="lastModiIdx" column="LAST_MODI_IDX" />
+		<result property="lastModiId" column="LAST_MODI_ID" />
+		<result property="lastModiName" column="LAST_MODI_NAME" />
+		<result property="lastModiDate" column="LAST_MODI_DATE" />
+		<result property="lastModiIp" column="LAST_MODI_IP" />
+		<result property="indutyNm" column="INDUTY_NM" />
+		<result property="limitCount" column="LIMIT_COUNT" />
+		<association property="cnslTeam" resultMap="CnslTeam" />
+		<association property="report" resultMap="Report" />
+		<collection property="cnslFiles" resultMap="CnslFile" />
+	</resultMap>
+
+
+	<insert id="insertCnslByDto">
+		<selectKey keyProperty="cnslIdx" resultType="Integer"
+			order="BEFORE">
+			SELECT CNSL_SEQ.NEXTVAL FROM
+			DUAL
+		</selectKey>
+		INSERT INTO
+		<include refid="CONSULTING_TABLE_NAME" />
+		(
+		CNSL_IDX,
+		BSC_IDX,
+		BSISCNSL_IDX,
+		BPL_NO,
+		CNSL_TYPE,
+		CNSL_TME,
+		CNSL_START_DATE,
+		CNSL_END_DATE,
+		CORP_NM,
+		REPER_NM,
+		BIZR_NO,
+		ZIP,
+		BPL_ADDR,
+		BPL_ADDR_DTL,
+		TELNO,
+		TOT_WORK_CNT,
+		INDUTY_NM,
+		TR_OPRTN_REGION_ZIP,
+		TR_OPRTN_REGION_ADDR,
+		TR_OPRTN_REGION_ADDR_DTL,
+		RECOMEND_INSTT_NM,
+		CNSL_DEMAND_MATTER,
+		CORP_PIC_NM,
+		CORP_PIC_OFCPS,
+		CORP_PIC_TELNO,
+		CORP_PIC_EMAIL,
+		SPNT_NM,
+		SPNT_TELNO,
+		CMPTNC_BRFFC_IDX,
+		CMPTNC_BRFFC_PIC_IDX,
+		DTY_CL,
+		MAIN_KWRD1,
+		MAIN_KWRD2,
+		MAIN_KWRD3,
+		CONFM_STATUS,
+		ISDELETE,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP,
+		LAST_MODI_IDX,
+		LAST_MODI_ID,
+		LAST_MODI_NAME,
+		LAST_MODI_DATE,
+		LAST_MODI_IP
+		)
+		VALUES (
+		#{cnslIdx},
+		#{bscIdx},
+		#{bsiscnslIdx},
+		#{bplNo},
+		#{cnslType},
+		#{cnslTme},
+		#{cnslStartDate},
+		#{cnslEndDate},
+		#{corpNm},
+		#{reperNm},
+		#{bizrNo},
+		#{zip},
+		#{bplAddr},
+		#{bplAddrDtl},
+		PKG_DGUARD.FN_ENC_TELNO(#{telno}),
+		#{totWorkCnt},
+		#{indutyNm},
+		#{trOprtnRegionZip},
+		#{trOprtnRegionAddr},
+		#{trOprtnRegionAddrDtl},
+		#{recomendInsttNm},
+		#{cnslDemandMatter},
+		#{corpPicNm},
+		#{corpPicOfcps},
+		PKG_DGUARD.FN_ENC_TELNO(#{corpPicTelno}),
+		#{corpPicEmail},
+		#{spntNm},
+		PKG_DGUARD.FN_ENC_TELNO(#{spntTelno}),
+		#{cmptncBrffcIdx},
+		#{cmptncBrffcPicIdx},
+		#{dtyCl},
+		#{mainKwrd1},
+		#{mainKwrd2},
+		#{mainKwrd3},
+		#{confmStatus},
+		'0',
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp},
+		#{lastModiIdx},
+		#{lastModiId},
+		#{lastModiName},
+		SYSDATE,
+		#{lastModiIp}
+		)
+	</insert>
+
+
+
+	<select id="selectByCnslIdx" resultMap="Cnsl">
+		SELECT
+		A.CNSL_IDX,
+		A.BSC_IDX,
+		A.BSISCNSL_IDX,
+		A.BPL_NO,
+		A.CNSL_TYPE,
+		A.CNSL_TME,
+		A.CNSL_START_DATE,
+		A.CNSL_END_DATE,
+		A.CORP_NM,
+		A.REPER_NM,
+		A.BIZR_NO,
+		A.INDUTY_NM,
+		A.ZIP,
+		A.BPL_ADDR,
+		A.BPL_ADDR_DTL,
+		PKG_DGUARD.FN_DEC_TELNO(A.TELNO) AS TELNO,
+		A.TOT_WORK_CNT,
+		A.TR_OPRTN_REGION_ZIP,
+		A.TR_OPRTN_REGION_ADDR,
+		A.TR_OPRTN_REGION_ADDR_DTL,
+		A.RECOMEND_INSTT_NM,
+		A.CNSL_DEMAND_MATTER,
+		A.CORP_PIC_NM,
+		A.CORP_PIC_OFCPS,
+		PKG_DGUARD.FN_DEC_TELNO(A.CORP_PIC_TELNO) AS CORP_PIC_TELNO,
+		A.CORP_PIC_EMAIL,
+		A.SPNT_NM,
+		PKG_DGUARD.FN_DEC_TELNO(A.SPNT_TELNO) AS SPNT_TELNO,
+		A.CMPTNC_BRFFC_IDX,
+		A.CMPTNC_BRFFC_PIC_IDX,
+		A.DTY_CL,
+		A.MAIN_KWRD1,
+		A.MAIN_KWRD2,
+		A.MAIN_KWRD3,
+		A.CONFM_STATUS,
+		A.ISDELETE,
+		A.REGI_IDX,
+		A.REGI_ID,
+		A.REGI_NAME,
+		A.REGI_DATE,
+		A.REGI_IP,
+		A.LAST_MODI_IDX,
+		A.LAST_MODI_ID,
+		A.LAST_MODI_NAME,
+		A.LAST_MODI_DATE,
+		A.LAST_MODI_IP,
+		B.*, C.*,
+		D.INSTT_NAME as CMPTNC_BRFFC_NM,
+		E.PRVTCNTR_NAME as SPNT,
+		PKG_DGUARD.FN_DEC_TELNO(F.DOCTOR_TELNO) as CMPTNC_BRFFC_PIC_TELNO,
+		G.CLASS_NAME AS
+		DTY_CL_NM
+		FROM HRD_CNSL A
+		LEFT JOIN HRD_CNSL_TEAM B ON
+		A.CNSL_IDX = B.CNSL_IDX
+		LEFT JOIN HRD_CNSL_FILE C ON A.CNSL_IDX =
+		C.CNSL_IDX
+		LEFT JOIN HRD_COM_INSTT D ON A.CMPTNC_BRFFC_IDX =
+		D.INSTT_IDX
+		LEFT JOIN HRD_COM_PRVTCNTR E ON A.SPNT_NM = E.PRVTCNTR_NO
+		LEFT JOIN HRD_COM_DOCTOR F ON A.CMPTNC_BRFFC_PIC_IDX = F.MEMBER_IDX
+		LEFT JOIN RBS_ICLASS_INFO G ON A.DTY_CL = G.CLASS_IDX
+		WHERE A.CNSL_IDX
+		= #{cnslIdx}
+	</select>
+
+	<update id="updateCnslByDto"
+		parameterType="rbs.modules.consulting.dto.Cnsl">
+		UPDATE HRD_CNSL
+		SET
+		TR_OPRTN_REGION_ZIP =
+		#{trOprtnRegionZip},
+		TR_OPRTN_REGION_ADDR = #{trOprtnRegionAddr},
+		TR_OPRTN_REGION_ADDR_DTL = #{trOprtnRegionAddrDtl},
+		CNSL_DEMAND_MATTER
+		= #{cnslDemandMatter},
+		CORP_PIC_NM = #{corpPicNm},
+		CORP_PIC_OFCPS =
+		#{corpPicOfcps},
+		CORP_PIC_TELNO =
+		PKG_DGUARD.FN_ENC_TELNO(#{corpPicTelno}),
+		CORP_PIC_EMAIL =
+		#{corpPicEmail},
+		CMPTNC_BRFFC_IDX = #{cmptncBrffcIdx},
+		CMPTNC_BRFFC_PIC_IDX = #{cmptncBrffcPicIdx},
+		DTY_CL = #{dtyCl},
+		MAIN_KWRD1 = #{mainKwrd1},
+		MAIN_KWRD2 = #{mainKwrd2},
+		MAIN_KWRD3 =
+		#{mainKwrd3},
+		CONFM_STATUS = #{confmStatus},
+		LAST_MODI_IDX =
+		#{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME =
+		#{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+
+		WHERE CNSL_IDX = #{cnslIdx}
+	</update>
+
+	<update id="updateCnslSubmitByDto"
+		parameterType="rbs.modules.consulting.dto.Cnsl">
+		UPDATE HRD_CNSL
+		SET
+		TR_OPRTN_REGION_ZIP = #{trOprtnRegionZip},
+		TR_OPRTN_REGION_ADDR = #{trOprtnRegionAddr},
+		TR_OPRTN_REGION_ADDR_DTL = #{trOprtnRegionAddrDtl},
+		SPNT_NM = #{spntNm},
+		SPNT_TELNO = PKG_DGUARD.FN_ENC_TELNO(#{spntTelno}),
+		CNSL_DEMAND_MATTER = #{cnslDemandMatter},
+		CORP_PIC_NM = #{corpPicNm},
+		CORP_PIC_OFCPS = #{corpPicOfcps},
+		CORP_PIC_TELNO = PKG_DGUARD.FN_ENC_TELNO(#{corpPicTelno}),
+		CORP_PIC_EMAIL = #{corpPicEmail},
+		CMPTNC_BRFFC_IDX = #{cmptncBrffcIdx},
+		CMPTNC_BRFFC_PIC_IDX = #{cmptncBrffcPicIdx},
+		DTY_CL = #{dtyCl},
+		MAIN_KWRD1 = #{mainKwrd1},
+		MAIN_KWRD2 = #{mainKwrd2},
+		MAIN_KWRD3 = #{mainKwrd3},
+		CONFM_STATUS = #{confmStatus},
+		REGI_IDX = #{regiIdx},
+		REGI_ID = #{regiId},
+		REGI_NAME = #{regiName},
+		REGI_DATE = SYSDATE,
+		REGI_IP = #{regiIp},
+		LAST_MODI_IDX = #{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME = #{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE CNSL_IDX = #{cnslIdx}
+	</update>
+
+	<update id="updateStatusBydto">
+		UPDATE HRD_CNSL
+		SET CONFM_STATUS = #{confmStatus},
+		LAST_MODI_IDX =
+		#{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME =
+		#{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP
+		= #{lastModiIp}
+		WHERE CNSL_IDX = #{cnslIdx}
+	</update>
+
+	<insert id="insertCnslConfmByDto">
+		INSERT INTO
+		HRD_CNSL_CONFM
+		(CNSL_IDX,
+		CONFM_IDX,
+		CONFM_STATUS,
+		CONFM_CN,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)VALUES(
+		#{cnslIdx},
+		CNSL_CONFIRM_SEQ.NEXTVAL,
+		#{confmStatus},
+		#{confmCn},
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		)
+
+	</insert>
+
+	<insert id="insertCnslFileByDto">
+		INSERT INTO HRD_CNSL_FILE
+		(CNSL_IDX,
+		FLE_IDX,
+		ITEM_ID,
+		FILE_SAVED_NAME,
+		FILE_ORIGIN_NAME,
+		FILE_SIZE,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)VALUES(
+		#{cnslIdx},
+		CNSL_FILE_SEQ.NEXTVAL,
+		#{itemId},
+		#{fileSavedName},
+		#{fileOriginName},
+		#{fileSize},
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		)
+	</insert>
+
+	<update id="mergeCnslFileByDto">
+		MERGE INTO HRD_CNSL_FILE
+		USING DUAL ON
+		(
+		CNSL_IDX =
+		#{cnslIdx}
+		AND ITEM_ID = #{itemId}
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+		FILE_SAVED_NAME = #{fileSavedName},
+		FILE_ORIGIN_NAME =
+		#{fileOriginName},
+		FILE_SIZE = #{fileSize},
+		LAST_MODI_IDX =
+		#{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME =
+		#{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHEN NOT MATCHED THEN
+		INSERT(
+		CNSL_IDX,
+		FLE_IDX,
+		ITEM_ID,
+		FILE_SAVED_NAME,
+		FILE_ORIGIN_NAME,
+		FILE_SIZE,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)VALUES(
+		#{cnslIdx},
+		CNSL_FILE_SEQ.NEXTVAL,
+		#{itemId},
+		#{fileSavedName},
+		#{fileOriginName},
+		#{fileSize},
+		#{lastModiIdx},
+		#{lastModiId},
+		#{lastModiName},
+		SYSDATE,
+		#{lastModiIp}
+		)
+	</update>
+
+	<insert id="insertCnslTeamByDto"
+		parameterType="rbs.modules.consulting.dto.CnslTeamDTO">
+		<foreach collection="members" item="member" index="index"
+			separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+			<if test="member.teamIdx != null">
+				INTO HRD_CNSL_TEAM (
+				CNSL_IDX,
+				TEAM_IDX,
+				TEAM_ORDER_IDX,
+				MEMBER_IDX,
+				LOGIN_ID,
+				RSPNBER_YN,
+				INNER_EXTRL_CD,
+				MBER_NAME,
+				MBER_PSITN,
+				MBER_OFCPS,
+				MBER_TELNO,
+				REGI_IDX,
+				REGI_ID,
+				REGI_NAME,
+				REGI_DATE,
+				REGI_IP
+				)VALUES(
+				#{cnslIdx},
+				#{member.teamIdx},
+				#{member.teamOrderIdx},
+				#{member.memberIdx},
+				#{member.loginId},
+				#{member.rspnberYn},
+				#{member.innerExtrlCd},
+				#{member.mberName},
+				#{member.mberPsitn},
+				#{member.mberOfcps},
+				PKG_DGUARD.FN_ENC_TELNO(#{member.mberTelno}),
+				#{regiIdx},
+				#{regiId},
+				#{regiName},
+				SYSDATE,
+				#{regiIp}
+				)
+			</if>
+		</foreach>
+	</insert>
+
+	<insert id="insertCnslTeamMember"
+		parameterType="rbs.modules.consulting.dto.CnslTeamDTO">
+		<foreach collection="members" item="member" index="index"
+			separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+			<if test="member.teamIdx eq 3">
+				INTO HRD_CNSL_TEAM (
+				CNSL_IDX,
+				TEAM_IDX,
+				TEAM_ORDER_IDX,
+				MEMBER_IDX,
+				LOGIN_ID,
+				RSPNBER_YN,
+				INNER_EXTRL_CD,
+				MBER_NAME,
+				MBER_PSITN,
+				MBER_OFCPS,
+				MBER_TELNO,
+				REGI_IDX,
+				REGI_ID,
+				REGI_NAME,
+				REGI_DATE,
+				REGI_IP
+				)VALUES(
+				#{cnslIdx},
+				#{member.teamIdx},
+				#{member.teamOrderIdx},
+				#{member.memberIdx},
+				#{member.loginId},
+				#{member.rspnberYn},
+				#{member.innerExtrlCd},
+				#{member.mberName},
+				#{member.mberPsitn},
+				#{member.mberOfcps},
+				PKG_DGUARD.FN_ENC_TELNO(#{member.mberTelno}),
+				#{regiIdx},
+				#{regiId},
+				#{regiName},
+				SYSDATE,
+				#{regiIp}
+				)
+			</if>
+		</foreach>
+	</insert>
+
+
+	<update id="mergeCnslTeamByDto"
+		parameterType="rbs.modules.consulting.dto.CnslTeamDTO">
+		BEGIN
+		<foreach collection="members" item="member" separator=" "
+			index="index">
+			<if test="member.teamIdx != null">
+				MERGE INTO HRD_CNSL_TEAM
+				USING DUAL ON
+				(
+				CNSL_IDX =
+				#{cnslIdx}
+				AND TEAM_IDX = #{member.teamIdx}
+				AND TEAM_ORDER_IDX =
+				#{member.teamOrderIdx}
+				)
+				WHEN MATCHED THEN
+				UPDATE SET
+				MEMBER_IDX = #{member.memberIdx},
+				LOGIN_ID = #{member.loginId},
+				RSPNBER_YN = #{member.rspnberYn},
+				INNER_EXTRL_CD = #{member.innerExtrlCd},
+				MBER_NAME = #{member.mberName},
+				MBER_PSITN = #{member.mberPsitn},
+				MBER_OFCPS = #{member.mberOfcps},
+				MBER_TELNO = PKG_DGUARD.FN_ENC_TELNO(#{member.mberTelno}),
+				LAST_MODI_IDX = #{lastModiIdx},
+				LAST_MODI_ID = #{lastModiId},
+				LAST_MODI_NAME =
+				#{lastModiName},
+				LAST_MODI_DATE = SYSDATE,
+				LAST_MODI_IP =
+				#{lastModiIp}
+				WHEN NOT MATCHED THEN
+				INSERT
+				(
+				CNSL_IDX,
+				TEAM_IDX,
+				TEAM_ORDER_IDX,
+				MEMBER_IDX,
+				LOGIN_ID,
+				RSPNBER_YN,
+				INNER_EXTRL_CD,
+				MBER_NAME,
+				MBER_PSITN,
+				MBER_OFCPS,
+				MBER_TELNO,
+				REGI_IDX,
+				REGI_ID,
+				REGI_NAME,
+				REGI_DATE,
+				REGI_IP
+				)VALUES(
+				#{cnslIdx},
+				#{member.teamIdx},
+				#{member.teamOrderIdx},
+				#{member.memberIdx},
+				#{member.loginId},
+				#{member.rspnberYn},
+				#{member.innerExtrlCd},
+				#{member.mberName},
+				#{member.mberPsitn},
+				#{member.mberOfcps},
+				PKG_DGUARD.FN_ENC_TELNO(#{member.mberTelno}),
+				#{lastModiIdx},
+				#{lastModiId},
+				#{lastModiName},
+				SYSDATE,
+				#{lastModiIp}
+				);
+			</if>
+		</foreach>
+		END;
+	</update>
+
+	<delete id="deleteCnslTeamByDTO"
+		parameterType="rbs.modules.consulting.dto.CnslTeamDTO">
+		BEGIN
+		<foreach collection="members" item="member" separator=" "
+			index="index">
+			DELETE FROM HRD_CNSL_TEAM
+			WHERE CNSL_IDX = #{cnslIdx}
+			AND
+			TEAM_IDX = #{member.teamIdx}
+			AND TEAM_ORDER_IDX =
+			#{member.teamOrderIdx};
+		</foreach>
+		END;
+	</delete>
+
+	<delete id="deleteCnslFileByDto"
+		parameterType="rbs.modules.consulting.dto.CnslFileDTO">
+		BEGIN
+		<foreach collection="list" item="file" separator=" ">
+			DELETE FROM
+			HRD_CNSL_FILE
+			WHERE CNSL_IDX = #{file.cnslIdx}
+			AND ITEM_ID =
+			#{file.itemId};
+		</foreach>
+		END;
+
+	</delete>
+
+	<select id="selectFileByCnslIdx" parameterType="int"
+		resultType="rbs.modules.consulting.dto.CnslFileDTO">
+		SELECT * FROM
+		HRD_CNSL_FILE
+		WHERE CNSL_IDX = #{cnslIdx}
+	</select>
+
+
+	<select id="select4uById" resultType="HashMap">
+		SELECT COUNT(*) AS count,
+		MEMBER_IDX, MEMBER_NAME, ORG_NAME, MOBILE_PHONE
+		FROM VIEW_HRD_DOCTOR
+		WHERE MEMBER_ID = #{hrd4uId}
+		GROUP BY MEMBER_IDX, MEMBER_NAME,
+		ORG_NAME, MOBILE_PHONE
+	</select>
+
+	<select id="selectHrpById"
+		resultType="rbs.modules.consulting.dto.HrpUserDTO">
+		SELECT HRP_ID, HRP_NM, WRK_AREA_NM, WRK_AREA_OFCPS,
+		MPHONE_NO as TEL_NO
+		FROM
+		VIEW_TB_HRP
+		WHERE
+		HRP_ID = (SELECT MEMBER_IDX
+		FROM VIEW_HRD_DOCTOR
+		WHERE
+		MEMBER_ID = #{hrd4uId}
+		FETCH FIRST 1 ROW ONLY)
+	</select>
+
+	<select id="selectTeamByCnslIdx" resultMap="CnslTeam">
+		SELECT * FROM
+		HRD_CNSL_TEAM
+		WHERE CNSL_IDX = #{cnslIdx}
+	</select>
+
+	<select id="getInsttList" resultType="HashMap">
+		SELECT
+		INSTT_NAME,
+		INSTT_IDX
+		FROM
+		HRD_COM_INSTT
+	</select>
+
+
+	<select id="selectCnslCountByBplNoAndCnslType"
+		parameterType="HashMap" resultType="int">
+		SELECT COUNT(1)
+		FROM HRD_CNSL
+		WHERE
+		BPL_NO = #{bplNo}
+		AND CNSL_TYPE = #{cnslType}
+		AND EXTRACT(YEAR FROM
+		REGI_DATE) = EXTRACT(YEAR FROM SYSDATE)
+		AND ISDELETE = 0
+		AND CONFM_STATUS IN ('10', '30', '35', '53', '55', '70', '72', '75')
+
+	</select>
+	
+	<select id="selectCnslSaveCountByBplNoAndCnslType"
+		parameterType="HashMap" resultType="int">
+		SELECT COUNT(1)
+		FROM HRD_CNSL
+		WHERE
+		BPL_NO = #{bplNo}
+		AND CNSL_TYPE = #{cnslType}
+		AND EXTRACT(YEAR FROM
+		REGI_DATE) = EXTRACT(YEAR FROM SYSDATE)
+		AND ISDELETE = 0
+		AND CONFM_STATUS IN ('5', '40')
+
+	</select>
+
+	<select id="selectCnslSubmitCountByBplNoAndCnslType"
+		parameterType="HashMap" resultType="int">
+		SELECT COUNT(1)
+		FROM HRD_CNSL
+		WHERE
+		BPL_NO = #{bplNo}
+		AND CNSL_TYPE = #{cnslType}
+		AND EXTRACT(YEAR FROM
+		REGI_DATE) = EXTRACT(YEAR FROM SYSDATE)
+		AND ISDELETE = 0
+	</select>
+
+	<select id="selectCnslCountByBplNoAndCnslType2" resultType="int">
+		SELECT SUM(cnt) as total_count from(
+		SELECT COUNT(*) as cnt
+		FROM
+		HRD_CNSL
+		WHERE BPL_NO = #{bplNo} AND CNSL_TYPE = 2
+		AND EXTRACT(YEAR FROM
+		REGI_DATE) = EXTRACT(YEAR FROM SYSDATE)
+		AND ISDELETE = 0
+		AND
+		CONFM_STATUS IN ('53', '55', '70', '72', '75')
+		UNION ALL
+		SELECT COUNT(*) as
+		cnt
+		FROM HRD_DEVLOP A
+		LEFT JOIN HRD_DEVLOP_TP B ON A.DEVLOP_IDX =
+		B.DEVLOP_IDX
+		WHERE A.BPL_NO = #{bplNo} AND B.PRTBIZ_IDX = 1
+		AND
+		EXTRACT(YEAR FROM A.REGI_DATE) = EXTRACT(YEAR FROM SYSDATE)
+		AND
+		A.ISDELETE = 0
+		AND A.CONFM_STATUS IN ('53', '55', '70', '72', '75')
+
+		)
+	</select>
+
+	<select id="select4URepveNmByBizrNo" parameterType="String"
+		resultType="String">
+		SELECT REPVE_NM
+		FROM HRDPORTAL.THR_CORP
+		WHERE BIZ_NUM =
+		#{bizrNo}
+		FETCH FIRST 1 ROW ONLY
+
+	</select>
+
+	<update id="mergeCnslTeamAuth"
+		parameterType="rbs.modules.consulting.dto.Cnsl">
+		BEGIN
+		<foreach collection="cnslTeam.members" item="member"
+			separator=" " index="index">
+			<if test="member.teamIdx != null and member.mberOfcps != '주치의'">
+				MERGE INTO RBS_AUTH_MEMBER
+				USING DUAL ON
+				(
+				MEMBER_IDX =
+				#{member.memberIdx}
+				AND AUTH_IDX = 5
+				)
+				WHEN MATCHED THEN
+				UPDATE SET
+				END_DATE = TO_DATE('2099-12-31', 'YYYY-MM-DD'),
+				APPLY_YN = 'Y',
+				LAST_MODI_IDX = #{regiIdx},
+				LAST_MODI_ID = #{regiId},
+				LAST_MODI_NAME =
+				#{regiName},
+				LAST_MODI_DATE = SYSDATE,
+				LAST_MODI_IP = #{regiIp}
+				WHEN
+				NOT MATCHED THEN
+				INSERT
+				(
+				AUTH_MEMBER_IDX,
+				AUTH_IDX,
+				MEMBER_IDX,
+				START_DATE,
+				END_DATE,
+				APPLY_YN,
+				ISDELETE,
+				REGI_IDX,
+				REGI_ID,
+				REGI_NAME,
+				REGI_DATE,
+				REGI_IP
+				)VALUES(
+				(SELECT NVL(MAX(AUTH_MEMBER_IDX),0)+1 FROM
+				RBS_AUTH_MEMBER),
+				5,
+				#{member.memberIdx},
+				SYSDATE,
+				TO_DATE('2099-12-31', 'YYYY-MM-DD'),
+				'Y',
+				0,
+				#{regiIdx},
+				#{regiId},
+				#{regiName},
+				SYSDATE,
+				#{regiIp}
+				);
+			</if>
+		</foreach>
+		END;
+	</update>
+
+
+	<delete id="deleteCnslTeamByCnslIdx">
+		DELETE FROM HRD_CNSL_TEAM
+		WHERE CNSL_IDX = #{cnslIdx}
+	</delete>
+
+	<select id="selectConfmByCnslIdx" resultType="rbs.modules.consulting.dto.Cnsl">
+		SELECT * FROM HRD_CNSL_CONFM
+		WHERE CNSL_IDX = #{cnslIdx}
+		AND CONFM_STATUS = '40'
+		ORDER BY REGI_DATE DESC
+	</select>
+
+	<insert id="insertChangeCnslByDto"
+		parameterType="rbs.modules.consulting.dto.Cnsl">
+		<selectKey keyProperty="chgIdx" resultType="int"
+			order="BEFORE">
+			SELECT CNSL_CHANGE_SEQ.NEXTVAL FROM
+			DUAL
+		</selectKey>
+		INSERT INTO HRD_CNSL_CHANGE
+		(
+		CNSL_IDX,
+		CHG_IDX,
+		BSC_IDX,
+		BSISCNSL_IDX,
+		BPL_NO,
+		CNSL_TYPE,
+		CNSL_TME,
+		CNSL_START_DATE,
+		CNSL_END_DATE,
+		CORP_NM,
+		REPER_NM,
+		BIZR_NO,
+		ZIP,
+		BPL_ADDR,
+		BPL_ADDR_DTL,
+		TELNO,
+		TOT_WORK_CNT,
+		INDUTY_NM,
+		TR_OPRTN_REGION_ZIP,
+		TR_OPRTN_REGION_ADDR,
+		TR_OPRTN_REGION_ADDR_DTL,
+		RECOMEND_INSTT_NM,
+		CNSL_DEMAND_MATTER,
+		CORP_PIC_NM,
+		CORP_PIC_OFCPS,
+		CORP_PIC_TELNO,
+		CORP_PIC_EMAIL,
+		SPNT_NM,
+		SPNT_TELNO,
+		CMPTNC_BRFFC_IDX,
+		CMPTNC_BRFFC_PIC_IDX,
+		DTY_CL,
+		MAIN_KWRD1,
+		MAIN_KWRD2,
+		MAIN_KWRD3,
+		CONFM_STATUS,
+		ISDELETE,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		) VALUES (
+		#{cnslIdx},
+		#{chgIdx},
+		#{bscIdx},
+		#{bsiscnslIdx},
+		#{bplNo},
+		#{cnslType},
+		#{cnslTme},
+		#{cnslStartDate},
+		#{cnslEndDate},
+		#{corpNm},
+		#{reperNm},
+		#{bizrNo},
+		#{zip},
+		#{bplAddr},
+		#{bplAddrDtl},
+		PKG_DGUARD.FN_ENC_TELNO(#{telno}),
+		#{totWorkCnt},
+		#{indutyNm},
+		#{trOprtnRegionZip},
+		#{trOprtnRegionAddr},
+		#{trOprtnRegionAddrDtl},
+		#{recomendInsttNm},
+		#{cnslDemandMatter},
+		#{corpPicNm},
+		#{corpPicOfcps},
+		PKG_DGUARD.FN_ENC_TELNO(#{corpPicTelno}),
+		#{corpPicEmail},
+		#{spntNm},
+		#{spntTelno},
+		PKG_DGUARD.FN_ENC_TELNO(#{cmptncBrffcIdx}),
+		#{cmptncBrffcPicIdx},
+		#{dtyCl},
+		#{mainKwrd1},
+		#{mainKwrd2},
+		#{mainKwrd3},
+		#{confmStatus},
+		'0',
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		)
+	</insert>
+
+	<insert id="inserChangeCnslFileByDto">
+		INSERT INTO HRD_CNSL_CHANGE_FILE
+		(CNSL_IDX,
+		CHG_IDX,
+		FLE_IDX,
+		ITEM_ID,
+		FILE_SAVED_NAME,
+		FILE_ORIGIN_NAME,
+		FILE_SIZE,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)VALUES(
+		#{cnslIdx},
+		#{chgIdx},
+		CNSL_FILE_SEQ.NEXTVAL,
+		#{itemId},
+		#{fileSavedName},
+		#{fileOriginName},
+		#{fileSize},
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		)
+	</insert>
+
+	<select id="selectFileByCnslIdxAndItemId"
+		resultType="rbs.modules.consulting.dto.CnslFileDTO">
+		SELECT *
+		FROM HRD_CNSL_FILE
+		WHERE CNSL_IDX = #{cnslIdx} AND
+		ITEM_ID = #{itemId}
+	</select>
+
+	<insert id="insertChangeCnslFileByExistFiles"
+		parameterType="rbs.modules.consulting.dto.CnslFileDTO">
+		<foreach collection="list" item="file" index="index"
+			separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+			INTO HRD_CNSL_CHANGE_FILE
+			(CNSL_IDX,
+			CHG_IDX,
+			ITEM_ID,
+			FLE_IDX,
+			FILE_SAVED_NAME,
+			FILE_ORIGIN_NAME,
+			FILE_SIZE,
+			REGI_IDX,
+			REGI_ID,
+			REGI_NAME,
+			REGI_DATE,
+			REGI_IP
+			)VALUES(
+			#{file.cnslIdx},
+			#{file.chgIdx},
+			#{file.itemId},
+			#{file.fleIdx},
+			#{file.fileSavedName},
+			#{file.fileOriginName},
+			#{file.fileSize},
+			#{file.regiIdx},
+			#{file.regiId},
+			#{file.regiName},
+			#{file.regiDate},
+			#{file.regiIp}
+			)
+		</foreach>
+
+	</insert>
+
+	<insert id="inserChangeCnslTeamByDto"
+		parameterType="rbs.modules.consulting.dto.CnslTeamDTO">
+		<foreach collection="members" item="member" index="index"
+			separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+			<if test="member.teamIdx != null">
+				INTO HRD_CNSL_CHANGE_TEAM (
+				CNSL_IDX,
+				TEAM_IDX,
+				TEAM_ORDER_IDX,
+				CHG_IDX,
+				MEMBER_IDX,
+				LOGIN_ID,
+				RSPNBER_YN,
+				INNER_EXTRL_CD,
+				MBER_NAME,
+				MBER_PSITN,
+				MBER_OFCPS,
+				MBER_TELNO,
+				REGI_IDX,
+				REGI_ID,
+				REGI_NAME,
+				REGI_DATE,
+				REGI_IP
+				)VALUES(
+				#{cnslIdx},
+				#{member.teamIdx},
+				#{member.teamOrderIdx},
+				#{chgIdx},
+				#{member.memberIdx},
+				#{member.loginId},
+				#{member.rspnberYn},
+				#{member.innerExtrlCd},
+				#{member.mberName},
+				#{member.mberPsitn},
+				#{member.mberOfcps},
+				PKG_DGUARD.FN_ENC_TELNO(#{member.mberTelno}),
+				#{regiIdx},
+				#{regiId},
+				#{regiName},
+				SYSDATE,
+				#{regiIp}
+				)
+			</if>
+		</foreach>
+	</insert>
+
+	<select id="selectChangeCnslByCnslIdx" parameterType="int"
+		resultMap="Cnsl">
+		SELECT A.CNSL_IDX,
+		A.CHG_IDX,
+		A.BSC_IDX,
+		A.BSISCNSL_IDX,
+		A.BPL_NO,
+		A.CNSL_TYPE,
+		A.CNSL_TME,
+		A.CNSL_START_DATE,
+		A.CNSL_END_DATE,
+		A.CORP_NM,
+		A.REPER_NM,
+		A.BIZR_NO,
+		A.INDUTY_NM,
+		A.ZIP,
+		A.BPL_ADDR,
+		A.BPL_ADDR_DTL,
+		PKG_DGUARD.FN_DEC_TELNO(A.TELNO) AS TELNO,
+		A.TOT_WORK_CNT,
+		A.TR_OPRTN_REGION_ZIP,
+		A.TR_OPRTN_REGION_ADDR,
+		A.TR_OPRTN_REGION_ADDR_DTL,
+		A.RECOMEND_INSTT_NM,
+		A.CNSL_DEMAND_MATTER,
+		A.CORP_PIC_NM,
+		A.CORP_PIC_OFCPS,
+		PKG_DGUARD.FN_DEC_TELNO(A.CORP_PIC_TELNO) AS CORP_PIC_TELNO,
+		A.CORP_PIC_EMAIL,
+		A.SPNT_NM,
+		PKG_DGUARD.FN_DEC_TELNO(A.SPNT_TELNO) AS SPNT_TELNO,
+		A.CMPTNC_BRFFC_IDX,
+		A.CMPTNC_BRFFC_PIC_IDX,
+		A.DTY_CL,
+		A.MAIN_KWRD1,
+		A.MAIN_KWRD2,
+		A.MAIN_KWRD3,
+		A.CONFM_STATUS,
+		A.ISDELETE,
+		A.REGI_IDX,
+		A.REGI_ID,
+		A.REGI_NAME,
+		A.REGI_DATE,
+		A.REGI_IP,
+		A.LAST_MODI_IDX,
+		A.LAST_MODI_ID,
+		A.LAST_MODI_NAME,
+		A.LAST_MODI_DATE,
+		A.LAST_MODI_IP,
+
+		B.*, C.*, D.INSTT_NAME as CMPTNC_BRFFC_NM,
+		E.PRVTCNTR_NAME as SPNT,
+		PKG_DGUARD.FN_DEC_TELNO(F.DOCTOR_TELNO) as CMPTNC_BRFFC_PIC_TELNO,
+		G.CLASS_NAME AS DTY_CL_NM
+		FROM HRD_CNSL_CHANGE A
+		LEFT JOIN
+		HRD_CNSL_CHANGE_TEAM B ON A.CNSL_IDX = B.CNSL_IDX AND A.CHG_IDX =
+		B.CHG_IDX
+		LEFT JOIN HRD_CNSL_CHANGE_FILE C ON A.CNSL_IDX = C.CNSL_IDX
+		AND A.CHG_IDX = C.CHG_IDX
+		LEFT JOIN HRD_COM_INSTT D ON
+		A.CMPTNC_BRFFC_IDX = D.INSTT_IDX
+		LEFT JOIN HRD_COM_PRVTCNTR E ON
+		A.SPNT_NM = E.PRVTCNTR_NO
+		LEFT JOIN HRD_COM_DOCTOR F ON
+		A.CMPTNC_BRFFC_PIC_IDX = F.MEMBER_IDX
+		LEFT JOIN RBS_ICLASS_INFO G ON
+		A.DTY_CL = G.CLASS_IDX
+		WHERE A.CNSL_IDX = #{cnslIdx}
+		AND A.CONFM_STATUS IN ('70','53') AND A.CHG_IDX = (SELECT MAX(CHG_IDX) FROM HRD_CNSL_CHANGE WHERE CNSL_IDX = #{cnslIdx})
+
+
+	</select>
+
+	<update id="updateChangeConfirmByDto"
+		parameterType="rbs.modules.consulting.dto.Cnsl">
+		BEGIN
+		<!-- HRD_CNSL_CHANGE 상태값 변경 -->
+		UPDATE HRD_CNSL_CHANGE
+		SET
+		CONFM_STATUS = '72',
+		LAST_MODI_IDX =
+		#{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME =
+		#{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE CNSL_IDX = #{cnslIdx} AND CHG_IDX =
+		#{chgIdx};
+
+		<!-- HRD_CNSL_CHANGE -> HRD_CNSL 값 업데이트 -->
+		UPDATE HRD_CNSL
+		SET
+		<!-- 컨설팅 내용 -->
+		CNSL_TYPE = #{cnslType},
+		<!-- 컨설팅 실시주소 -->
+		TR_OPRTN_REGION_ZIP = #{trOprtnRegionZip},
+		TR_OPRTN_REGION_ADDR =
+		#{trOprtnRegionAddr},
+		TR_OPRTN_REGION_ADDR_DTL =
+		#{trOprtnRegionAddrDtl},
+		<!-- 관할지부지사,담당자 -->
+		CMPTNC_BRFFC_IDX = #{cmptncBrffcIdx},
+		CMPTNC_BRFFC_PIC_IDX =
+		#{cmptncBrffcPicIdx},
+		<!-- 컨설팅 실시일,종료일 -->
+		CNSL_START_DATE = #{cnslStartDate},
+		CNSL_END_DATE = #{cnslEndDate},
+
+		<!-- 기업담당자 -->
+		CORP_PIC_NM = #{corpPicNm},
+		CORP_PIC_OFCPS = #{corpPicOfcps},
+		CORP_PIC_TELNO = PKG_DGUARD.FN_ENC_TELNO(#{corpPicTelno}),
+		CORP_PIC_EMAIL = #{corpPicEmail},
+
+		<!-- 컨설팅/훈련 요구사항 -->
+		CNSL_DEMAND_MATTER = #{cnslDemandMatter},
+		MAIN_KWRD1 = #{mainKwrd1},
+		MAIN_KWRD2 = #{mainKwrd2},
+		MAIN_KWRD3 = #{mainKwrd3},
+		DTY_CL = #{dtyCl},
+		RECOMEND_INSTT_NM = #{recomendInsttNm},
+		CONFM_STATUS = '72',
+		LAST_MODI_IDX = #{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME = #{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE CNSL_IDX = #{cnslIdx};
+
+
+
+		<!-- HRD_CNSL_CHANGE_CONFM 에 승인 이력 생성 -->
+		INSERT INTO HRD_CNSL_CHANGE_CONFM
+		(
+		CNSL_IDX,
+		CHG_IDX,
+		CONFM_IDX,
+		CONFM_STATUS,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		) VALUES (
+		#{cnslIdx},
+		#{chgIdx},
+		CNSL_CHANGE_CONFIRM_SEQ.NEXTVAL,
+		'72',
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		);
+
+		<!-- HRD_CNSL_CONFM 에 승인 이력 생성 -->
+		INSERT INTO HRD_CNSL_CONFM
+		(CNSL_IDX,
+		CONFM_IDX,
+		CONFM_STATUS,
+		CONFM_CN,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)VALUES(
+		#{cnslIdx},
+		CNSL_CONFIRM_SEQ.NEXTVAL,
+		'72',
+		#{confmCn},
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		);
+
+		END;
+	</update>
+
+	<select id="selectCountIndvdlInfo" resultType="int">
+		SELECT COUNT(*)
+		FROM HRD_COM_MEMBER_INDVDLINFO
+		WHERE MEMBER_IDX = (SELECT MEMBER_IDX
+		FROM VIEW_HRD_DOCTOR WHERE MEMBER_ID
+		= #{hrd4uId})
+	</select>
+
+	<update id="mergeChangeFileConfirmByDto"
+		parameterType="rbs.modules.consulting.dto.Cnsl">
+		BEGIN
+		<!-- HRD_CNSL_CHANGE_FILE -> HRD_CNSL_FILE 값 업데이트 -->
+		<foreach collection="cnslFiles" item="file" separator=";"
+			close=";" index="index">
+			MERGE INTO HRD_CNSL_FILE
+			USING DUAL ON
+			(
+			CNSL_IDX =
+			#{cnslIdx}
+			AND ITEM_ID = #{file.itemId}
+			)
+			WHEN MATCHED THEN
+			UPDATE SET
+			FILE_SAVED_NAME = #{file.fileSavedName},
+			FILE_ORIGIN_NAME =
+			#{file.fileOriginName},
+			FILE_SIZE = #{file.fileSize},
+			LAST_MODI_IDX =
+			#{lastModiIdx},
+			LAST_MODI_ID = #{lastModiId},
+			LAST_MODI_NAME =
+			#{lastModiName},
+			LAST_MODI_DATE = SYSDATE,
+			LAST_MODI_IP = #{lastModiIp}
+			WHEN NOT MATCHED THEN
+			INSERT(
+			CNSL_IDX,
+			FLE_IDX,
+			ITEM_ID,
+			FILE_SAVED_NAME,
+			FILE_ORIGIN_NAME,
+			FILE_SIZE,
+			REGI_IDX,
+			REGI_ID,
+			REGI_NAME,
+			REGI_DATE,
+			REGI_IP
+			)VALUES(
+			#{cnslIdx},
+			CNSL_FILE_SEQ.NEXTVAL,
+			#{file.itemId},
+			#{file.fileSavedName},
+			#{file.fileOriginName},
+			#{file.fileSize},
+			#{lastModiIdx},
+			#{lastModiId},
+			#{lastModiName},
+			SYSDATE,
+			#{lastModiIp}
+			)
+
+		</foreach>
+		END;
+
+	</update>
+
+	<update id="mergeChangeTeamConfirmByDto"
+		parameterType="rbs.modules.consulting.dto.Cnsl">
+		BEGIN
+		<foreach collection="cnslTeam.members" item="member"
+			separator=" " index="index">
+			<if test="member.teamIdx != null">
+				MERGE INTO HRD_CNSL_TEAM
+				USING DUAL ON
+				(
+				CNSL_IDX =
+				#{cnslIdx}
+				AND TEAM_IDX = #{member.teamIdx}
+				AND TEAM_ORDER_IDX =
+				#{member.teamOrderIdx}
+				)
+				WHEN MATCHED THEN
+				UPDATE SET
+				LOGIN_ID =
+				#{member.loginId},
+				RSPNBER_YN = #{member.rspnberYn},
+				INNER_EXTRL_CD =
+				#{member.innerExtrlCd},
+				MBER_NAME = #{member.mberName},
+				MBER_PSITN =
+				#{member.mberPsitn},
+				MBER_OFCPS = #{member.mberOfcps},
+				MBER_TELNO =
+				PKG_DGUARD.FN_ENC_TELNO(#{member.mberTelno}),
+				LAST_MODI_IDX =
+				#{lastModiIdx},
+				LAST_MODI_ID = #{lastModiId},
+				LAST_MODI_NAME =
+				#{lastModiName},
+				LAST_MODI_DATE = SYSDATE,
+				LAST_MODI_IP =
+				#{lastModiIp}
+				WHEN NOT MATCHED THEN
+				INSERT
+				(
+				CNSL_IDX,
+				TEAM_IDX,
+				TEAM_ORDER_IDX,
+				MEMBER_IDX,
+				LOGIN_ID,
+				RSPNBER_YN,
+				INNER_EXTRL_CD,
+				MBER_NAME,
+				MBER_PSITN,
+				MBER_OFCPS,
+				MBER_TELNO,
+				REGI_IDX,
+				REGI_ID,
+				REGI_NAME,
+				REGI_DATE,
+				REGI_IP
+				)VALUES(
+				#{cnslIdx},
+				#{member.teamIdx},
+				#{member.teamOrderIdx},
+				#{member.memberIdx},
+				#{member.loginId},
+				#{member.rspnberYn},
+				#{member.innerExtrlCd},
+				#{member.mberName},
+				#{member.mberPsitn},
+				#{member.mberOfcps},
+				PKG_DGUARD.FN_ENC_TELNO(#{member.mberTelno}),
+				#{lastModiIdx},
+				#{lastModiId},
+				#{lastModiName},
+				SYSDATE,
+				#{lastModiIp}
+				);
+			</if>
+		</foreach>
+		END;
+	</update>
+
+	<update id="updateChangeRejectByDto"
+		parameterType="rbs.modules.consulting.dto.Cnsl">
+		BEGIN
+		<!-- HRD_CNSL_CHANGE 상태값 변경 -->
+		UPDATE HRD_CNSL_CHANGE
+		SET
+		CONFM_STATUS = '53',
+		LAST_MODI_IDX =
+		#{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME =
+		#{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE CNSL_IDX = #{cnslIdx} AND CHG_IDX = #{chgIdx};
+
+		<!-- HRD_CNSL 상태값 변경 -->
+		UPDATE HRD_CNSL
+		SET
+		CONFM_STATUS = '53',
+		LAST_MODI_IDX = #{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME = #{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE CNSL_IDX =
+		#{cnslIdx};
+
+
+		<!-- HRD_CNSL_CHANGE_CONFM 에 반려 이력 생성 -->
+		INSERT INTO HRD_CNSL_CHANGE_CONFM
+		(CNSL_IDX,
+		CHG_IDX,
+		CONFM_IDX,
+		CONFM_STATUS,
+		CONFM_CN,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)
+		VALUES (
+		#{cnslIdx},
+		#{chgIdx},
+		CNSL_CHANGE_CONFIRM_SEQ.NEXTVAL,
+		'53',
+		#{confmCn},
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		);
+
+		<!-- HRD_CNSL_CONFM 에 반려 이력 생성 -->
+		INSERT INTO HRD_CNSL_CONFM
+		(CNSL_IDX,
+		CONFM_IDX,
+		CONFM_STATUS,
+		CONFM_CN,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)VALUES(
+		#{cnslIdx},
+		CNSL_CONFIRM_SEQ.NEXTVAL,
+		'53',
+		#{confmCn},
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		);
+		END;
+	</update>
+
+
+	<select id="selectCenterInfo" resultType="java.util.HashMap">
+		SELECT * FROM
+		HRD_COM_PRVTCNTR
+		WHERE PRVTCNTR_NO = #{centerIdx}
+	</select>
+
+	<select id="selectSojtConfm" parameterType="String"
+		resultType="int">
+		SELECT COUNT(*) FROM HRD_DGNS_SOJT_REQ
+		WHERE BPL_NO =
+		#{bplNo}
+		AND CONFM_STATUS = 55
+	</select>
+
+	<select id="selectCountOfConsulting"
+		resultType="java.util.HashMap">
+		SELECT LOGIN_ID, SUM(countNum) as totalCount
+		FROM(
+		SELECT
+		T.LOGIN_ID, P.BPL_NO, COUNT(DISTINCT P.BPL_NO) as countNum
+		FROM
+		HRD_CNSL_TEAM T
+		JOIN HRD_CNSL P ON T.CNSL_IDX = P.CNSL_IDX AND P.CONFM_STATUS IN ('55','70','72','53','75')
+		GROUP BY
+		T.LOGIN_ID, P.BPL_NO)
+		WHERE LOGIN_ID = #{hrd4uId}
+		GROUP BY LOGIN_ID
+	</select>
+
+	<select id="selectNcsInfo" resultType="java.util.HashMap">
+		SELECT CLASS_IDX AS
+		NCS_CODE, CLASS_NAME AS NCS_NAME
+		FROM RBS_ICLASS_INFO
+		WHERE MASTER_CODE
+		= 'NCS_CODE'
+		AND CLASS_LEVEL = 3
+		AND CLASS_NAME LIKE '%' || #{json} ||
+		'%'
+	</select>
+	
+	<select id="selectNcsInfoDepth1" resultType="java.util.HashMap">
+		SELECT CLASS_IDX AS
+		NCS_CODE, CLASS_NAME AS NCS_NAME
+		FROM RBS_ICLASS_INFO
+		WHERE MASTER_CODE
+		= 'NCS_CODE'
+		AND CLASS_LEVEL = 1
+	</select>
+	
+	<select id="selectNextNcsDepth" resultType="java.util.HashMap">
+		SELECT CLASS_IDX AS
+		NCS_CODE, CLASS_NAME AS NCS_NAME
+		FROM RBS_ICLASS_INFO
+		WHERE MASTER_CODE
+		= 'NCS_CODE'
+		AND PARENT_CLASS_IDX = #{json}
+	</select>
+
+
+	<select id="selectInsttIdxByZip" resultType="java.util.HashMap">
+		SELECT A.INSTT_IDX,
+		C.INSTT_NAME,E.MEMBER_IDX, G.MEMBER_ID, G.MEMBER_NAME,
+		PKG_DGUARD.FN_DEC_TELNO(E.DOCTOR_TELNO) AS DOCTOR_TELNO,
+		E.MEMBER_IDX
+		FROM
+		INF_ZIP_GROUP
+		A,
+		RBS_ICLASS_INFO B,
+		HRD_COM_INSTT C,
+		HRD_COM_INSTT_BLOCK D,
+		HRD_COM_DOCTOR E,
+		HRD_COM_DOCTOR_BLOCK F,
+		VIEW_HRD_DOCTOR G
+		WHERE
+		A.INSTT_IDX = C.INSTT_IDX
+		AND A.INSTT_IDX = D.INSTT_IDX
+		AND B.CLASS_IDX
+		= D.BLOCK_CD
+		AND A.INSTT_IDX = E.INSTT_IDX
+		AND E.DOCTOR_IDX =
+		F.DOCTOR_IDX
+		AND B.CLASS_IDX = F.BLOCK_CD
+		AND E.MEMBER_IDX =
+		G.MEMBER_IDX AND E.APPLY_YN = 'Y' AND E.ISDELETE = 0
+		AND A.ZIP = #{zip}
+		FETCH FIRST 1 ROW ONLY
+	</select>
+
+	<select id="selectDoctorInfoByInsttIdx"
+		resultType="java.util.HashMap">
+		SELECT A.MEMBER_IDX, A.INSTT_IDX,
+		PKG_DGUARD.FN_DEC_TELNO(A.DOCTOR_TELNO) AS DOCTOR_TELNO, B.MEMBER_NAME, B.MEMBER_ID
+		FROM HRD_COM_DOCTOR A
+		LEFT JOIN VIEW_HRD_DOCTOR B ON A.MEMBER_IDX =
+		B.MEMBER_IDX
+		WHERE A.INSTT_IDX = #{insttIdx}
+	</select>
+
+	<update id="changeCmptncBrffcPic" parameterType="HashMap">
+		UPDATE HRD_CNSL
+		SET CMPTNC_BRFFC_PIC_IDX = ${memberIdx}
+		WHERE CNSL_IDX = ${cnslIdx}
+	</update>
+
+	<select id="selectSojtIsSelected" parameterType="String"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM HRD_DGNS_SOJT_REQ
+		WHERE BPL_NO =
+		#{bplNo}
+		AND EXTRACT(YEAR FROM REGI_DATE) = EXTRACT(YEAR FROM SYSDATE)
+	</select>
+
+	<select id="getDiaryList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.*,
+		(SELECT CONFM_STATUS FROM HRD_CNSL_REPORT WHERE CNSL_IDX = #{cnslIdx}) AS CONFM_STATUS
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="DIARY_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		AND
+		CNSL_IDX = #{cnslIdx}
+		<choose>
+			<when test="dsetOrderField == null">
+				<bind name="defaultOrderStr" value="'A.DIARY_IDX'" />
+			</when>
+			<otherwise>
+				<bind name="defaultOrderStr"
+					value="_parameter.get('dsetOrderField')" />
+			</otherwise>
+		</choose>
+		<include refid="rbs.commonMapper.COM_ORDER" />
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<select id="getDiaryCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="DIARY_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		AND
+		CNSL_IDX = #{cnslIdx}
+	</select>
+	
+	<select id="chkDuplicate" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+			FROM
+		<include refid="DIARY_TABLE_NAME" />
+			A
+		WHERE
+			A.REGI_IDX = #{regiIdx}
+		AND
+		(
+			(TO_DATE(#{mtgStartDt},'YYYYMMDDHH24MISS') BETWEEN MTG_START_DT AND MTG_END_DT) OR (TO_DATE(#{mtgEndDt},'YYYYMMDDHH24MISS') BETWEEN MTG_START_DT AND MTG_END_DT)
+		)
+		AND
+			A.ISDELETE = '0'
+		<if test="diaryIdx != 0">
+		AND
+			A.DIARY_IDX != #{diaryIdx}
+		</if>
+	</select>
+
+	<select id="chkEntrstRole" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+			FROM
+		<include refid="VIEW_TABLE_NAME" />
+			A
+		WHERE
+			A.HRP_ID = #{regiIdx}
+		AND
+			FROM_DATE = #{chkDate}
+		AND
+		(
+			((FROM_TIME BETWEEN #{chkStart} AND #{chkEnd}) OR (TO_TIME BETWEEN #{chkStart} AND #{chkEnd}))
+				OR
+			((#{chkStart} BETWEEN FROM_TIME AND TO_TIME) OR (#{chkEnd} BETWEEN FROM_TIME AND TO_TIME))
+		)
+	</select>
+
+	<select id="getInstt" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.*
+		FROM
+		<include refid="INSTT_TABLE_NAME" />
+		A
+		WHERE
+		A.INSTT_IDX = #{insttIdx}
+		AND
+		A.ISDELETE = '0'
+	</select>
+	<select id="getDiaryView" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		SELECT
+		A.*
+		FROM
+		<if test="fnIdx == 5">
+			<include refid="EVL_TABLE_NAME" />
+		</if>
+		<if test="fnIdx == 7">
+			<include refid="DIARY_TABLE_NAME" />
+		</if>
+		A
+		WHERE
+		A.CNSL_IDX = #{cnslIdx}
+		AND
+		A.ISDELETE = '0'
+	</select>
+
+	<select id="getEntList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.*
+		FROM
+		<include refid="VIEW_TABLE_NAME" />
+		A
+		WHERE
+		A.IND_SUB = #{indSub}
+	</select>
+
+	<select id="getEntCnt" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT
+		COUNT(1) CNT
+		FROM
+		<include refid="VIEW_TABLE_NAME" />
+		A
+		WHERE
+		A.IND_SUB = #{indSub}
+	</select>
+
+	<insert id="insertEvl" parameterType="java.util.HashMap">
+		INSERT INTO HRD_CNSL_HRP_EVL (
+		EVL_IDX,
+		CNSL_IDX,
+		HRP_ID,
+		ENTRST_ROLE_CD,
+		SORT_SN,
+		DIARY_IDX,
+		INPT_BGNDT,
+		INPT_ENDDT,
+		INPT_BGNTM,
+		INPT_ENDTM,
+		BRFFC_NM,
+		FATHER_SIGN,
+		PIC_NM,
+		RSPNS_YN,
+		INOUT_SE,
+		HRP_SE,
+		BIZ_NM,
+		ISDELETE,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		) VALUES (
+			<![CDATA[
+				(SELECT NVL(MAX(EVL_IDX),0)+1 FROM HRD_CNSL_HRP_EVL),
+			]]>
+		#{cnslIdx},
+		#{hrpId},
+		#{entrstRoleCd},
+		<![CDATA[
+			(SELECT NVL(MAX(SORT_SN),0)+1 FROM HRD_CNSL_HRP_EVL WHERE BIZ_NM='DOC' AND REGI_IDX = #{regiIdx}),
+		]]>
+		#{diaryIdx},
+		#{receiptSdate},
+		#{receiptEdate},
+		#{exTime1},
+		#{exTime2},
+		#{bizCode},
+		#{dept},
+		#{chrgrNm},
+		#{hrpRespone},
+		#{hrpOjt},
+		#{hrpPooldiv},
+		#{indSub},
+		'0',
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{registIp}
+		)
+	</insert>
+
+	<select id="getEvlList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		<if test="cnslIdx == 0">
+		(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = CNSL.CMPTNC_BRFFC_IDX) AS INSTT_NAME,
+		(SELECT MBER_NAME FROM HRD_CNSL_TEAM WHERE CNSL_IDX = A.CNSL_IDX AND TEAM_IDX = 1 AND TEAM_ORDER_IDX = 1) AS MBER_NAME,
+		</if>
+		(SELECT MTG_WEEK_EXPLSN1 FROM HRD_CNSL_DIARY WHERE DIARY_IDX = A.DIARY_IDX) AS MTG_WEEK_EXPLSN,
+		(SELECT SPORT_TYPE FROM HRD_CNSL_DIARY WHERE DIARY_IDX = A.DIARY_IDX) AS SPORT_TYPE,
+		(SELECT POST_SEQ FROM VIEW_TB_HRP_ENTRST_ROLE WHERE SORT_SN = A.SORT_SN AND IND_SUB = 'DOC' AND REGTR_ID = #{regiId}) AS POST_SEQ,
+		A.*
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="EVL_TABLE_NAME" />
+		A 
+		<if test="cnslIdx == 0">
+			LEFT JOIN HRD_CNSL CNSL ON A.CNSL_IDX = CNSL.CNSL_IDX
+		</if>
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<if test="cnslIdx == 0 and brffcCd != '1000000001'">
+			AND CNSL.CMPTNC_BRFFC_IDX = #{insttIdx}
+		</if>
+		<if test="cnslIdx != 0">
+			AND CNSL_IDX = #{cnslIdx}
+		</if>
+		<choose>
+			<when test="dsetOrderField == null">
+				<bind name="defaultOrderStr" value="'A.EVL_IDX'" />
+			</when>
+			<otherwise>
+				<bind name="defaultOrderStr"
+					value="_parameter.get('dsetOrderField')" />
+			</otherwise>
+		</choose>
+		<include refid="rbs.commonMapper.COM_ORDER" />
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<select id="getEvlCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="EVL_TABLE_NAME" />
+		A
+		<if test="cnslIdx == 0">
+			LEFT JOIN HRD_CNSL CNSL ON A.CNSL_IDX = CNSL.CNSL_IDX
+		</if>
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<if test="cnslIdx == 0 and brffcCd != '1000000001'">
+			AND CNSL.CMPTNC_BRFFC_IDX = #{insttIdx}
+		</if>
+		<if test="cnslIdx != 0">
+			AND CNSL_IDX = #{cnslIdx}
+		</if>
+	</select>
+
+	<update id="updateEntrst" parameterType="java.util.HashMap">
+		UPDATE HRD_CNSL_HRP_EVL
+		SET
+		ACT_ROLE_CD = #{actRoleCd},
+		ACT_DAYCNT = #{actDaycnt},
+		ACT_DE = TO_DATE(#{actDe}, 'YYYY-MM-DD'),
+		EVL_DE = SYSDATE,
+		EVL_ITEM1 = #{evlItem1},
+		EVL_ITEM2 = #{evlItem2},
+		EVL_ITEM3 = #{evlItem3},
+		EVL_ITEM4 = #{evlItem4},
+		EVL_ITEM5 = #{evlItem5},
+		EVL_TOT_POINT = #{evlTotPoint},
+		EVL_GRAD = #{evlGrad},
+		GNRLZ_OPINION = #{gnrlzOpinion},
+		ALLWNC = #{allwnc},
+		REGI_DATE = SYSDATE,
+		EVL_STATUS = 1,
+		LAST_MODI_IDX = #{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME = #{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE EVL_IDX = #{evlIdx}
+	</update>
+
+	<select id="isTrainingComplecated" parameterType="String"
+		resultType="int">
+		SELECT COUNT(*)
+		FROM
+		(SELECT B.MEMBER_IDX
+		FROM HRD_SPTJ_EDC A
+		INNER JOIN HRD_SPTJ_EDC_MEMBER B ON A.EDC_IDX = B.EDC_IDX
+		WHERE A.EDC_CD = 'CNST' AND B.CONFM_STATUS = '55' AND B.ATT_YN = 'Y')
+		WHERE MEMBER_IDX IN (SELECT MEMBER_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_ID
+		= #{hrd4uId})
+	</select>
+	
+	<select id="selectDiaryListByCnslIdx" resultType="rbs.modules.consulting.dto.CnslDiaryDTO">
+		SELECT * FROM HRD_CNSL_DIARY
+		WHERE CNSL_IDX = #{cnslIdx}
+	</select>
+	
+	<select id="selectCnslListByBplNoForViewAll" resultType="rbs.modules.consulting.dto.Cnsl">
+	SELECT * FROM HRD_CNSL
+	WHERE BPL_NO = #{bplNo}
+	AND CONFM_STATUS IN ('53', '55','70','72', 75)
+	</select>
+	
+	<select id="selectCnslListByMemberIdxForViewAll" resultType="rbs.modules.consulting.dto.Cnsl">
+	SELECT * FROM HRD_CNSL A
+	JOIN HRD_CNSL_TEAM B ON A.CNSL_IDX = B.CNSL_IDX
+	WHERE B.MEMBER_IDX = #{memberIdx}
+	AND A.CONFM_STATUS IN ('53', '55','70','72', 75)
+	</select>
+	
+	<select id="selectCnslListBySpntMemberIdxForViewAll" resultType="rbs.modules.consulting.dto.Cnsl">
+	SELECT * FROM HRD_CNSL A
+	WHERE CONFM_STATUS IN ('40', '53', '55','70','72', 75)
+	AND SPNT_NM = (SELECT PRVTCNTR_NO FROM HRD_COM_PRVTCNTR WHERE MEMBER_IDX = #{memberIdx})
+	</select>
+	
+	<select id="selectCnslListByDoctorMemberIdxForViewAll" resultType="rbs.modules.consulting.dto.Cnsl">
+	SELECT * FROM HRD_CNSL A
+	WHERE CONFM_STATUS IN ('40', '53', '55','70','72', 75)
+	AND A.CMPTNC_BRFFC_IDX = (SELECT INSTT_IDX FROM VIEW_HRD_DOCTOR WHERE MEMBER_IDX = #{memberIdx})
+	</select>
+	
+	<select id="selectCnslListAllForViewAll" resultType="rbs.modules.consulting.dto.Cnsl">
+	SELECT * FROM HRD_CNSL A
+	WHERE CONFM_STATUS IN ('40', '53', '55','70','72', 75)
+	</select>
+	
+	<select id="findBizData" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT
+			*
+		FROM
+			<include refid="BSK_TABLE_NAME" /> B
+		WHERE 1=1
+			AND B.BPL_NO = #{bplNo}
+	</select>
+	
+	<insert id="applyInsert" parameterType="java.util.HashMap">
+		INSERT INTO
+		<include refid="APPLY_TABLE_NAME" />
+		(
+		<include refid="rbs.commonMapper.INSERT_COLUMNS" />, REGI_DATE,
+		CORP_PIC_TELNO, RECOMEND_TELNO, STATUS
+		) VALUES (
+		<include refid="rbs.commonMapper.INSERT_VALUES" />,
+		<include refid="rbs.commonDBMSMapper.currentDate" />,
+		PKG_DGUARD.FN_ENC_TELNO(#{corpPicTelNo}),
+		PKG_DGUARD.FN_ENC_TELNO(#{recomendTelno}), #{status}
+		)
+	</insert>
+	
+	<update id="applyUpdate" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="APPLY_TABLE_NAME" />
+		SET
+			STATUS = #{status},
+			LAST_MODI_IDX = #{lastModiIdx},
+			LAST_MODI_ID = #{lastModiId},
+			LAST_MODI_NAME = #{lastModiName},
+			LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate" />,
+			LAST_MODI_IP = #{lastModiIp}
+		WHERE
+			APPLY_IDX = #{applyIdx}
+	</update>
+	
+	
+	<select id="getCnslApplyList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+			A.APPLY_IDX,
+			A.CORP_NM,
+			A.BPL_NO,
+			A.CORP_PIC_NM,
+			A.RECOMEND_NM,
+			A.RECOMEND_PSITN,
+			PKG_DGUARD.FN_DEC_TELNO(A.RECOMEND_TELNO) AS RECOMEND_TELNO,
+			PKG_DGUARD.FN_DEC_TELNO(A.CORP_PIC_TELNO) AS CORP_PIC_TELNO,
+			A.CORP_PIC_EMAIL,
+			A.BPL_ADDR,
+			A.REGI_DATE,
+			(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = A.CMPTNC_BRFFC_IDX) AS INSTT_NAME,
+			A.LAST_MODI_NAME,
+			A.LAST_MODI_DATE,
+			A.STATUS
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="APPLY_TABLE_NAME" />
+			A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<if test="insttIdx == '' and insttIdx == null">
+			AND CMPTNC_BRFFC_IDX = A.CMPTNC_BRFFC_IDX
+		</if>
+		<if test="insttIdx != '' and insttIdx != null and insttIdx != 33">
+			AND CMPTNC_BRFFC_IDX = #{insttIdx}
+		</if>
+		<if test="trCorpNm != '' and trCorpNm != null">
+			AND CORP_NM LIKE '%' || #{trCorpNm} || '%'
+		</if>
+		<if test="schBplNo != '' and schBplNo != null">
+			AND BPL_NO LIKE '%' || #{schBplNo} || '%'
+		</if>
+		<if test="getStatus != '' and getStatus != null">
+			AND STATUS = #{getStatus}
+		</if>
+		<if test="useExcel == null">
+			<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+		</if>
+		ORDER BY STATUS, APPLY_IDX DESC
+	</select>
+
+	<select id="getCnslApplyCnt" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(1) CNT
+		FROM
+		<include refid="APPLY_TABLE_NAME" />
+			A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<if test="insttIdx == '' and insttIdx == null">
+			AND CMPTNC_BRFFC_IDX = A.CMPTNC_BRFFC_IDX
+		</if>
+		<if test="insttIdx != '' and insttIdx != null and insttIdx != 33">
+			AND CMPTNC_BRFFC_IDX = #{insttIdx}
+		</if>
+		<if test="trCorpNm != '' and trCorpNm != null">
+			AND CORP_NM LIKE '%' || #{trCorpNm} || '%'
+		</if>
+		<if test="schBplNo != '' and schBplNo != null">
+			AND BPL_NO LIKE '%' || #{schBplNo} || '%'
+		</if>
+	</select>
+	
+	<select id="selectSojtFormInfo" resultType="HashMap">
+	SELECT * FROM HRD_DGNS_SOJT_REQ
+	WHERE BPL_NO = #{bplNo}
+	AND CONFM_STATUS = '55'
+	
+	</select>
+	
+	<select id="selectChangeConfmCn" resultType="rbs.modules.consulting.dto.Cnsl">
+		SELECT * FROM HRD_CNSL_CHANGE_CONFM
+		WHERE CNSL_IDX = #{cnslIdx}
+		AND CONFM_STATUS = '53'
+		ORDER BY REGI_DATE DESC
+	</select>
+	
+	<select id="selectDoctorById" resultType="HashMap">
+	SELECT 	A.MEMBER_IDX, B.MEMBER_NAME, B.REGIMENT,PKG_DGUARD.FN_DEC_TELNO(A.DOCTOR_TELNO) AS DOCTOR_TELNO FROM HRD_COM_DOCTOR A
+	LEFT JOIN VIEW_HRD_DOCTOR B ON B.MEMBER_IDX = A.MEMBER_IDX
+	WHERE B.MEMBER_ID = #{hrd4uId} AND A.ISDELETE = 0 AND A.APPLY_YN = 'Y'
+	</select>
+
+
+</mapper>            

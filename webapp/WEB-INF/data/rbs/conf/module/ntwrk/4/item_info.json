@@ -1,0 +1,281 @@
+{
+	"item_info":{
+		"items":{
+		    "expertIdx":{
+				"column_id":"EXPERT_IDX"
+				, "item_name":"전문가 식별색인"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"name":{
+				"column_id":"NAME"
+				, "item_name":"전문가 이름"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"brthdy":{
+				"column_id":"BRTHDY"
+				, "item_name":"생년월일"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"psitnGrpName":{
+				"column_id":"PSITN_GRP_NAME"
+				, "item_name":"소속단체명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"psitnGrpType":{
+				"column_id":"소속단체타입"
+				, "item_name":"전문가 식별색인"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"zip":{
+				"column_id":"ZIP"
+				, "item_name":"우편번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"addr":{
+				"column_id":"ADDR"
+				, "item_name":"주소"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"addrDtl":{
+				"column_id":"ADDR_DTL"
+				, "item_name":"상세주소"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"spcltyRealm":{
+				"column_id":"SPCLTY_REALM"
+				, "item_name":"전문분야"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"dept":{
+				"column_id":"DEPT"
+				, "item_name":"부서"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"ofcps":{
+				"column_id":"OFCPS"
+				, "item_name":"직위"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"mbtlnum":{
+				"column_id":"MBTLNUM"
+				, "item_name":"휴대폰번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"email":{
+				"column_id":"EMAIL"
+				, "item_name":"이메일"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"remarks":{
+				"column_id":"REMARKS"
+				, "item_name":"비고"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"isdelete":{
+				"column_id":"ISDELETE"
+				, "item_name":"삭제가부"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"expertInsttIdx": {
+				"column_id": "INSTT_IDX",
+				"item_name": "관할 기관",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"partnerInsttIdxs": {
+				"column_id": "INSTT_IDX",
+				"item_name": "소속 기관",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			}
+		}, "list_order":[
+			"subject"
+			, "name"
+			, "contents"
+		]
+		, "view_order":[
+			"name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "write_order":[
+		    "name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "writeproc_order":[
+			"name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "modify_order":[
+			"name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "modifyproc_order":[
+		    "name"
+			, "subject"
+			, "contents"
+			, "file"
+		]
+		, "list_search":{
+			"key" : {
+				"items" : {
+					"name": {
+						"item_name":"전문가 이름"
+						,"column_id":"NAME"
+					},
+					"psitnGrpName": {
+						"item_name":"기업명"
+						,"column_id":"PSITN_GRP_NAME"
+					},
+					"expertInsttIdx": {
+						"item_name":"관할 기관"
+						,"column_id":"INSTT_IDX"
+						,"format_type" : 0
+						,"object_type" : 2
+					},
+					"partnerInsttIdxs": {
+						"item_name":"소속 기관"
+						,"column_id":"PARTNER_INSTT_IDX"
+						,"format_type" : 0
+						,"object_type" : 2
+					},
+				}
+			}, 
+			"searchForm_order":[
+				 "name",
+				 "psitnGrpName",
+				 "expertInsttIdx",
+				 "partnerInsttIdxs"
+			], "search_order":[
+				 "name",
+				 "psitnGrpName",
+				 "expertInsttIdx",
+				 "partnerInsttIdxs"
+			]
+		}
+	}
+}

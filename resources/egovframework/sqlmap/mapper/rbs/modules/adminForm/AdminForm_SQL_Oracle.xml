@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rbs.modules.adminForm.adminFormMapper">
+	<!-- 테이블명 -->
+	<sql id="HRD_SPTJ_ADMSFM">HRD_SPTJ_ADMSFM</sql>
+	<sql id="HRD_DGNS_PRTBIZ">HRD_DGNS_PRTBIZ</sql>
+
+	<sql id="COUNT_TOP"><trim>SELECT COUNT(rn) FROM( SELECT rownum rn, TB.* FROM (</trim></sql>
+	<sql id="COUNT_BOTTOM"><trim>) TB )</trim></sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX([KEY_IDX_COLUMN]), 0)</trim> + 1 MAXID
+		FROM  HRD_SPTJ_ADMSFM A
+	</select>
+	
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<!-- 방문기업서식 쿼리 -->
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT SPTJ.ADMSFM_IDX
+						, SPTJ.ADMSFM_VER
+				        , SPTJ.ADMSFM_NM
+				        , SPTJ.JOB_TYPE
+				        , SPTJ.SGNTR
+				        , SPTJ.REGI_DATE
+				        , SPTJ.REGI_NAME
+				        , SPTJ.USE_YN
+	                    , SPTJ.TMPR_SAVE_YN
+	                    , SPTJ.DCSN_YN
+				        , PRTBIZ.PRTBIZ_IDX,
+   				CASE
+			        WHEN PRTBIZ.PRTBIZ_IDX = 1 THEN 'S-OJT'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 2 THEN '일학습병행'   
+			        WHEN PRTBIZ.PRTBIZ_IDX = 4 THEN '사업주훈련'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 11 THEN '컨소시엄'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 6 THEN '대부'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 16 THEN '인증'
+			    ELSE '기타'
+		    END AS PRTBIZ_TITLE
+		<include refid="editAuthListQuery"/>
+		FROM  HRD_SPTJ_ADMSFM SPTJ
+			LEFT OUTER JOIN HRD_DGNS_PRTBIZ PRTBIZ
+			ON SPTJ.PRTBIZ_IDX = PRTBIZ.PRTBIZ_IDX
+		WHERE SPTJ.ISDELETE = '0'
+		<choose>
+			<when test="insttIdx != null ">
+				<if test="insttIdx == 33">
+					AND 1=1
+				</if>
+				<if test="insttIdx != 33">
+					AND SPTJ.DCSN_YN = 'Y'
+				</if>
+			</when>
+			<when test="userTypeIdx >= 40">
+				AND 1=1
+			</when>
+			<otherwise>
+				AND SPTJ.DCSN_YN = 'Y'
+			</otherwise>
+		</choose>
+		<foreach collection="searchList" item="searchItem" index="i">
+			<choose>
+				<when test="searchItem.columnId == 'PRTBIZ_IDX'">
+					<if test='searchItem.columnValue == "1"'>
+						AND PRTBIZ.PRTBIZ_IDX = 1
+					</if>
+					<if test='searchItem.columnValue == "2"'>
+						AND PRTBIZ.PRTBIZ_IDX = 2
+					</if>
+					<if test='searchItem.columnValue == "4"'>
+						AND PRTBIZ.PRTBIZ_IDX = 4
+					</if>
+					<if test='searchItem.columnValue == "6"'>
+						AND PRTBIZ.PRTBIZ_IDX = 6
+					</if>
+					<if test='searchItem.columnValue == "11"'>
+						AND PRTBIZ.PRTBIZ_IDX = 11
+					</if>
+					<if test='searchItem.columnValue == "16"'>
+						AND PRTBIZ.PRTBIZ_IDX = 16
+					</if>
+				</when>
+				<when test="searchItem.columnId == 'JOB_TYPE'">
+					<if test='searchItem.columnValue =="모니터링"'>
+						AND SPTJ.JOB_TYPE = '모니터링'
+					</if>
+					<if test='searchItem.columnValue =="동의(서약)서"'>
+						AND SPTJ.JOB_TYPE = '동의(서약)서'
+					</if>
+					<if test='searchItem.columnValue =="동의서"'>
+						AND SPTJ.JOB_TYPE = '동의서'
+					</if>
+					<if test='searchItem.columnValue =="신청서"'>
+						AND SPTJ.JOB_TYPE = '신청서'
+					</if>
+					<if test='searchItem.columnValue =="수당명세서"'>
+						AND SPTJ.JOB_TYPE = '수당명세서'
+					</if>
+				</when>
+				<when test="searchItem.columnId == 'SGNTR'">
+					<if test='searchItem.columnValue =="기업"'>
+						AND SPTJ.SGNTR = '기업'
+					</if>
+					<if test='searchItem.columnValue =="주치의(공단지원)"'>
+						AND SPTJ.SGNTR = '주치의(공단지원)'
+					</if>
+					<if test='searchItem.columnValue =="공단직원"'>
+						AND SPTJ.SGNTR = '공단직원'
+					</if>
+					<if test='searchItem.columnValue =="외부전문가"'>
+						AND SPTJ.SGNTR = '외부전문가'
+					</if>
+					<if test='searchItem.columnValue =="훈련기관"'>
+						AND SPTJ.SGNTR = '훈련기관'
+					</if>
+					<if test='searchItem.columnValue =="불특정"'>
+						AND SPTJ.SGNTR = '불특정'
+					</if>
+				</when>
+				<otherwise>
+					AND SPTJ.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+				</otherwise>
+			</choose>
+		</foreach>
+		ORDER BY SPTJ.ADMSFM_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP"/>	
+		SELECT SPTJ.ADMSFM_IDX
+					, SPTJ.ADMSFM_VER
+			        , SPTJ.ADMSFM_NM
+			        , SPTJ.JOB_TYPE
+			        , SPTJ.SGNTR
+			        , SPTJ.REGI_DATE
+			        , SPTJ.REGI_NAME
+			        , SPTJ.USE_YN
+                    , SPTJ.TMPR_SAVE_YN
+        	        , SPTJ.DCSN_YN
+			        , PRTBIZ.PRTBIZ_IDX
+		<include refid="editAuthListQuery"/>
+		FROM  HRD_SPTJ_ADMSFM SPTJ
+			LEFT OUTER JOIN HRD_DGNS_PRTBIZ PRTBIZ
+			ON SPTJ.PRTBIZ_IDX = PRTBIZ.PRTBIZ_IDX
+		WHERE SPTJ.ISDELETE = '0'
+		<choose>
+			<when test="insttIdx != null ">
+				<if test="insttIdx == 33">
+					AND 1=1
+				</if>
+				<if test="insttIdx != 33">
+					AND SPTJ.DCSN_YN = 'Y'
+				</if>
+			</when>
+			<when test="userTypeIdx >= 40">
+				AND 1=1
+			</when>
+			<otherwise>
+				AND SPTJ.DCSN_YN = 'Y'
+			</otherwise>
+		</choose>
+		<foreach collection="searchList" item="searchItem" index="i">
+			<choose>
+				<when test="searchItem.columnId == 'PRTBIZ_IDX'">
+					<if test='searchItem.columnValue == "1"'>
+						AND PRTBIZ.PRTBIZ_IDX = 1
+					</if>
+					<if test='searchItem.columnValue == "2"'>
+						AND PRTBIZ.PRTBIZ_IDX = 2
+					</if>
+					<if test='searchItem.columnValue == "4"'>
+						AND PRTBIZ.PRTBIZ_IDX = 4
+					</if>
+					<if test='searchItem.columnValue == "6"'>
+						AND PRTBIZ.PRTBIZ_IDX = 6
+					</if>
+					<if test='searchItem.columnValue == "11"'>
+						AND PRTBIZ.PRTBIZ_IDX = 11
+					</if>
+					<if test='searchItem.columnValue == "16"'>
+						AND PRTBIZ.PRTBIZ_IDX = 16
+					</if>
+				</when>
+				<when test="searchItem.columnId == 'JOB_TYPE'">
+					<if test='searchItem.columnValue =="모니터링"'>
+						AND SPTJ.JOB_TYPE = '모니터링'
+					</if>
+					<if test='searchItem.columnValue =="동의(서약)서"'>
+						AND SPTJ.JOB_TYPE = '동의(서약)서'
+					</if>
+					<if test='searchItem.columnValue =="동의서"'>
+						AND SPTJ.JOB_TYPE = '동의서'
+					</if>
+					<if test='searchItem.columnValue =="신청서"'>
+						AND SPTJ.JOB_TYPE = '신청서'
+					</if>
+					<if test='searchItem.columnValue =="수당명세서"'>
+						AND SPTJ.JOB_TYPE = '수당명세서'
+					</if>
+				</when>
+				<when test="searchItem.columnId == 'SGNTR'">
+					<if test='searchItem.columnValue =="기업"'>
+						AND SPTJ.SGNTR = '기업'
+					</if>
+					<if test='searchItem.columnValue =="주치의(공단지원)"'>
+						AND SPTJ.SGNTR = '주치의(공단지원)'
+					</if>
+					<if test='searchItem.columnValue =="공단직원"'>
+						AND SPTJ.SGNTR = '공단직원'
+					</if>
+					<if test='searchItem.columnValue =="외부전문가"'>
+						AND SPTJ.SGNTR = '외부전문가'
+					</if>
+					<if test='searchItem.columnValue =="훈련기관"'>
+						AND SPTJ.SGNTR = '훈련기관'
+					</if>
+					<if test='searchItem.columnValue =="불특정"'>
+						AND SPTJ.SGNTR = '불특정'
+					</if>
+				</when>
+				<otherwise>
+					AND SPTJ.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+				</otherwise>
+			</choose>
+		</foreach>
+		ORDER BY ADMSFM_IDX DESC
+		<include refid="COUNT_BOTTOM" />	
+	</select>
+	
+	<select id="selectDoc" parameterType="String" resultType="map">
+		SELECT A.DOCTOR_IDX
+				    , A.MEMBER_IDX
+				    , A.INSTT_IDX
+				    , B.REGIMENT
+				    , A.DOCTOR_DEPT_NAME
+				    , A.DOCTOR_OFCPS
+				    , B.MEMBER_NAME
+				    , A.STATUS
+		FROM HRD_COM_DOCTOR A
+		    LEFT OUTER JOIN VIEW_HRD_DOCTOR B
+		    ON A.MEMBER_IDX = B.MEMBER_IDX
+		WHERE
+		    A.INSTT_IDX IS NOT NULL
+		    AND A.DOCTOR_IDX = B.DOCTOR_IDX
+		    AND A.MEMBER_IDX = #{memberIdx}
+	        AND B.USERTYPE_IDX >= 5
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT SPTJ.ADMSFM_IDX
+						, SPTJ.ADMSFM_VER
+				        , SPTJ.ADMSFM_NM
+				        , SPTJ.TMPR_SAVE_YN
+      			        , PRTBIZ.PRTBIZ_IDX
+				        , SPTJ.JOB_TYPE
+				        , SPTJ.SGNTR
+				        , SPTJ.ELCTRN_FORMAT_ID
+				        , SPTJ.ELCTRN_FORMAT_COURS
+				        , SPTJ.REGI_DATE
+				        , SPTJ.USE_YN
+                  	    , SPTJ.REGI_IDX
+                        , SPTJ.REGI_NAME
+                        , DOC.DOCTOR_DEPT_NAME,
+				CASE
+			        WHEN PRTBIZ.PRTBIZ_IDX = 1 THEN 'S-OJT'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 2 THEN '일학습병행'   
+			        WHEN PRTBIZ.PRTBIZ_IDX = 4 THEN '사업주훈련'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 11 THEN '컨소시엄'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 6 THEN '대부'
+			        WHEN PRTBIZ.PRTBIZ_IDX = 16 THEN '인증'
+			    ELSE '기타'
+		    END AS PRTBIZ_TITLE
+		<include refid="editAuthListQuery"/>
+		FROM  HRD_SPTJ_ADMSFM SPTJ
+			LEFT OUTER JOIN HRD_DGNS_PRTBIZ PRTBIZ
+			ON SPTJ.PRTBIZ_IDX = PRTBIZ.PRTBIZ_IDX
+            LEFT OUTER JOIN HRD_COM_DOCTOR DOC
+            ON SPTJ.REGI_IDX = DOC.MEMBER_IDX
+		WHERE SPTJ.ADMSFM_IDX  = #{admsfmIdx}
+		ORDER BY SPTJ.ADMSFM_IDX DESC
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+	<selectKey keyProperty="admsfmIdx" resultType="Integer" order="BEFORE">
+		SELECT ADMSFM_SEQ.NEXTVAL FROM DUAL
+	</selectKey>
+		INSERT INTO HRD_SPTJ_ADMSFM (ADMSFM_IDX, ADMSFM_NM, PRTBIZ_IDX, JOB_TYPE, SGNTR, ELCTRN_FORMAT_ID, ELCTRN_FORMAT_COURS, TMPR_SAVE_YN, DCSN_YN, USE_YN, REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES (#{admsfmIdx}, #{admsfmNm}, #{prtbizIdx}, #{jobType}, #{sgntr}, #{formatId}, #{formatCours}, #{tmprSaveYn}, #{dcsnYn}, #{useYn}, #{regiIdx}, #{regiId}, #{regiName}, sysdate, #{regiIp})
+	</insert>
+	
+	<insert id="insertFile" parameterType="java.util.HashMap">
+		INSERT INTO HRD_SPTJ_ADMSFM_FILE (ADMSFM_IDX, FLE_IDX, ITEM_ID, FILE_SAVED_NAME, FILE_ORIGIN_NAME, FILE_SIZE, REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES (#{admsfmIdx}, ADMSFM_FILE_SEQ.NEXTVAL, #{itemId}, #{resultFileName }, #{uploadFileName}, #{fileSize}, #{regiIdx}, #{regiId}, #{regiName}, sysdate, #{regiIp}) 
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE HRD_SPTJ_ADMSFM 
+		SET ADMSFM_NM = #{admsfmNm}
+			, ADMSFM_VER = (#{version}+0.1)
+			, PRTBIZ_IDX = #{prtbizIdx}
+			, JOB_TYPE = #{jobType}
+			, SGNTR = #{sgntr}
+			, ELCTRN_FORMAT_ID = #{formatId}
+			, ELCTRN_FORMAT_COURS = #{formatCours}
+			, TMPR_SAVE_YN = #{tmprSaveYn}
+			, DCSN_YN = #{dcsnYn}
+			, USE_YN = #{useYn}
+			, LAST_MODI_IDX = #{lastModiIdx}
+			, LAST_MODI_ID = #{lastModiId}
+			, LAST_MODI_NAME = #{lastModiName}
+			, LAST_MODI_DATE = sysdate
+			, LAST_MODI_IP = #{lastModiIp}
+		WHERE ADMSFM_IDX = #{admsfmIdx}
+	</update>
+	
+	<update id="updateFile" parameterType="java.util.HashMap">
+		UPDATE HRD_SPTJ_ADMSFM_FILE
+		SET ITEM_ID = #{itemId}
+			, FILE_SAVED_NAME = #{resultFileName}
+			, FILE_ORIGIN_NAME = #{uploadFileName}
+			, FILE_SIZE = #{fileSize}
+			, REGI_IDX = #{lastModiIdx}
+			, REGI_ID = #{lastModiId}
+			, REGI_NAME = #{lastModiName}
+			, REGI_DATE = sysdate
+			, REGI_IP = #{lastModiIp}
+		WHERE ADMSFM_IDX =#{admsfmIdx}
+			AND FLE_IDX = #{fleIdx}
+	</update>
+	
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT * 
+		FROM HRD_SPTJ_ADMSFM_FILE
+		WHERE ADMSFM_IDX=#{admsfmIdx}
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE HRD_SPTJ_ADMSFM 
+		SET ISDELETE = '1'
+			, LAST_MODI_IDX = #{lastModiIdx}
+			, LAST_MODI_ID = #{lastModiId}
+			, LAST_MODI_NAME = #{lastModiName}
+			, LAST_MODI_DATE = sysdate
+			, LAST_MODI_IP = #{lastModiIp}
+		WHERE ADMSFM_IDX =#{admsfmIdx}
+	</update>
+	
+</mapper>            

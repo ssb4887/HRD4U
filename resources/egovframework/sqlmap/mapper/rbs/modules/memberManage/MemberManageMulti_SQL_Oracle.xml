@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. [KEY_IDX_COLUMN], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.memberManage.MemberManageMultiMapper">
+	<!-- 테이블명 -->
+	<sql id="AUTH_MENU"><trim><include refid="rbs.commonMapper.TABLE_PRE_FLAG" />AUTH_MENU</trim></sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.*
+			FROM 
+			<include refid="AUTH_MENU"/> A 
+			WHERE A.AUTH_IDX = #{AUTH_IDX}
+			ORDER BY SITE_ID
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			<include refid="AUTH_MENU"/> A
+			<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.*
+			FROM 
+			<include refid="AUTH_MENU"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="AUTH_MENU"/> (
+			AUTH_IDX, SITE_ID, VER_IDX, MENU_IDX, M, C, R, U, D, F, 
+			REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP,
+			LAST_MODI_IDX, LAST_MODI_ID, LAST_MODI_NAME, LAST_MODI_DATE, LAST_MODI_IP, ISDELETE
+		) VALUES (
+			#{AUTH_IDX}, #{SITE_ID}, #{VER_IDX}, #{MENU_IDX}, #{M}, #{C}, #{R}, #{U}, #{D}, #{F}, 
+			#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, <include refid="rbs.commonDBMSMapper.currentDate"/>, #{REGI_IP},
+			#{LAST_MODI_IDX}, #{LAST_MODI_ID}, #{LAST_MODI_NAME}, <include refid="rbs.commonDBMSMapper.currentDate"/>, #{LAST_MODI_IP}, 0
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE <include refid="AUTH_MENU"/> SET 
+		<include refid="rbs.commonMapper.UPDATE_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+		AND MENU_IDX = #{KEY_IDX}
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="AUTH_MENU"/>  
+		WHERE AUTH_IDX = #{AUTH_IDX}
+		<include refid="rbs.commonMapper.COM_LK_WHERE"/>
+	</delete>
+</mapper>            

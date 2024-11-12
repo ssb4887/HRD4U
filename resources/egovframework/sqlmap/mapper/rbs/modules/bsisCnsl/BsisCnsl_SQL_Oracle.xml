@@ -1,0 +1,900 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 1. [KEY_IDX_COLUMN], HRD_BSISCNSL, [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 
+	사용 2. 그 외 필요에 따라 쿼리 수정하여 사용 -->
+<mapper namespace="rbs.modules.bsisCnsl.bsisCnslMapper">
+	<!-- 테이블명 -->
+	<sql id="BSC_TABLE_NAME">
+		<trim>HRD_DGNS_BSC</trim>
+	</sql>
+
+	<sql id="QUSTNR_RSLT_TABLE_NAME">
+		<trim>HRD_DGNS_QUSTNR_RSLT</trim>
+	</sql>
+	<sql id="QUSTNR_RSLT_ANSWER_TABLE_NAME">
+		<trim>HRD_DGNS_QUSTNR_RSLT_ANSWER</trim>
+	</sql>
+	<sql id="QUSTNR_TABLE_NAME">
+		<trim>HRD_DGNS_QUSTNR</trim>
+	</sql>
+	<sql id="QUSTNR_QUESTION_TABLE_NAME">
+		<trim>HRD_DGNS_QUSTNR_QUESTION</trim>
+	</sql>
+	<sql id="QUSTNR_QUESTION_DETAIL_TABLE_NAME">
+		<trim>HRD_DGNS_QUSTNR_QUESTION_DTL</trim>
+	</sql>
+
+	<sql id="BSISCNSL_TABLE_NAME">
+		<trim>HRD_DGNS_BSISCNSL</trim>
+	</sql>
+	<sql id="BSISCNSL_RCTR_BIZ_TABLE_NAME">
+		<trim>HRD_DGNS_BSISCNSL_RCTR_BIZ</trim>
+	</sql>
+	<sql id="BSISCNSL_RCTR_COURSE_TABLE_NAME">
+		<trim>HRD_DGNS_BSISCNSL_RCTR_COURSE</trim>
+	</sql>
+
+	<sql id="COUNT_TOP">
+		<trim>SELECT COUNT(rn) FROM( SELECT rownum rn, TB.* FROM (</trim>
+	</sql>
+	<sql id="COUNT_BOTTOM">
+		<trim>) TB )</trim>
+	</sql>
+
+
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT
+		<trim>
+			<include refid="rbs.commonDBMSMapper.nullFn" />
+			(MAX(IDX), 0)
+		</trim>
+		+ 1 MAXID
+		FROM
+		<include refid="BSISCNSL_TABLE_NAME" />
+		A
+	</select>
+
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 <select id="nextId" parameterType="java.util.HashMap" 
+		resultType="java.lang.String"> SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> 
+		|| LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.[KEY_IDX_COLUMN]), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> 
+		|| '0'), 7)) + 1, 4, '0') MAXID FROM <include refid="BSISCNSL_TABLE_NAME"/> 
+		A WHERE A.[KEY_IDX_COLUMN] LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> 
+		|| '%' </select> -->
+	<!-- 수정/삭제 권한 : 등록자 -->
+	<!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+			, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE
+			'0' END AS
+			AUTH_MNG
+		</if>
+	</sql>
+
+	<!-- 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+			AND A.REGI_IDX = #{AUTH_MEMBER_IDX}
+		</if>
+	</sql>
+
+	<!-- 기초진단 리스트 -->
+	<select id="selectBscList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT A.BSC_IDX, A.BPL_NO, A.ISSUE_NO AS BSC_ISSUE_NO,
+		TO_CHAR(A.ISSUE_DATE,'YYYY-MM-DD') AS BSC_ISSUE_DATE, A.CORP_NAME,
+		A.STATUS AS BSC_STATUS
+		FROM
+		<include refid="BSC_TABLE_NAME" />
+		A
+		<where>
+			A.BPL_NO=#{bplNo}
+			AND NOT EXISTS(SELECT 1 FROM
+			<include refid="QUSTNR_RSLT_TABLE_NAME" />
+			B WHERE A.BSC_IDX=B.BSC_IDX)
+		</where>
+		ORDER BY A.BSC_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<!-- 기초진단 리스트 총갯수 -->
+	<select id="selectBscTotalCount"
+		parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP" />
+		SELECT A.BSC_IDX, A.BPL_NO, A.ISSUE_NO AS BSC_ISSUE_NO,
+		TO_DATE(A.ISSUE_DATE,'YY/MM/DD') AS BSC_ISSUE_DATE, A.CORP_NAME,
+		A.STATUS AS BSC_STATUS
+		FROM
+		<include refid="BSC_TABLE_NAME" />
+		A
+		<where>
+			A.BPL_NO=#{bplNo}
+			AND NOT EXISTS(SELECT 1 FROM
+			<include refid="QUSTNR_RSLT_TABLE_NAME" />
+			B WHERE A.BSC_IDX=B.BSC_IDX)
+		</where>
+		ORDER BY A.BSC_IDX DESC
+		<include refid="COUNT_BOTTOM" />
+	</select>
+
+	<!-- 기초진단&설문조사&기초컨설팅 리스트 -->
+	<select id="selectList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.BSC_IDX, A.BPL_NO, A.CORP_NAME, A.CORP_PIC_NAME, A.ISSUE_NO AS
+		ISSUE_NO,
+		A.ISSUE_DATE AS BSC_ISSUE_DATE,
+		A.INSTT_IDX, A.INSTT_NAME,
+		A.DOCTOR_NAME, A.DOCTOR_DEPT_NAME, A.DOCTOR_OFCPS,
+		PKG_DGUARD.FN_DEC_TELNO(A.DOCTOR_TELNO) AS FN_DEC_TELNO,
+		A.DOCTOR_EMAIL,
+		B.RSLT_IDX, B.STATUS AS QUSTNR_STATUS, B.ISSUE_DATE AS
+		QUSTNR_ISSUE_DATE,
+		B.QUSTNR_IDX, B.ISSUE_NO AS QUSTNR_ISSUE_NO,
+		C.BSISCNSL_IDX, C.ISSUE_DATE AS BSISCNSL_ISSUE_DATE, C.STATUS AS
+		BSISCNSL_STATUS,
+		C.ISSUE_NO AS BSISCNSL_ISSUE_NO,
+		C.CORP_PIC_NAME AS
+		BSISCNSL_CORP_PIC_NAME, C.CORP_PIC_OFCPS AS
+		BSISCNSL_CORP_PIC_OFCPS,
+		PKG_DGUARD.FN_DEC_TELNO(C.CORP_PIC_TELNO) AS BSISCNSL_CORP_PIC_TELNO,
+		C.CORP_PIC_EMAIL AS
+		BSISCNSL_CORP_PIC_EMAIL,
+		C.INSTT_IDX AS BSISCNSL_INSTT_IDX,
+		C.INSTT_NAME AS BSISCNSL_INSTT_NAME,
+		C.DOCTOR_NAME AS
+		BSISCNSL_DOCTOR_NAME, C.DOCTOR_DEPT_NAME AS
+		BSISCNSL_DOCTOR_DEPT_NAME,
+		C.DOCTOR_OFCPS AS BSISCNSL_DOCTOR_OFCPS,
+		PKG_DGUARD.FN_DEC_TELNO(C.DOCTOR_TELNO) AS
+		BSISCNSL_DOCTOR_TELNO, C.DOCTOR_EMAIL AS
+		BSISCNSL_DOCTOR_EMAIL
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="BSC_TABLE_NAME" />
+		A
+		LEFT JOIN
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		B
+		ON A.BSC_IDX=B.BSC_IDX
+		LEFT JOIN
+		<include refid="BSISCNSL_TABLE_NAME" />
+		C
+		ON B.RSLT_IDX=C.RSLT_IDX
+		<where>
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'BSC_ISSUE_DATE1'">
+						AND TO_CHAR(A.ISSUE_DATE, 'YYYY-MM-DD')
+						${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'BSC_ISSUE_DATE2'">
+						AND TO_CHAR(A.ISSUE_DATE, 'YYYY-MM-DD')
+						${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'INSTT_IDX' and searchItem.columnValue == 'empty'">
+						AND (
+							C.${searchItem.columnId} IS NULL 
+							OR
+							A.${searchItem.columnId} IS NULL
+						)
+					</when>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND (
+							C.${searchItem.columnId} = #{searchItem.columnValue}
+							OR
+							A.${searchItem.columnId} = #{searchItem.columnValue}
+						)
+					</when>
+					<when test="searchItem.columnId == 'DOCTOR_IDX'">
+						AND C.${searchItem.columnId} = #{searchItem.columnValue} 
+					</when>
+					<otherwise>
+						AND A.${searchItem.columnId} ${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+					</otherwise>
+				</choose>
+			</foreach>
+			AND A.ISSUE_DATE IS NOT NULL
+			AND B.STATUS IS NOT NULL
+
+			<!-- 본부(1000000001) -->
+			<choose>
+				<when
+					test="login.regiCode != null and login.regiCode == '1000000001'">
+					AND 1=1
+				</when>
+				<when
+					test="login.regiCode != null and login.regiCode != '1000000001'">
+					AND (
+					A.INSTT_IDX = (SELECT INSTT_IDX FROM HRD_COM_INSTT WHERE
+					BRFFC_CD =
+					#{login.regiCode})
+					OR
+					C.INSTT_IDX = (SELECT INSTT_IDX FROM
+					HRD_COM_INSTT WHERE BRFFC_CD =
+					#{login.regiCode})
+					)
+				</when>
+				<when test="login != null and login.usertypeIdx > 40">
+					AND 1=1
+				</when>
+				<otherwise>
+					AND 1=0
+				</otherwise>
+			</choose>
+
+			ORDER BY BSC_IDX DESC
+		</where>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<select id="selectTotalCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		<include refid="COUNT_TOP" />
+		SELECT
+		A.BSC_IDX, A.BPL_NO, A.CORP_NAME, A.CORP_PIC_NAME, A.ISSUE_DATE
+		AS
+		BSC_ISSUE_DATE,
+		B.RSLT_IDX, B.STATUS AS QUSTNR_STATUS, B.ISSUE_DATE
+		AS QUSTNR_ISSUE_DATE,
+		B.QUSTNR_IDX,
+		C.BSISCNSL_IDX, C.ISSUE_DATE AS
+		BSISCNSL_ISSUE_DATE, C.STATUS AS BSISCNSL_STATUS,
+		C.ISSUE_NO AS
+		BSISCNSL_ISSUE_NO
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="BSC_TABLE_NAME" />
+		A
+		LEFT JOIN
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		B
+		ON A.BSC_IDX=B.BSC_IDX
+		LEFT JOIN
+		<include refid="BSISCNSL_TABLE_NAME" />
+		C
+		ON B.RSLT_IDX=C.RSLT_IDX
+		<where>
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'BSC_ISSUE_DATE1'">
+						AND TO_CHAR(A.ISSUE_DATE, 'YYYY-MM-DD')
+						${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'BSC_ISSUE_DATE2'">
+						AND TO_CHAR(A.ISSUE_DATE, 'YYYY-MM-DD')
+						${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'INSTT_IDX' and searchItem.columnValue == 'empty'">
+						AND (
+							C.${searchItem.columnId} IS NULL 
+							OR
+							A.${searchItem.columnId} IS NULL
+						)
+					</when>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND (
+							C.${searchItem.columnId} = #{searchItem.columnValue}
+							OR
+							A.${searchItem.columnId} = #{searchItem.columnValue}
+						)
+					</when>
+					<when test="searchItem.columnId == 'DOCTOR_IDX'">
+						AND C.${searchItem.columnId} = #{searchItem.columnValue} 
+					</when>
+					<otherwise>
+						AND A.${searchItem.columnId} ${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+					</otherwise>
+				</choose>
+			</foreach>
+			AND A.ISSUE_DATE IS NOT NULL
+			AND B.STATUS IS NOT NULL
+
+			<!-- 본부(1000000001) -->
+			<choose>
+				<when
+					test="login.regiCode != null and login.regiCode == '1000000001'">
+					AND 1=1
+				</when>
+				<when
+					test="login.regiCode != null and login.regiCode != '1000000001'">
+					AND (
+					A.INSTT_IDX = (SELECT INSTT_IDX FROM HRD_COM_INSTT WHERE
+					BRFFC_CD =
+					#{login.regiCode})
+					OR
+					C.INSTT_IDX = (SELECT INSTT_IDX FROM
+					HRD_COM_INSTT WHERE BRFFC_CD =
+					#{login.regiCode})
+					)
+				</when>
+				<when test="login != null and login.usertypeIdx > 40">
+					AND 1=1
+				</when>
+				<otherwise>
+					AND 1=0
+				</otherwise>
+			</choose>
+
+			ORDER BY BSC_IDX DESC
+		</where>
+		<include refid="COUNT_BOTTOM" />
+	</select>
+
+	<!-- (web)HRD기초컨설팅 이력 count -->
+	<select id="selectMyTotalCount"
+		parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP" />
+		SELECT
+		A.BSC_IDX, A.BPL_NO, A.CORP_NAME, A.CORP_PIC_NAME, A.ISSUE_DATE
+		AS
+		BSC_ISSUE_DATE,
+		B.RSLT_IDX, B.STATUS AS QUSTNR_STATUS, B.ISSUE_DATE
+		AS QUSTNR_ISSUE_DATE,
+		B.QUSTNR_IDX,
+		C.BSISCNSL_IDX, C.ISSUE_DATE AS
+		BSISCNSL_ISSUE_DATE, C.STATUS AS BSISCNSL_STATUS,
+		C.ISSUE_NO AS
+		BSISCNSL_ISSUE_NO
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="BSC_TABLE_NAME" />
+		A
+		LEFT JOIN
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		B
+		ON A.BSC_IDX=B.BSC_IDX
+		LEFT JOIN
+		<include refid="BSISCNSL_TABLE_NAME" />
+		C
+		ON B.RSLT_IDX=C.RSLT_IDX
+		<where>
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'BSC_ISSUE_DATE1'">
+						AND TO_CHAR(A.ISSUE_DATE, 'YYYY-MM-DD')
+						${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'BSC_ISSUE_DATE2'">
+						AND TO_CHAR(A.ISSUE_DATE, 'YYYY-MM-DD')
+						${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'BSISCNSL_STATUS'">
+						AND C.STATUS = #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'BSISCNSL_ISSUE_NO'">
+						AND C.ISSUE_NO ${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+						AND C.ISSUE_NO IS NOT NULL
+					</when>
+					<when test="searchItem.columnId == 'BPL_NO'">
+						AND A.BPL_NO IN ${searchItem.columnValue}
+					</when>
+				</choose>
+			</foreach>
+			AND A.ISSUE_DATE IS NOT NULL
+			AND B.STATUS IS NOT NULL
+			<if test="bplNo != null and bplNo != ''">
+			AND A.BPL_NO =
+			#{bplNo}
+			</if>
+		</where>
+		ORDER BY BSISCNSL_IDX DESC, BSC_IDX DESC
+		<include refid="COUNT_BOTTOM" />
+	</select>
+
+	<!-- (web)HRD기초컨설팅 이력 list -->
+	<select id="selectMyList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.BSC_IDX, A.BPL_NO, A.CORP_NAME, A.CORP_PIC_NAME, A.ISSUE_DATE
+		AS
+		BSC_ISSUE_DATE,
+		B.RSLT_IDX, B.STATUS AS QUSTNR_STATUS, B.ISSUE_DATE
+		AS QUSTNR_ISSUE_DATE,
+		B.QUSTNR_IDX,
+		C.BSISCNSL_IDX, C.ISSUE_DATE AS
+		BSISCNSL_ISSUE_DATE, C.STATUS AS BSISCNSL_STATUS,
+		C.ISSUE_NO AS
+		BSISCNSL_ISSUE_NO
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="BSC_TABLE_NAME" />
+		A
+		LEFT JOIN
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		B
+		ON A.BSC_IDX=B.BSC_IDX
+		LEFT JOIN
+		<include refid="BSISCNSL_TABLE_NAME" />
+		C
+		ON B.RSLT_IDX=C.RSLT_IDX
+		<where>
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'BSC_ISSUE_DATE1'">
+						AND TO_CHAR(A.ISSUE_DATE, 'YYYY-MM-DD')
+						${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'BSC_ISSUE_DATE2'">
+						AND TO_CHAR(A.ISSUE_DATE, 'YYYY-MM-DD')
+						${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'BSISCNSL_STATUS'">
+						AND C.STATUS = #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'BSISCNSL_ISSUE_NO'">
+						AND C.ISSUE_NO ${searchItem.columnVFlag}
+						#{searchItem.columnValue}
+						AND C.ISSUE_NO IS NOT NULL
+					</when>
+					<when test="searchItem.columnId == 'BPL_NO'">
+						AND A.BPL_NO IN ${searchItem.columnValue}
+					</when>
+				</choose>
+			</foreach>
+			AND A.ISSUE_DATE IS NOT NULL
+			AND B.STATUS IS NOT NULL
+			<if test="bplNo != null and bplNo != ''">
+			AND A.BPL_NO =
+			#{bplNo}
+			</if>
+		</where>
+		ORDER BY BSISCNSL_IDX DESC, BSC_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<select id="selectCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="BSISCNSL_TABLE_NAME" />
+		A
+		<!-- <include refid="rbs.commonMapper.SELECT_DF_WHERE"/> -->
+	</select>
+
+	<select id="selectView" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.*
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="BSISCNSL_TABLE_NAME" />
+		A
+		<!-- <include refid="rbs.commonMapper.SELECT_DF_WHERE"/> -->
+	</select>
+
+	<!-- 설문조사지(QUSTNR) -->
+	<select id="selectQustnrView" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.*, B.DETAIL_IDX, B.NO AS DETAIL_NO, B.OPTN_CN
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="QUSTNR_QUESTION_TABLE_NAME" />
+		A
+		LEFT OUTER JOIN
+		<include refid="QUSTNR_QUESTION_DETAIL_TABLE_NAME" />
+		B
+		ON A.QUSTNR_IDX=B.QUSTNR_IDX AND A.QUESTION_IDX=B.QUESTION_IDX
+		<where>
+			<choose>
+				<when test="rsltIdx != null">
+					A.QUSTNR_IDX =
+					(SELECT QUSTNR_IDX FROM
+					<include refid="QUSTNR_RSLT_TABLE_NAME" />
+					WHERE RSLT_IDX=#{rsltIdx} ORDER BY QUSTNR_IDX DESC FETCH FIRST 1
+					ROWS ONLY)
+				</when>
+				<otherwise>
+					A.QUSTNR_IDX=
+					(SELECT QUSTNR_IDX FROM
+					<include refid="QUSTNR_TABLE_NAME" />
+					WHERE USE_YN='Y' AND ISDELETE='N' ORDER BY QUSTNR_IDX DESC FETCH
+					FIRST 1 ROWS ONLY)
+				</otherwise>
+			</choose>
+		</where>
+		ORDER BY A.QUESTION_IDX, B.NO
+		<!-- <include refid="rbs.commonMapper.SELECT_DF_WHERE"/> -->
+	</select>
+
+	<!-- 설문조사지 답변(QUSTNR Answer) -->
+	<select id="selectQustnrAnswer"
+		parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+		A.*,
+		B.BSC_IDX, B.STATUS AS QUSTNR_STATUS, B.ISSUE_NO,
+		TO_CHAR(B.ISSUE_DATE,'YYYY-MM-DD') ISSUE_DATE,
+		C.BSISCNSL_IDX, C.STATUS
+		AS BSISCNSL_STATUS
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="QUSTNR_RSLT_ANSWER_TABLE_NAME" />
+		A
+		LEFT OUTER JOIN
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		B
+		LEFT JOIN
+		<include refid="BSISCNSL_TABLE_NAME" />
+		C ON B.RSLT_IDX=C.RSLT_IDX
+		ON A.RSLT_IDX=B.RSLT_IDX
+		<where>
+			A.RSLT_IDX = #{rsltIdx}
+		</where>
+		<!-- <include refid="rbs.commonMapper.SELECT_DF_WHERE"/> -->
+	</select>
+
+	<select id="selectFileList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		<foreach collection="columnList" item="columnItem" index="i"
+			separator=",">
+			${columnItem}
+		</foreach>
+		FROM
+		<include refid="BSISCNSL_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.${columnItem}_SAVED_NAME, A.${columnItem}_ORIGIN_NAME
+		FROM
+		<include refid="BSISCNSL_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+	</select>
+
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="BSISCNSL_TABLE_NAME" />
+		SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1
+		WHERE IDX =
+		#{KEY_IDX}
+	</update>
+
+	<select id="authCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="BSISCNSL_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<include refid="editAuthWhereQuery" />
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.*
+		FROM
+		<include refid="BSISCNSL_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE" />
+		<include refid="editAuthWhereQuery" />
+	</select>
+
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO
+		<include refid="BSISCNSL_TABLE_NAME" />
+		(
+		<include refid="rbs.commonMapper.INSERT_COLUMNS" />
+		, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+		<include refid="rbs.commonMapper.INSERT_VALUES" />
+		,
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		,
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		)
+	</insert>
+
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="BSISCNSL_TABLE_NAME" />
+		SET LAST_MODI_DATE =
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</update>
+
+	<select id="deleteList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.*
+		FROM
+		<include refid="BSISCNSL_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE" />
+		ORDER BY A.IDX
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<select id="deleteCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="BSISCNSL_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE" />
+	</select>
+
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="BSISCNSL_TABLE_NAME" />
+		SET ISDELETE = '1', LAST_MODI_DATE =
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</update>
+
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="BSISCNSL_TABLE_NAME" />
+		SET ISDELETE = '0', LAST_MODI_DATE =
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</update>
+
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM
+		<include refid="BSISCNSL_TABLE_NAME" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</delete>
+
+	<update id="updateQustnrResult"
+		parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		SET
+		STATUS=#{status}
+		<if test="issueNo != null">, ISSUE_NO=#{issueNo}, ISSUE_DATE=sysdate </if>
+		, LAST_MODI_IDX=#{LAST_MODI_IDX}
+		, LAST_MODI_ID=#{LAST_MODI_ID}
+		,
+		LAST_MODI_NAME=#{LAST_MODI_NAME}
+		, LAST_MODI_DATE=sysdate
+		,
+		LAST_MODI_IP=#{LAST_MODI_IP}
+		WHERE RSLT_IDX=#{rsltIdx}
+	</update>
+
+	<insert id="insertQustnrResult"
+		parameterType="java.util.HashMap" useGeneratedKeys="true"
+		keyProperty="rsltIdx">
+		<selectKey keyProperty="rsltIdx"
+			resultType="java.lang.Integer" order="BEFORE">
+			SELECT NVL(MAX(RSLT_IDX),0) + 1 FROM
+			<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		</selectKey>
+		INSERT INTO
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		(RSLT_IDX, BSC_IDX, QUSTNR_IDX, STATUS, ISSUE_NO, ISSUE_DATE,
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES
+		(#{rsltIdx},
+		#{bscIdx}, #{qustnrIdx}, #{status},
+		<choose>
+			<when test="issueNo != null">#{issueNo}, sysdate,</when>
+			<otherwise>'', '',</otherwise>
+		</choose>
+		#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP})
+
+	</insert>
+
+	<insert id="updateQustnrAnswers" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";"
+			open="DECLARE BEGIN " close="; END;">
+			UPDATE
+			<include refid="QUSTNR_RSLT_ANSWER_TABLE_NAME" />
+			SET
+			QUESTION_ANSWER=#{item.answer}, QUESTION_IDX=#{item.questionIdx}
+			<where>
+				RSLT_IDX=#{item.rsltIdx} AND ANSWER_IDX=#{item.answerIdx}
+			</where>
+		</foreach>
+	</insert>
+
+	<!-- <foreach collection="list" item="item" separator=","> <selectKey keyProperty="ANSWER_IDX" 
+		resultType="java.lang.Integer" order="BEFORE"> SELECT NVL(MAX(ANSWER_IDX),0) 
+		+ 1 FROM <include refid="QUSTNR_RSLT_ANSWER_TABLE_NAME" /> </selectKey> (#{item.rsltIdx}, 
+		#{ANSWER_IDX}, #{item.qustnrIdx}, #{item.questionIdx}, #{item.answer}) </foreach> -->
+
+	<select id="selectQustnrAnswerOnly" resultType="dataMap"
+		parameterType="java.util.HashMap">
+		SELECT * FROM
+		<include refid="QUSTNR_RSLT_ANSWER_TABLE_NAME" />
+		WHERE RSLT_IDX=#{rsltIdx}
+		ORDER BY QUESTION_IDX, ANSWER_IDX
+	</select>
+
+	<select id="getMaxAnswerIdx" resultType="java.lang.Integer">
+		SELECT NVL(MAX(ANSWER_IDX), 0) + 1 FROM
+		<include refid="QUSTNR_RSLT_ANSWER_TABLE_NAME" />
+	</select>
+
+	<insert id="insertQustnrAnswers" parameterType="java.util.List">
+		<foreach collection="list" item="item" open="INSERT ALL"
+			close="SELECT * FROM DUAL" separator=" ">
+			INTO
+			<include refid="QUSTNR_RSLT_ANSWER_TABLE_NAME" />
+			VALUES
+			(#{item.rsltIdx}, #{item.answerIdx}, #{item.qustnrIdx},
+			#{item.questionIdx},
+			#{item.answer})
+		</foreach>
+	</insert>
+
+	<select id="isQustnrExistsByBsc" parameterType="dataMap"
+		resultType="dataMap">
+		SELECT * FROM
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		WHERE BSC_IDX=#{bscIdx}
+		FETCH FIRST 1 ROWS ONLY
+	</select>
+
+	<select id="getIssue" parameterType="dataMap" resultType="map">
+		SELECT REGEXP_REPLACE(ISSUE_NO, '(-1$)', '-2') ISSUE_NO,
+		to_char(sysdate, 'yyyy-mm-dd') ISSUE_DATE
+		FROM
+		<include refid="BSC_TABLE_NAME" />
+		WHERE BSC_IDX = #{bscIdx}
+	</select>
+
+	<select id="getBscInitList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.BSC_IDX, A.BPL_NO, A.CORP_NAME, A.CORP_PIC_NAME, A.ISSUE_DATE
+		AS
+		BSC_ISSUE_DATE, A.ISSUE_NO AS BSC_ISSUE_NO
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="BSC_TABLE_NAME" />
+		A
+		LEFT JOIN
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		B
+		ON A.BSC_IDX=B.BSC_IDX
+		LEFT JOIN
+		<include refid="BSISCNSL_TABLE_NAME" />
+		C
+		ON B.RSLT_IDX=C.RSLT_IDX
+		<where>
+			A.ISSUE_DATE IS NOT NULL
+			AND A.BPL_NO = #{bplNo}
+			AND B.BSC_IDX IS
+			NULL
+			AND C.RSLT_IDX IS NULL
+		</where>
+		ORDER BY BSISCNSL_IDX DESC, BSC_IDX DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<select id="getBscInitTotalCount"
+		parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP" />
+		SELECT
+		A.BSC_IDX, A.BPL_NO, A.CORP_NAME, A.CORP_PIC_NAME,
+		TO_DATE(A.ISSUE_DATE,'YYYY-MM-DD') AS BSC_ISSUE_DATE, A.ISSUE_NO AS
+		BSC_ISSUE_NO
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="BSC_TABLE_NAME" />
+		A
+		LEFT JOIN
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		B
+		ON A.BSC_IDX=B.BSC_IDX
+		LEFT JOIN
+		<include refid="BSISCNSL_TABLE_NAME" />
+		C
+		ON B.RSLT_IDX=C.RSLT_IDX
+		<where>
+			A.ISSUE_DATE IS NOT NULL
+			AND A.BPL_NO = #{bplNo}
+			AND B.BSC_IDX IS
+			NULL
+			AND C.RSLT_IDX IS NULL
+		</where>
+		ORDER BY BSISCNSL_IDX DESC, BSC_IDX DESC
+		<include refid="COUNT_BOTTOM" />
+	</select>
+
+	<select id="getRsltIdx" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(RSLT_IDX) FROM
+		<include refid="QUSTNR_RSLT_TABLE_NAME" />
+		WHERE BSC_IDX=#{bscIdx}
+		ORDER BY RSLT_IDX DESC
+	</select>
+
+	<select id="getCompletedBsisCnslOne" parameterType="String"
+		resultType="HashMap">
+		SELECT 
+			BSISCNSL_IDX, 
+			CORP_PIC_NAME,
+			CORP_PIC_OFCPS,
+			PKG_DGUARD.FN_DEC_TELNO(CORP_PIC_TELNO) AS CORP_PIC_TELNO,
+			CORP_PIC_EMAIL, 
+			ISSUE_DATE, 
+			COUNT(BSISCNSL_IDX) as count
+		FROM <include refid="BSISCNSL_TABLE_NAME" />
+		WHERE BPL_NO = #{bplNo}
+		AND STATUS = '1'
+		GROUP BY 
+			BSISCNSL_IDX, 
+			ISSUE_DATE, 
+			CORP_PIC_NAME,
+			CORP_PIC_OFCPS,
+			CORP_PIC_TELNO,
+			CORP_PIC_EMAIL
+		ORDER BY ISSUE_DATE
+		FETCH FIRST 1 ROW ONLY
+	</select>
+	
+	<select id="selectListForAdmin" parameterType="map" resultType="dataMap">
+		SELECT
+		  ROW_NUMBER() OVER(ORDER BY ISSUE_DATE) AS RN, 
+		  A.INSTT_IDX, A.INSTT_NAME, A.DOCTOR_OFCPS, A.DOCTOR_NAME, A.ISSUE_DATE, A.DOC, A.ISSUE_NO, A.BPL_NO, A.PRISUP_CD, A.CORP_NAME, A.TRANSFER, A.CORP_PIC_OFCPS, A.CORP_PIC_NAME, PKG_DGUARD.FN_DEC_TELNO(A.CORP_PIC_TELNO) AS CORP_PIC_TELNO, A.CORP_PIC_EMAIL, 
+		  B.INSTT_NO 
+		FROM (
+			select 
+				instt_idx, instt_name, doctor_ofcps, doctor_name, to_char(issue_date, 'YYYY-mm-dd') issue_date, '1.기초진단지' doc, issue_no,bpl_no, decode(pri_sup_cd,1,'대규모 기업', '우선지원대상기업') prisup_cd, corp_name, '' transfer, corp_pic_ofcps, corp_pic_name, corp_pic_telno, corp_pic_email 
+				from <include refid="BSC_TABLE_NAME" /> where issue_date >= #{date}
+			union all
+			select 
+				b.instt_idx, b.instt_name, b.doctor_ofcps, b.doctor_name, to_char(a.issue_date, 'YYYY-mm-dd') issue_date, '2.훈련요구역량조사지' doc, a.issue_no, b.bpl_no, decode(b.pri_sup_cd,1,'대규모 기업', '우선지원대상기업') prisup_cd, b.corp_name, '' transfer, b.corp_pic_ofcps, b.corp_pic_name, b.corp_pic_telno, b.corp_pic_email 
+				from <include refid="QUSTNR_RSLT_TABLE_NAME" /> a, <include refid="BSC_TABLE_NAME" /> b where a.issue_date >= #{date} and a.bsc_idx = b.bsc_idx
+			union all
+			select 
+				instt_idx, instt_name, doctor_ofcps, doctor_name, to_char(issue_date, 'YYYY-mm-dd') issue_date, '3.기초컨설팅보고서' doc, issue_no,bpl_no, decode(pri_sup_cd,1,'대규모 기업', '우선지원대상기업') prisup_cd, corp_name, '' transfer, corp_pic_ofcps, corp_pic_name, corp_pic_telno, corp_pic_email  
+				from <include refid="BSISCNSL_TABLE_NAME" /> where issue_date >= #{date}
+		) A 
+		LEFT JOIN HRD_COM_INSTT B ON A.INSTT_IDX=B.INSTT_IDX 
+	</select>
+	
+	<select id="selectBsisCnslByIdx" parameterType="map" resultType="map">
+		SELECT 
+			A.BSISCNSL_IDX, A.RSLT_IDX, A.BPL_NO, A.ISSUE_NO, A.ISSUE_DATE, A.INSTT_IDX AS BSISCNSL_INSTT_IDX, A.INSTT_NAME AS BSISCNSL_INSTT_NAME, 
+			C.INSTT_IDX AS BSC_INSTT_IDX, 
+			D.BRFFC_CD AS BSISCNSL_BRFFC_CD, 
+			E.BRFFC_CD AS BSC_BRFFC_CD 
+		FROM <include refid="BSISCNSL_TABLE_NAME" /> A 
+		LEFT JOIN <include refid="QUSTNR_RSLT_TABLE_NAME" /> B ON A.RSLT_IDX = B.RSLT_IDX 
+		LEFT JOIN <include refid="BSC_TABLE_NAME" /> C ON B.BSC_IDX=C.BSC_IDX 
+		LEFT JOIN HRD_COM_INSTT D ON A.INSTT_IDX=D.INSTT_IDX 
+		LEFT JOIN HRD_COM_INSTT E ON C.INSTT_IDX=E.INSTT_IDX 
+		WHERE A.BSISCNSL_IDX=#{bsiscnslIdx}
+	</select>
+	
+	<update id="updateFtfYn" parameterType="map">
+		UPDATE <include refid="BSISCNSL_TABLE_NAME" /> 
+		SET 
+			FTF_YN=#{ftfYn}, 
+			LAST_MODI_IDX=#{LAST_MODI_IDX},
+			LAST_MODI_ID=#{LAST_MODI_ID},
+			LAST_MODI_NAME=#{LAST_MODI_NAME},
+			LAST_MODI_DATE=SYSDATE,
+			LAST_MODI_IP=#{REGI_IP} 
+		WHERE BSISCNSL_IDX=#{bsiscnslIdx}
+	</update>
+</mapper>            

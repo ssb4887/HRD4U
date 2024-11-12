@@ -1,0 +1,197 @@
+@charset "utf-8";
+body {
+    margin: 5px;
+    color: #333;
+    font: 18px Dotum, '돋움', sans-serif;
+}
+
+.font36 {
+    font-size: 36px;
+    line-height: 120%
+}
+
+.font20 {
+    font-size: 20px;
+    line-height: 120%
+}
+
+.font14 {
+    font-size: 14px;
+    line-height: 120%
+}
+
+.font14_2 {
+    font-size: 14px;
+    line-height: 160%
+}
+
+.font18 {
+    font-size: 18px;
+    line-height: 160%
+}
+
+.font50 {
+    font-size: 50px;
+    line-height: 120%
+}
+
+.font28 {
+    font-size: 28px;
+    line-height: 120%
+}
+
+.font20_2 {
+    font-size: 20px;
+    line-height: 160%
+}
+
+.lh140 {
+    line-height: 140%
+}
+
+.bgBlue {
+    background-color: #c7defe
+}
+
+.bgBlue2 {
+    background-color: #aecbd8
+}
+
+.bgWhite {
+    background-color: #ffffff
+}
+
+.bgGray {
+    background-color: #ababab
+}
+
+.bld {
+    font-weight: bold
+}
+
+.txtCenter {
+    text-align: center
+}
+
+.tbBorder {
+    border-collapse: collapse;
+}
+
+.tbBorder2 {
+    border: 2px solid #000;
+}
+
+.bd_right {
+    border-right: 2px solid #000
+}
+
+.bd_top {
+    border-top: 2px solid #000;
+}
+
+.bd_btm {
+    border-bottom: 1px solid #000
+}
+
+.bd_btm2 {
+    border-bottom: 2px solid #000;
+}
+
+.pdl5 {
+    padding-left: 5px
+}
+
+.pdl10 {
+    padding-left: 10px
+}
+
+.pdl45 {
+    padding-left: 45px
+}
+
+.pdl73 {
+    padding-left: 73px
+}
+
+.pdl105 {
+    padding-left: 105px
+}
+
+.pd10 {
+    padding: 10px
+}
+
+.pdr3 {
+    padding-right: 3px
+}
+
+.pdr5 {
+    padding-right: 5px
+}
+
+.pdr10 {
+    padding-right: 10px
+}
+
+.mgt5 {
+    margin-top: 5px
+}
+
+.mgt10 {
+    margin-top: 10px
+}
+
+
+/* 20121229 추가 */
+
+.mgt30 {
+    margin-top: 30px
+}
+
+
+/* 20121229 추가 */
+
+.word-name {
+    position: relative;
+}
+
+.word-name>strong {
+    position: relative;
+    font-weight: bold;
+    z-index: 1;
+}
+
+.word-name>img {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    display: block;
+    margin-right: -30px;
+    margin-top: -30px;
+    width: 60px;
+    z-index: 0;
+}
+
+.btn-s {
+    display: inline-block;
+    vertical-align: middle;
+    height: 40px;
+    line-height: 40px;
+    color: #fff;
+    padding: 0 20px;
+    text-decoration: none;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-color01 {
+    background: #0c4da2 !important;
+    border: 1px solid #0c4da2 !important;
+    color: #fff !important
+}
+
+.btn-color02 {
+    background: #666666 !important;
+    border: 1px solid #666 !important;
+    color: #fff !important
+}

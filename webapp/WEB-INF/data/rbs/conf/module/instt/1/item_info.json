@@ -1,0 +1,612 @@
+{
+	"item_info":{
+		"items":{
+		    "insttName":{
+				"item_id": "insttName"
+				, "column_id":"INSTT_NAME"
+				, "item_name":"기관명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "insttNo":{
+				"item_id": "insttNo"
+				, "column_id":"INSTT_NO"
+				, "item_name":"기관번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "locCode":{
+				"item_id": "locCode"
+				, "column_id":"LOCPLC_CD"
+				, "item_name":"소재지"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":22
+				, "master_code":"SIDO_SIGUNGU"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "phone":{
+				"item_id": "phone"
+				, "column_id":"TELNO"
+				, "item_name":"전화번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 0
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "homepage":{
+				"item_id": "homepage"
+				, "column_id":"HMPG"
+				, "item_name":"홈페이지"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 0
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "remarks":{
+				"item_id": "remarks"
+				, "column_id":"REMARKS"
+				, "item_name":"비고"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 0
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "orderIdx":{
+				"item_id": "orderIdx"
+				, "column_id":"ORDER_IDX"
+				, "item_name":"순서"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 0
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "blockCode":{
+				"item_id": "blockCode"
+				, "column_id":"BLOCK_CD"
+				, "item_name":"관할구역"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":4
+				, "master_code":"SIDO_SIGUNGU"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1			
+			}
+		}
+		, "list_order":[
+			"insttName"
+			, "locCode"
+			, "blockCode"
+		]
+		, "view_order":[
+			"insttName"
+			, "insttNo"
+			, "locCode"
+			, "blockCode"
+			, "phone"
+			, "homepage"
+			, "remarks"
+		]
+		, "write_order":[
+		    "insttName"
+			, "insttNo"
+			, "locCode"
+			, "blockCode"
+			, "phone"
+			, "homepage"
+			, "remarks"
+		]
+		, "writeproc_order":[
+			"insttName"
+			, "insttNo"
+			, "locCode"
+			, "blockCode"
+			, "homepage"
+			, "remarks"
+		]
+		, "modify_order":[
+			"insttName"
+			, "insttNo"
+			, "locCode"
+			, "blockCode"
+			, "phone"
+			, "homepage"
+			, "remarks"
+		]
+		, "modifyproc_order":[
+		    "insttName"
+			, "insttNo"
+			, "locCode"
+			, "blockCode"
+			, "homepage"
+			, "remarks"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "insttName":{
+						"column_id":"INSTT_NAME"
+						, "item_name":"기관명"
+					}
+				}, "select_order":[
+				    "insttName"
+				]
+			}, "key":{
+				"items":{
+					"locCode":{
+						"column_id":"LOCPLC_CD"
+						, "item_name":"소재지"
+						, "format_type":0
+						, "object_type":2
+						, "master_code":"SIDO"
+						, "style_width":120
+					}, "blockCode":{
+						"column_id":"BLOCK_CD"
+						, "item_name":"관할구역"
+						, "format_type":0
+						, "object_type":22
+						, "option_split":1
+						, "master_code":"SIDO_SIGUNGU"
+						, "style_width":120
+					}
+				}
+			}, "searchForm_order":[
+				"locCode"
+				, "blockCode"
+				, "keyField"
+			], "search_order":[
+				"locCode"
+				, "keyField"
+			], "searchAddOptn_order":[
+				"blockCode"
+			]
+		}, "deleteList_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "insttName":{
+						"column_id":"INSTT_NAME"
+						, "item_name":"기관명"
+					}
+				}, "select_order":[
+				    "insttName"
+				]
+			}, "key":{
+				"items":{
+					"locCode":{
+						"column_id":"LOCPLC_CD"
+						, "item_name":"소재지"
+						, "format_type":0
+						, "object_type":22
+						, "master_code":"SIDO_SIGUNGU"
+						, "style_width":120
+					}, "blockCode":{
+						"column_id":"BLOCK_CD"
+						, "item_name":"관할구역"
+						, "format_type":0
+						, "object_type":22
+						, "master_code":"SIDO_SIGUNGU"
+						, "style_width":120
+					}
+				}
+			}, "searchForm_order":[
+				"locCode"
+				, "blockCode"
+				, "keyField"
+			], "search_order":[
+				"locCode"
+				, "keyField"
+			], "searchAddOptn_order":[
+				"blockCode"
+			]
+		}
+	},
+	"insttSearch_item_info":{
+		"items":{
+		    "insttName":{
+				"item_id": "insttName"
+				, "column_id":"INSTT_NAME"
+				, "item_name":"기관명"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "insttNo":{
+				"item_id": "insttNO"
+				, "column_id":"INSTT_NO"
+				, "item_name":"기관번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "locCode":{
+				"item_id": "locCode"
+				, "column_id":"LOCPLC_CD"
+				, "item_name":"소재지"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":22
+				, "master_code":"SIDO_SIGUNGU"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "phone":{
+				"item_id": "phone"
+				, "column_id":"TELNO"
+				, "item_name":"전화번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 0
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "homepage":{
+				"item_id": "homepage"
+				, "column_id":"HMPG"
+				, "item_name":"홈페이지"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 0
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "remarks":{
+				"item_id": "remarks"
+				, "column_id":"REMARKS"
+				, "item_name":"비고"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 0
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "orderIdx":{
+				"item_id": "orderIdx"
+				, "column_id":"ORDER_IDX"
+				, "item_name":"순서"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 0
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "blockCode":{
+				"item_id": "blockCode"
+				, "column_id":"BLOCK_CD"
+				, "item_name":"관할구역"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":4
+				, "master_code":"SIDO_SIGUNGU"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1			
+			}, "location":{
+				"item_id": "location"
+				, "column_id":"CTPRVN"
+				, "item_name":"소재지"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":22
+				, "master_code":"SIDO_SIGUNGU"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "insttIdx":{
+				"item_id": "insttIdx"
+				, "column_id":"INSTT_IDX"
+				, "item_name":"기관번호"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "ctprvn":{
+				"item_id": "ctprvn"
+				, "column_id":"CTPRVN"
+				, "item_name":"소재지"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "signgu":{
+				"item_id": "signgu"
+				, "column_id":"SIGNGU"
+				, "item_name":"세부 소재지"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "zipCode":{
+				"item_id": "zipCode"
+				, "column_id":"ZIPCODE"
+				, "item_name":"우편번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}
+		}
+		, "list_order":[
+			"insttName"
+			, "locCode"
+			, "blockCode"
+		]
+		, "view_order":[
+			"insttName"
+			, "insttNo"
+			, "locCode"
+			, "blockCode"
+			, "phone"
+			, "homepage"
+			, "remarks"
+			, "orderIdx"
+		]
+		, "write_order":[
+		    "insttName"
+			, "insttNo"
+			, "locCode"
+			, "blockCode"
+			, "phone"
+			, "homepage"
+			, "remarks"
+			, "orderIdx"
+		]
+		, "writeproc_order":[
+			
+			"zipCode"
+		]
+		, "modify_order":[
+			"insttName"
+			, "insttNo"
+			, "locCode"
+			, "blockCode"
+			, "phone"
+			, "homepage"
+			, "remarks"
+			, "orderIdx"
+		]
+		, "modifyproc_order":[
+		    "insttName"
+			, "insttNo"
+			, "locCode"
+			, "blockCode"
+			, "phone"
+			, "homepage"
+			, "remarks"
+			, "orderIdx"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "insttName":{
+						"column_id":"INSTT_NAME"
+						, "item_name":"기관명"
+					}
+				}, "select_order":[
+				    "insttName"
+				]
+			}, "key":{
+				"items":{
+					"locCode":{
+						"column_id":"LOCPLC_CD"
+						, "item_name":"소재지"
+						, "format_type":0
+						, "object_type":2
+						, "master_code":"SIDO"
+						, "style_width":120
+					}
+				}
+			}, "searchForm_order":[
+				"locCode"
+				, "keyField"
+			], "search_order":[
+				"locCode"
+				, "keyField"
+			]
+		}, "mailList_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "zip":{
+						"column_id":"ZIP"
+						, "item_name":"우편번호"
+					}
+				}, "select_order":[
+				    "zip"
+				]
+			}, "key":{
+				"items":{
+					"insttIdx":{
+						"column_id":"INSTT_IDX"
+						, "item_name":"기관명"
+						, "format_type":0
+						, "object_type":2
+						, "master_code":"SIDO"
+						, "style_width":120
+					}, "blockCode":{
+						"column_id":"BLOCK_CD"
+						, "item_name":"관할구역"
+						, "format_type":0
+						, "object_type":22
+						, "option_split":1
+						, "style_width":120
+					}
+				}
+			}, "searchForm_order":[
+				"insttIdx"
+				, "blockCode"
+				, "keyField"
+			], "search_order":[
+				"insttIdx"
+				, "keyField"
+			], "searchAddOptn_order":[
+				"blockCode"
+			]
+		}, "deleteList_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "insttName":{
+						"column_id":"INSTT_NAME"
+						, "item_name":"기관명"
+					}
+				}, "select_order":[
+				    "insttName"
+				]
+			}, "key":{
+				"items":{
+					"locCode":{
+						"column_id":"LOCPLC_CD"
+						, "item_name":"소재지"
+						, "format_type":0
+						, "object_type":22
+						, "master_code":"SIDO_SIGUNGU"
+						, "style_width":120
+					}
+				}
+			}, "searchForm_order":[
+				"locCode"
+				, "keyField"
+			], "search_order":[
+				"locCode"
+				, "keyField"
+			]
+		}
+	}
+}

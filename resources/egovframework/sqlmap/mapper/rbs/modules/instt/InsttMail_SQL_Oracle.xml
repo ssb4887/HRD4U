@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. IDX, <include refid="INSTT_TABLE_NAME"/>, [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.instt.insttMailMapper">
+	<!-- 테이블명 -->
+	<sql id="INSTT_TABLE_NAME">HRD_COM_INSTT</sql>
+	<!-- 운영업로드시  -->
+	<sql id="ZIP_TABLE_NAME">INF_ZIP_GROUP</sql>
+	<!-- 개발업로드시  -->
+	<!-- <sql id="ZIP_TABLE_NAME">ZDEL_INF_ZIP_GROUP</sql> -->
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(INSTT_IDX), 0)</trim> + 1 MAXID
+		FROM 
+		<include refid="INSTT_TABLE_NAME"/> A
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.IDX), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		<include refid="INSTT_TABLE_NAME"/> A 
+		WHERE A.IDX LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql> 
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+		SELECT A.*, B.INSTT_NAME
+		    FROM 
+		        <include refid="ZIP_TABLE_NAME"/> A
+		        LEFT OUTER JOIN HRD_COM_INSTT B ON A.INSTT_IDX = B.INSTT_IDX
+		    WHERE 
+		    	1 = 1 
+		    <if test="INSTT_IDX != null">
+				AND A.INSTT_IDX = #{INSTT_IDX}
+			</if>
+			<if test="SIDO != null and GUGUN != NULL">
+				AND A.CTPRVN LIKE #{SIDO}
+				AND A.SIGNGU LIKE #{GUGUN}
+			</if>
+			<if test="ZIP != null">
+				AND ZIP LIKE #{ZIP}
+			</if>
+			ORDER BY A.ZIP
+		<include refid="rbs.commonMapper.COM_ORDER"/>
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		    (
+		    	SELECT A.*
+		    FROM 
+		        <include refid="ZIP_TABLE_NAME"/> A
+		        LEFT OUTER JOIN HRD_COM_INSTT B ON A.INSTT_IDX = B.INSTT_IDX
+		    WHERE 
+		    	1 = 1 
+		    <if test="INSTT_IDX != null">
+				AND A.INSTT_IDX = #{INSTT_IDX}
+			</if>
+			<if test="SIDO != null and GUGUN != NULL">
+				AND A.CTPRVN LIKE #{SIDO}
+				AND A.SIGNGU LIKE #{GUGUN}
+			</if>
+			<if test="ZIP != null">
+				AND ZIP LIKE #{ZIP}
+			</if>
+			ORDER BY A.ZIP
+			)
+	</select>
+	
+	<select id="selectInsttList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			INSTT_IDX AS OPTION_CODE, 
+			INSTT_NAME AS OPTION_NAME
+		FROM 
+			HRD_COM_INSTT
+		WHERE
+			INSTT_NO <![CDATA[>=]]> '01' 
+			AND INSTT_NO <![CDATA[<=]]> '31'
+			
+	</select>
+	
+	<delete id="mailDelete" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="ZIP_TABLE_NAME"/> 
+		WHERE ZIP IN (
+			<foreach collection="DELLIST" item="item" index="i" separator=",">
+				'${item}'
+			</foreach> 
+		)
+	</delete>
+	
+	<update id="zipAllUpdate" parameterType="java.util.HashMap">
+		UPDATE <include refid="ZIP_TABLE_NAME"/> 
+		SET INSTT_IDX = #{INSTT_IDX}
+		WHERE ZIP IN (
+			<foreach collection="ZIPLIST" item="item" index="i" separator=",">
+				${item}
+			</foreach>
+			)
+	</update>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.INSTT_IDX,
+            A.INSTT_NO,
+            A.INSTT_NAME,
+            A.LOCPLC_CD,
+            A.TELNO,
+            A.HMPG,
+            A.BRFFC_CD,
+            A.REMARKS,
+            A.ORDER_IDX,
+            REGEXP_REPLACE(
+            	LISTAGG(C.PARENT_CLASS_IDX, ',') 
+            	WITHIN GROUP(ORDER BY C.PARENT_CLASS_IDX), 
+            	'([^,]+)(,\1)*(,|$)', '\1\3'
+            ) PARENT_BLOCK_CD ,
+            REGEXP_REPLACE(
+		        LISTAGG(B.BLOCK_CD,',') 
+		        WITHIN GROUP(ORDER BY B.BLOCK_IDX),
+		        '([^,]+)(,\1)*(,|$)','\1\3'
+		    ) BLOCK_CD
+        FROM
+            <include refid="INSTT_TABLE_NAME"/> A 
+            LEFT JOIN HRD_COM_INSTT_BLOCK B ON A.INSTT_IDX = B.INSTT_IDX
+            LEFT JOIN RBS_ICLASS_INFO C ON B.BLOCK_CD = C.CLASS_IDX
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		GROUP BY
+	        A.INSTT_IDX,
+	        A.INSTT_NO,
+	        A.INSTT_NAME,
+	        A.LOCPLC_CD,
+	        A.TELNO,	
+	        A.HMPG,
+	        A.REMARKS,
+	        A.BRFFC_CD,
+	        A.ORDER_IDX
+	</select>
+	
+	<select id="selectOptionCount" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+		    PARENT_CLASS_IDX,
+		    COUNT(1) AS OPTION_COUNT
+		FROM
+		    RBS_ICLASS_INFO
+		WHERE
+		    MASTER_CODE = 'SIDO_SIGUNGU'
+		    AND   PARENT_CLASS_IDX != 0
+		GROUP BY
+		    PARENT_CLASS_IDX
+		ORDER BY
+		    PARENT_CLASS_IDX
+	</select>
+	
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			<include refid="INSTT_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.${columnItem}_SAVED_NAME, A.${columnItem}_ORIGIN_NAME
+			FROM 
+			<include refid="INSTT_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE <include refid="INSTT_TABLE_NAME"/> SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1 
+		WHERE INSTT_IDX = #{INSTT_IDX}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="INSTT_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.INSTT_IDX,
+		    A.INSTT_NO,
+		    A.INSTT_NAME,
+		    A.LOCPLC_CD,
+		    A.TELNO,
+		    A.HMPG,
+		    A.REMARKS,
+		    A.BRFFC_CD,
+		    A.ORDER_IDX,
+		    LISTAGG(
+		        NVL(B.BLOCK_CD, ''),
+		    ',') WITHIN GROUP(
+		    ORDER BY
+		        NVL(B.BLOCK_IDX, -1)
+		    ) AS BLOCK_CD
+		FROM 
+		<include refid="INSTT_TABLE_NAME"/> A 
+		LEFT JOIN HRD_COM_INSTT_BLOCK B ON A.INSTT_IDX = B.INSTT_IDX
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		GROUP BY
+		    A.INSTT_IDX,
+		    A.INSTT_NO,
+		    A.INSTT_NAME,
+		    A.LOCPLC_CD,
+		    A.TELNO,	
+		    A.HMPG,
+		    A.REMARKS,
+		    A.BRFFC_CD,
+		    A.ORDER_IDX
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<insert id="mailInsert" parameterType="java.util.HashMap">
+		MERGE INTO <include refid="ZIP_TABLE_NAME"/> A
+			USING DUAL
+			ON (A.ZIP = #{ZIP})
+			WHEN MATCHED THEN
+				UPDATE SET A.CTPRVN = #{CTPRVN}, A.SIGNGU = #{SIGNGU}, A.INSTT_IDX = #{INSTT_IDX}
+			WHEN NOT MATCHED THEN
+				INSERT (
+					A.ZIP, A.CTPRVN, A.SIGNGU, A.INSTT_IDX
+				) VALUES (
+					#{ZIP}, #{CTPRVN}, #{SIGNGU}, #{INSTT_IDX}
+				)
+	</insert>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="INSTT_TABLE_NAME"/> (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE <include refid="INSTT_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*
+			FROM 
+			<include refid="INSTT_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			<if test="BLOCK_CD != null">
+			AND A.INSTT_IDX IN (
+				SELECT B.INSTT_IDX
+				FROM <include refid="rbs.modules.instt.insttMultiMapper.MULTI_TABLE_NAME"/> B
+				WHERE B.BLOCK_CD IN (
+		 			SELECT CLASS_IDX 
+		 			FROM RBS_ICLASS_INFO D
+         			WHERE MASTER_CODE = #{MASTER_CODE}
+	         			AND ORDER_IDX <![CDATA[>=]]> (
+		         			SELECT ORDER_IDX
+		      				FROM RBS_ICLASS_INFO
+		         			WHERE MASTER_CODE = #{MASTER_CODE}
+		         			AND CLASS_IDX = #{BLOCK_CD}
+	         			)
+	         			AND ORDER_IDX <![CDATA[<]]> (
+		         			SELECT NVL(MIN(ORDER_IDX),A.ORDER_IDX + 1)
+		         			FROM RBS_ICLASS_INFO INCLASS
+		         			WHERE MASTER_CODE = #{MASTER_CODE}
+		         			AND CLASS_LEVEL <![CDATA[<=]]> (
+			         			SELECT CLASS_LEVEL
+			         			FROM RBS_ICLASS_INFO
+			        			WHERE MASTER_CODE = #{MASTER_CODE}
+			         			AND CLASS_IDX = #{BLOCK_CD}
+	         			)
+	         			AND ORDER_IDX <![CDATA[>]]> (
+		         			SELECT ORDER_IDX
+		         			FROM RBS_ICLASS_INFO
+		         			WHERE MASTER_CODE = #{MASTER_CODE}
+		         			AND CLASS_IDX = #{BLOCK_CD}
+	         			)
+     	 			)	
+    	 		)
+    	 	)
+		 	</if>
+			ORDER BY A.INSTT_IDX
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="INSTT_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+		<if test="BLOCK_CD != null">
+			AND A.INSTT_IDX IN (
+				SELECT B.INSTT_IDX
+				FROM <include refid="rbs.modules.instt.insttMultiMapper.MULTI_TABLE_NAME"/> B
+				WHERE B.BLOCK_CD IN (
+		 			SELECT CLASS_IDX 
+		 			FROM RBS_ICLASS_INFO D
+         			WHERE MASTER_CODE = #{MASTER_CODE}
+	         			AND ORDER_IDX <![CDATA[>=]]> (
+		         			SELECT ORDER_IDX
+		      				FROM RBS_ICLASS_INFO
+		         			WHERE MASTER_CODE = #{MASTER_CODE}
+		         			AND CLASS_IDX = #{BLOCK_CD}
+	         			)
+	         			AND ORDER_IDX <![CDATA[<]]> (
+		         			SELECT NVL(MIN(ORDER_IDX),A.ORDER_IDX + 1)
+		         			FROM RBS_ICLASS_INFO INCLASS
+		         			WHERE MASTER_CODE = #{MASTER_CODE}
+		         			AND CLASS_LEVEL <![CDATA[<=]]> (
+			         			SELECT CLASS_LEVEL
+			         			FROM RBS_ICLASS_INFO
+			        			WHERE MASTER_CODE = #{MASTER_CODE}
+			         			AND CLASS_IDX = #{BLOCK_CD}
+	         			)
+	         			AND ORDER_IDX <![CDATA[>]]> (
+		         			SELECT ORDER_IDX
+		         			FROM RBS_ICLASS_INFO
+		         			WHERE MASTER_CODE = #{MASTER_CODE}
+		         			AND CLASS_IDX = #{BLOCK_CD}
+	         			)
+     	 			)	
+    	 		)
+    	 	)
+		 </if>
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE <include refid="INSTT_TABLE_NAME"/> SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE <include refid="INSTT_TABLE_NAME"/> SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="INSTT_TABLE_NAME"/>  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	
+</mapper>            

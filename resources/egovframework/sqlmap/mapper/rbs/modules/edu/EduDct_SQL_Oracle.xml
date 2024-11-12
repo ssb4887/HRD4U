@@ -1,0 +1,692 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="rbs.modules.edu.eduDctMapper">
+	<!-- 테이블명 -->
+	<sql id="SPTJ_EDC">HRD_SPTJ_EDC</sql>
+	<sql id="SPTJ_EDC_FILE">HRD_SPTJ_EDC_FILE</sql>
+	<sql id="SPTJ_EDC_MEMBER">HRD_SPTJ_EDC_MEMBER</sql>
+	<sql id="SPTJ_EDC_MEMBER_CONFM">HRD_SPTJ_EDC_MEMBER_CONFM</sql>
+	<sql id="COM_INSTT">HRD_COM_INSTT</sql>
+	<sql id="RBS_OPTION_INFO">RBS_OPTION_INFO</sql>
+	<sql id="VIEW_HRD_DOCTOR">VIEW_HRD_DOCTOR</sql>
+	<sql id="GROUP_INFO">RBS_GROUP_INFO</sql>
+	
+	<sql id="COUNT_TOP">
+		<trim>SELECT COUNT(rn) FROM( SELECT rownum rn, TB.* FROM (</trim>
+	</sql>
+	
+	<sql id="COUNT_BOTTOM">
+		<trim>) TB )</trim>
+	</sql>
+	
+	<insert id="insertEdc" parameterType="map" useGeneratedKeys="true" keyProperty="edcIdx">
+		<selectKey keyProperty="edcIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_SPTJ_EDC_IDX.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO <include refid="SPTJ_EDC" /> 
+		(EDC_IDX, INSTT_IDX, EDC_NAME, EDC_CD, EDC_PLACE, TOT_EDC_TIME, EDC_START_DATE, EDC_END_DATE,
+		INSTRCTR_NAME, INSTRCTR_TELNO, INSTRCTR_EMAIL, INSTRCTR_INTRCN, OTHBC_YN,
+		RECPT_BGNDT, RECPT_ENDDT, CTFHV_ISSUE_YN, MAX_RECPT_NMPR, CN,
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP) 
+		VALUES 
+		(#{edcIdx}, #{insttIdx}, #{edcName}, #{edcCd}, #{edcPlace}, #{totEdcTime}, TO_DATE(#{edcStartDate}, 'YYYY-MM-DD HH24:MI'), TO_DATE(#{edcEndDate}, 'YYYY-MM-DD HH24:MI'),
+		#{instrctrName}, PKG_DGUARD.FN_ENC_TELNO(#{instrctrTelno}), #{instrctrEmail}, #{instrctrIntrcn}, #{othbcYn},
+		TO_DATE(#{recptBgndt}, 'YYYY-MM-DD HH24:MI'), TO_DATE(#{recptEnddt}, 'YYYY-MM-DD HH24:MI'), #{ctfhvIssueYn}, #{maxRecptNmpr}, #{cn},
+		#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP})
+	</insert>
+	
+	<update id="updateEdc" parameterType="map">
+		UPDATE <include refid="SPTJ_EDC" /> 
+		SET INSTT_IDX=#{insttIdx}, EDC_NAME=#{edcName}, EDC_CD=#{edcCd}, EDC_PLACE=#{edcPlace}, TOT_EDC_TIME=#{totEdcTime}, EDC_START_DATE=TO_DATE(#{edcStartDate}, 'YYYY-MM-DD HH24:MI'), EDC_END_DATE=TO_DATE(#{edcEndDate}, 'YYYY-MM-DD HH24:MI'), 
+		INSTRCTR_NAME=#{instrctrName}, INSTRCTR_TELNO = PKG_DGUARD.FN_ENC_TELNO(#{instrctrTelno}), INSTRCTR_EMAIL=#{instrctrEmail}, INSTRCTR_INTRCN=#{instrctrIntrcn}, OTHBC_YN=#{othbcYn},
+		RECPT_BGNDT=TO_DATE(#{recptBgndt}, 'YYYY-MM-DD HH24:MI'), RECPT_ENDDT=TO_DATE(#{recptEnddt}, 'YYYY-MM-DD HH24:MI'), CTFHV_ISSUE_YN=#{ctfhvIssueYn}, MAX_RECPT_NMPR=#{maxRecptNmpr}, CN=#{cn},
+		LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE EDC_IDX=#{edcIdx} 
+	</update>
+	
+	<select id="selectEdcFileList" parameterType="map" resultType="dataMap">
+		SELECT A.* FROM <include refid="SPTJ_EDC_FILE" /> A 
+		WHERE A.EDC_IDX=#{edcIdx} 
+		AND ISDELETE != 1 
+		ORDER BY ORDER_IDX ASC, FLE_IDX DESC 
+	</select>
+	
+	<update id="updateEdcFileData" parameterType="map">
+		UPDATE <include refid="SPTJ_EDC_FILE" /> 
+		SET ORDER_IDX=#{orderIdx}, ISDELETE=#{isdelete}, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_IP=#{LAST_MODI_IP}, LAST_MODI_DATE = sysdate  
+		WHERE FLE_IDX=#{fleIdx} 
+	</update>
+	
+	<insert id="insertEdcFileData" parameterType="map" useGeneratedKeys="true" keyProperty="fleIdx">
+		<selectKey keyProperty="fleIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_SPTJ_EDC_FLE_IDX.NEXTVAL FROM DUAL 
+		</selectKey>
+		INSERT INTO <include refid="SPTJ_EDC_FILE" /> 
+		(EDC_IDX, FLE_IDX, ITEM_ID, FILE_SAVED_NAME, FILE_ORIGIN_NAME, FILE_SIZE, FILE_TEXT, ORDER_IDX, 
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES 
+		(#{edcIdx}, #{fleIdx}, 'FILE', #{fileSavedName}, #{fileOriginName}, #{fileSize}, #{replcText}, #{orderIdx}, 
+		#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP}) 
+	</insert>
+	
+	<select id="selectEdcList" parameterType="map" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT 
+			A.*, 
+			B.INSTT_NAME, 
+			CASE 
+				WHEN OTHBC_YN = 'N' THEN '1'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE BETWEEN RECPT_BGNDT AND RECPT_ENDDT THEN '2' 
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ < ]]> RECPT_BGNDT THEN '3'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ > ]]> RECPT_ENDDT THEN '4'
+			END AS RECPT_STATUS,
+			C.OPTION_NAME AS RECPT_STATUS_NAME,
+			E.OPTION_NAME AS EDC_CD_NAME, 
+			(SELECT COUNT(D.EDC_IDX) 
+			FROM <include refid="SPTJ_EDC_MEMBER" /> D  
+			WHERE A.EDC_IDX=D.EDC_IDX AND D.ISDELETE != 1) AS EDC_MEMBER_COUNT 
+			<if test="myMemberIdx != null">
+				, (SELECT COUNT(E.MEMBER_IDX) FROM <include refid="SPTJ_EDC_MEMBER" /> E 
+				WHERE A.EDC_IDX=E.EDC_IDX AND E.ISDELETE=0 AND E.MEMBER_IDX=#{myMemberIdx}) AS EDC_MY_COUNT 
+			</if>
+		FROM <include refid="SPTJ_EDC" /> A 
+		LEFT JOIN <include refid="COM_INSTT" /> B ON A.INSTT_IDX=B.INSTT_IDX  
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> C 
+		ON C.MASTER_CODE='EDC_STATUS' AND 
+			(CASE 
+				WHEN OTHBC_YN = 'N' THEN '1'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE BETWEEN RECPT_BGNDT AND RECPT_ENDDT THEN '2' 
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ < ]]> RECPT_BGNDT THEN '3'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ > ]]> RECPT_ENDDT THEN '4'
+			END) = C.OPTION_CODE 
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> E 
+		ON E.MASTER_CODE='EDC_CD_NAME' AND A.EDC_CD=E.OPTION_CODE 
+		<where>
+			AND A.ISDELETE != 1 
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND A.INSTT_IDX = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_STATUS'">
+						AND (CASE 
+								WHEN OTHBC_YN = 'N' THEN '1'
+								WHEN OTHBC_YN = 'Y' AND SYSDATE BETWEEN RECPT_BGNDT AND RECPT_ENDDT THEN '2' 
+								WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ < ]]> RECPT_BGNDT THEN '3'
+								WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ > ]]> RECPT_ENDDT THEN '4'
+							END) = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_DATE1'">
+						AND A.EDC_START_DATE ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'EDC_DATE2'">
+						AND A.EDC_END_DATE ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'RECPT_DATE1'">
+						AND A.RECPT_BGNDT ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'RECPT_DATE2'">
+						AND A.RECPT_ENDDT ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<otherwise>
+						AND A.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue} 
+					</otherwise>
+				</choose>
+			</foreach>
+			<if test="edcCd != null">AND A.EDC_CD = #{edcCd}</if>
+			<if test="siteId != null">AND A.OTHBC_YN = 'Y'</if>
+		</where>
+		ORDER BY A.EDC_START_DATE 
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+	
+	<select id="selectEdcTotalCount" parameterType="map" resultType="int">
+		<include refid="COUNT_TOP" />
+		SELECT 
+			A.*, 
+			B.INSTT_NAME, 
+			CASE 
+				WHEN OTHBC_YN = 'N' THEN '1'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE BETWEEN RECPT_BGNDT AND RECPT_ENDDT THEN '2' 
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ < ]]> RECPT_BGNDT THEN '3'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ > ]]> RECPT_ENDDT THEN '4'
+			END AS RECPT_STATUS,
+			C.OPTION_NAME AS RECPT_STATUS_NAME,
+			(SELECT COUNT(D.EDC_IDX) 
+			FROM <include refid="SPTJ_EDC_MEMBER" /> D  
+			WHERE A.EDC_IDX=D.EDC_IDX AND D.ISDELETE != 1) AS EDC_MEMBER_COUNT 
+		FROM <include refid="SPTJ_EDC" /> A 
+		LEFT JOIN <include refid="COM_INSTT" /> B ON A.INSTT_IDX=B.INSTT_IDX  
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> C 
+		ON C.MASTER_CODE='EDC_STATUS' AND 
+			(CASE 
+				WHEN OTHBC_YN = 'N' THEN '1'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE BETWEEN RECPT_BGNDT AND RECPT_ENDDT THEN '2' 
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ < ]]> RECPT_BGNDT THEN '3'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ > ]]> RECPT_ENDDT THEN '4'
+			END) = C.OPTION_CODE 
+		<where>
+			AND A.ISDELETE != 1 
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND A.INSTT_IDX = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_STATUS'">
+						AND (CASE 
+								WHEN OTHBC_YN = 'N' THEN '1'
+								WHEN OTHBC_YN = 'Y' AND SYSDATE BETWEEN RECPT_BGNDT AND RECPT_ENDDT THEN '2' 
+								WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ < ]]> RECPT_BGNDT THEN '3'
+								WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ > ]]> RECPT_ENDDT THEN '4'
+							END) = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_DATE1'">
+						AND A.EDC_START_DATE ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'EDC_DATE2'">
+						AND A.EDC_END_DATE ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'RECPT_DATE1'">
+						AND A.RECPT_BGNDT ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'RECPT_DATE2'">
+						AND A.RECPT_ENDDT ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<otherwise>
+						AND A.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue} 
+					</otherwise>
+				</choose>
+			</foreach>
+			<if test="edcCd != null">AND A.EDC_CD = #{edcCd}</if>
+			<if test="siteId != null">AND A.OTHBC_YN = 'Y'</if>
+		</where>
+		ORDER BY 
+				CASE 
+					WHEN A.LAST_MODI_DATE IS NOT NULL THEN A.LAST_MODI_DATE 
+					ELSE A.REGI_DATE
+				END DESC 
+		<include refid="COUNT_BOTTOM" />
+	</select>
+	
+	<update id="deleteEdc" parameterType="map">
+		UPDATE <include refid="SPTJ_EDC" /> 
+		SET ISDELETE = 1, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE EDC_IDX IN 
+		<foreach collection="deleteIdxs" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="selectEdc" parameterType="map" resultType="dataMap">
+		SELECT 
+			A.EDC_IDX, A.INSTT_IDX, A.EDC_NAME, A.EDC_CD, A.EDC_PLACE, A.TOT_EDC_TIME,
+	        A.EDC_START_DATE, A.EDC_END_DATE, A.INSTRCTR_NAME, PKG_DGUARD.FN_DEC_TELNO(A.INSTRCTR_TELNO) AS INSTRCTR_TELNO, A.INSTRCTR_EMAIL, A.INSTRCTR_INTRCN,
+	        A.OTHBC_YN, A.RECPT_BGNDT, A.RECPT_ENDDT, A.CTFHV_ISSUE_YN, A.MAX_RECPT_NMPR, A.CN, A.ISDELETE, 
+	        A.REGI_IDX, A.REGI_NAME, A.REGI_DATE, 
+	        C.OPTION_NAME AS EDC_CD_NAME,
+			TO_CHAR(A.EDC_START_DATE, 'HH24') AS EDC_START_HOUR, 
+			TO_CHAR(A.EDC_START_DATE, 'MI') AS EDC_START_MIN, 
+			TO_CHAR(A.EDC_END_DATE, 'HH24') AS EDC_END_HOUR,
+			TO_CHAR(A.EDC_END_DATE, 'MI') AS EDC_END_MIN,
+			TO_CHAR(A.RECPT_BGNDT, 'HH24') AS RECPT_BGNDT_HOUR, 
+			TO_CHAR(A.RECPT_BGNDT, 'MI') AS RECPT_BGNDT_MIN, 
+			TO_CHAR(A.RECPT_ENDDT, 'HH24') AS RECPT_ENDDT_HOUR,
+			TO_CHAR(A.RECPT_ENDDT, 'MI') AS RECPT_ENDDT_MIN,
+			(CASE WHEN SYSDATE <![CDATA[ <  ]]> A.RECPT_BGNDT OR SYSDATE <![CDATA[ >  ]]> A.RECPT_ENDDT OR A.OTHBC_YN = 'N' THEN 'N' ELSE 'Y' END) AS RECPT_POSSIBLE_YN, 
+			COUNT(B.MEMBER_IDX) AS TOTAL_MEMBER_COUNT, 
+			COALESCE(SUM(CASE WHEN B.CONFM_STATUS = 0 THEN 1 ELSE 0 END), 0) AS MEMBER_COUNT_0,
+			COALESCE(SUM(CASE WHEN B.CONFM_STATUS = 1 THEN 1 ELSE 0 END), 0) AS MEMBER_COUNT_1,
+			COALESCE(SUM(CASE WHEN B.CONFM_STATUS = 2 THEN 1 ELSE 0 END), 0) AS MEMBER_COUNT_2,
+			COALESCE(SUM(CASE WHEN B.ATT_YN = 'Y' THEN 1 ELSE 0 END), 0) AS MEMBER_ATT_Y_COUNT   
+		FROM <include refid="SPTJ_EDC" /> A 
+		LEFT JOIN <include refid="SPTJ_EDC_MEMBER" /> B ON A.EDC_IDX=B.EDC_IDX AND B.ISDELETE = 0 
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> C ON A.EDC_CD=C.OPTION_CODE AND C.MASTER_CODE='EDC_CD_NAME' 
+		WHERE A.EDC_IDX=#{edcIdx} 
+		GROUP BY 
+			A.EDC_IDX, A.INSTT_IDX, A.EDC_NAME, A.EDC_CD, A.EDC_PLACE, A.TOT_EDC_TIME,
+	        A.EDC_START_DATE, A.EDC_END_DATE, A.INSTRCTR_NAME, A.INSTRCTR_TELNO, A.INSTRCTR_EMAIL, A.INSTRCTR_INTRCN,
+	        A.OTHBC_YN, A.RECPT_BGNDT, A.RECPT_ENDDT, A.CTFHV_ISSUE_YN, A.MAX_RECPT_NMPR, A.CN, A.ISDELETE, 
+	        A.REGI_IDX, A.REGI_NAME, A.REGI_DATE, C.OPTION_NAME 
+	</select>
+	
+	<select id="selectEdcFileOne" parameterType="map" resultType="map">
+		SELECT A.* FROM <include refid="SPTJ_EDC_FILE" /> A 
+		WHERE FLE_IDX = #{fleIdx} 
+		FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<select id="selectMemberList" parameterType="map" resultType="dataMap">
+		SELECT 
+			A.MEMBER_ID AS USER_ID, MEMBER_NAME AS USER_NAME, MEMBER_IDX AS USER_IDX, A.ORG_NAME,
+			NVL(B.INSTT_NAME, '') AS INSTT_NAME,
+			C.GROUP_NAME 
+		FROM <include refid="VIEW_HRD_DOCTOR" /> A 
+		LEFT JOIN <include refid="COM_INSTT" /> B ON A.INSTT_IDX=B.INSTT_IDX 
+		LEFT JOIN <include refid="GROUP_INFO" /> C ON A.GROUP_CODES=C.GROUP_CODE 
+		<where>
+			AND A.USERTYPE_IDX >= 5 
+			<if test="groupCode != null and groupCode != ''">
+				AND A.GROUP_CODES = #{groupCode}
+			</if>
+			<if test="instt != null and instt != ''">
+				AND A.INSTT_IDX = #{instt}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND A.${keyFieldColumn} LIKE #{keyword}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertEdcMember" parameterType="map">
+		INSERT INTO <include refid="SPTJ_EDC_MEMBER" /> 
+		(EDC_IDX, MEMBER_IDX, CONFM_STATUS, ATT_YN, CTFHV_NO, 
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP) 
+		VALUES 
+		(#{edcIdx}, #{memberIdx}, #{confmStatus}, #{attYn}, #{ctfhv_no}, 
+		#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP})
+	</insert>
+	
+	<select id="isExistsEdcMember" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM <include refid="SPTJ_EDC_MEMBER" /> 
+		WHERE EDC_IDX=#{edcIdx} AND MEMBER_IDX=#{memberIdx} 
+	</select>
+	
+	<update id="updateEdcMember" parameterType="map">
+		UPDATE <include refid="SPTJ_EDC_MEMBER" /> 
+		SET CONFM_STATUS=#{confmStatus}, ATT_YN=#{attYn}, CTFHV_NO=#{ctfhvNo}, ISDELETE=#{isdelete}, 
+		LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE EDC_IDX=#{edcIdx} AND MEMBER_IDX=#{memberIdx} 
+	</update>
+	
+	<select id="selectEdcMemberList" parameterType="map" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT 
+			A.EDC_IDX, A.MEMBER_IDX, A.CONFM_STATUS, A.ATT_YN, A.CTFHV_NO, A.REGI_IDX, A.REGI_DATE, 
+		 	B.MEMBER_ID, B.MEMBER_NAME, B.MEMBER_EMAIL, B.INSTT_IDX, B.ORG_NAME, B.MOBILE_PHONE, 
+		 	C.INSTT_NAME, 
+		 	CASE 
+		 		WHEN A.MEMBER_IDX=A.REGI_IDX THEN '직접신청' 
+		 		ELSE '주치의신청' 
+		 	END AS REGI_WAY,
+		 	D.OPTION_NAME AS CONFM_STATUS_NAME 
+		FROM <include refid="SPTJ_EDC_MEMBER" /> A 
+		INNER JOIN <include refid="VIEW_HRD_DOCTOR" /> B ON A.MEMBER_IDX=B.MEMBER_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> C ON B.INSTT_IDX=C.INSTT_IDX 
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> D ON D.MASTER_CODE='EDC_CONFM_STATUS' AND A.CONFM_STATUS=D.OPTION_CODE 
+		<where>
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND C.INSTT_IDX = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_CONFM_STATUS'">
+						AND A.CONFM_STATUS = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'ATT_YN'">
+						AND A.ATT_YN = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'MEMBER_NAME'">
+						AND B.MEMBER_NAME LIKE #{searchItem.columnValue}  
+					</when>
+					<when test="searchItem.columnId == 'REGI_DATE1' or searchItem.columnId == 'REGI_DATE2'">
+						AND A.REGI_DATE ${searchItem.columnVFlag} #{searchItem.columnValue} 
+					</when>
+				</choose>
+			</foreach>
+			AND A.EDC_IDX=#{edcIdx} AND A.ISDELETE != 1 
+		</where> 
+		ORDER BY A.REGI_DATE DESC 
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+	
+	<select id="selectEdcMemberListCount" parameterType="map" resultType="int">
+		<include refid="COUNT_TOP" />
+		SELECT 
+			A.EDC_IDX, A.MEMBER_IDX, A.CONFM_STATUS, A.ATT_YN, A.CTFHV_NO, A.REGI_IDX, A.REGI_DATE, 
+		 	B.MEMBER_ID, B.MEMBER_NAME, B.MEMBER_EMAIL, B.INSTT_IDX, B.ORG_NAME, B.MOBILE_PHONE, 
+		 	C.INSTT_NAME 
+		FROM <include refid="SPTJ_EDC_MEMBER" /> A 
+		INNER JOIN <include refid="VIEW_HRD_DOCTOR" /> B ON A.MEMBER_IDX=B.MEMBER_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> C ON B.INSTT_IDX=C.INSTT_IDX 
+		<where>
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND C.INSTT_IDX = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_CONFM_STATUS'">
+						AND A.CONFM_STATUS = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'ATT_YN'">
+						AND A.ATT_YN = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'MEMBER_NAME'">
+						AND B.MEMBER_NAME LIKE #{searchItem.columnValue}  
+					</when>
+					<when test="searchItem.columnId == 'REGI_DATE1' or searchItem.columnId == 'REGI_DATE2'">
+						AND A.REGI_DATE ${searchItem.columnVFlag} #{searchItem.columnValue} 
+					</when>
+				</choose>
+			</foreach>
+			AND A.EDC_IDX=#{edcIdx} AND A.ISDELETE != 1 
+		</where>
+		ORDER BY 
+				CASE 
+					WHEN A.LAST_MODI_DATE IS NOT NULL THEN A.LAST_MODI_DATE 
+					ELSE A.REGI_DATE
+				END DESC 
+		<include refid="COUNT_BOTTOM" />
+	</select>
+	
+	<update id="deleteEdcMembers" parameterType="map">
+		UPDATE <include refid="SPTJ_EDC_MEMBER" />
+		SET ISDELETE = 1, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE EDC_IDX=#{edcIdx} AND MEMBER_IDX IN 
+		<foreach collection="deleteIdxs" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<update id="changeEdcMemberStatus" parameterType="map">
+		UPDATE <include refid="SPTJ_EDC_MEMBER" /> 
+		SET ${statusName} = #{status}, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE EDC_IDX=#{edcIdx} AND MEMBER_IDX=#{memberIdx} 
+	</update>
+	
+	<select id="selectEdcMember" parameterType="map" resultType="map">
+		SELECT 
+			A.EDC_IDX, A.MEMBER_IDX, A.CONFM_STATUS, A.ATT_YN, A.CTFHV_NO, A.CTFHV_ISSUE_DATE, A.ISDELETE, A.REGI_IDX, A.REGI_DATE, 
+		 	B.MEMBER_ID, B.MEMBER_NAME, B.MEMBER_EMAIL, B.INSTT_IDX, B.ORG_NAME, B.MOBILE_PHONE, 
+		 	C.INSTT_NAME, 
+		 	CASE 
+		 		WHEN A.MEMBER_IDX=A.REGI_IDX THEN '직접신청' 
+		 		ELSE '주치의신청' 
+		 	END AS REGI_WAY,
+		 	D.OPTION_NAME AS CONFM_STATUS_NAME 
+		 FROM <include refid="SPTJ_EDC_MEMBER" /> A 
+		LEFT JOIN <include refid="VIEW_HRD_DOCTOR" /> B ON A.MEMBER_IDX=B.MEMBER_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> C ON B.INSTT_IDX=C.INSTT_IDX 
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> D ON D.MASTER_CODE='EDC_CONFM_STATUS' AND A.CONFM_STATUS=D.OPTION_CODE 
+		WHERE A.EDC_IDX=#{edcIdx} AND A.MEMBER_IDX=#{memberIdx} 
+		FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<update id="changeManyEdcMemberStatus" parameterType="map">
+		UPDATE <include refid="SPTJ_EDC_MEMBER" /> 
+		SET 
+			<if test="confmStatus != null">
+				CONFM_STATUS = #{confmStatus},
+			</if>
+			<if test="attYn != null">
+				ATT_YN = #{attYn},
+			</if>
+			LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		<where>
+			EDC_IDX=#{edcIdx} AND 
+			MEMBER_IDX IN 
+			<foreach collection="memberIdxs" item="item" open="(" separator="," close=")">
+			#{item}
+			</foreach>
+		</where>
+	</update>
+	
+	<insert id="changeManyEdcMemberStatusConfm" parameterType="map">
+		<selectKey keyProperty="confmIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_SPTJ_EDC_MEMBER_CONFM_IDX.NEXTVAL FROM DUAL
+		</selectKey>
+		<foreach collection="memberIdxs" item="item" open="INSERT ALL" close="SELECT * FROM DUAL" separator=" ">
+			INTO <include refid="SPTJ_EDC_MEMBER_CONFM" /> 
+			(EDC_IDX, MEMBER_IDX, CONFM_IDX, CONFM_STATUS, CONFM_CN, 
+			REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP) 
+			VALUES 
+			(#{edcIdx}, #{item}, #{confmIdx}, #{confmStatus}, #{confmCn}, 
+			#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP}) 
+		</foreach>
+	</insert>
+	
+	<insert id="chagneEdcMemberStatusConfm" parameterType="map" useGeneratedKeys="true" keyProperty="confmIdx">
+		<selectKey keyProperty="confmIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_SPTJ_EDC_MEMBER_CONFM_IDX.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO <include refid="SPTJ_EDC_MEMBER_CONFM" /> 
+		(EDC_IDX, MEMBER_IDX, CONFM_IDX, CONFM_STATUS, CONFM_CN, 
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP) 
+		VALUES 
+		(#{edcIdx}, #{memberIdx}, #{confmIdx}, #{status}, #{confmCn}, 
+		#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP})
+	</insert>
+	
+	<select id="selectMemberOrderInEdc" parameterType="map" resultType="map">
+		SELECT MEMBER_NO, MEMBER_IDX, EDC_IDX 
+		FROM (
+			SELECT ROW_NUMBER() OVER (ORDER BY REGI_DATE) AS MEMBER_NO, MEMBER_IDX, EDC_IDX 
+			FROM <include refid="SPTJ_EDC_MEMBER" /> 
+			WHERE EDC_IDX=#{edcIdx}
+		) SUB 
+		WHERE MEMBER_IDX=#{memberIdx} 
+		FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<update id="issueCertificate" parameterType="map">
+		UPDATE <include refid="SPTJ_EDC_MEMBER" /> 
+		<![CDATA[
+		SET CTFHV_NO=(TO_CHAR(sysdate, 'YYYYMM') || '-' || #{edcIdx} || '-' || #{memberNo}), 
+		CTFHV_ISSUE_DATE=sysdate, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		]]>
+		<where>
+			EDC_IDX=#{edcIdx} AND MEMBER_IDX=#{memberIdx} 
+		</where>
+	</update>
+	
+	<select id="selectMyEdcHistoryList" parameterType="map" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT 
+		    A.*, 
+		    B.INSTT_IDX, B.EDC_NAME, B.EDC_CD, B.EDC_PLACE, B.EDC_START_DATE, B.EDC_END_DATE, B.OTHBC_YN, B.RECPT_BGNDT, B.RECPT_ENDDT, B.CTFHV_ISSUE_YN, 
+		    C.INSTT_NAME,
+		    D.OPTION_NAME AS CONFM_STATUS_NAME,
+		    E.OPTION_NAME AS EDC_CD_NAME 
+		FROM <include refid="SPTJ_EDC_MEMBER" /> A 
+		LEFT JOIN <include refid="SPTJ_EDC" /> B ON A.EDC_IDX = B.EDC_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> C ON B.INSTT_IDX=C.INSTT_IDX 
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> D ON A.CONFM_STATUS=D.OPTION_CODE AND D.MASTER_CODE='EDC_CONFM_STATUS' 
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> E ON B.EDC_CD=E.OPTION_CODE AND E.MASTER_CODE='EDC_CD_NAME' 
+		<where>
+			A.MEMBER_IDX=#{memberIdx} AND A.ISDELETE = 0 
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND B.INSTT_IDX = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_CONFM_STATUS'">
+						AND A.CONFM_STATUS = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_DATE1'">
+						AND B.EDC_START_DATE ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'EDC_DATE2'">
+						AND B.EDC_END_DATE ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'RECPT_DATE1'">
+						AND B.RECPT_BGNDT ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'RECPT_DATE2'">
+						AND B.RECPT_ENDDT ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+				</choose>
+			</foreach>
+			<if test="edcCd != null">AND B.EDC_CD = #{edcCd}</if>
+		</where>
+		ORDER BY 
+				CASE 
+					WHEN A.LAST_MODI_DATE IS NOT NULL THEN A.LAST_MODI_DATE 
+					ELSE A.REGI_DATE
+				END DESC 
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+	
+	<select id="selectMyEdcHistoryCount" parameterType="map" resultType="int">
+		<include refid="COUNT_TOP" />
+		SELECT 
+		    A.*, 
+		    B.INSTT_IDX, B.EDC_NAME, B.EDC_CD, B.EDC_PLACE, B.EDC_START_DATE, B.EDC_END_DATE, B.OTHBC_YN, B.RECPT_BGNDT, B.RECPT_ENDDT, B.CTFHV_ISSUE_YN, 
+		    C.INSTT_NAME,
+		    D.OPTION_NAME AS CONFM_STATUS_NAME,
+		    E.OPTION_NAME AS EDC_CD_NAME 
+		FROM <include refid="SPTJ_EDC_MEMBER" /> A 
+		LEFT JOIN <include refid="SPTJ_EDC" /> B ON A.EDC_IDX = B.EDC_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> C ON B.INSTT_IDX=C.INSTT_IDX 
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> D ON A.CONFM_STATUS=D.OPTION_CODE AND D.MASTER_CODE='EDC_CONFM_STATUS' 
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> E ON B.EDC_CD=E.OPTION_CODE AND E.MASTER_CODE='EDC_CD_NAME' 
+		<where>
+			A.MEMBER_IDX=#{memberIdx} AND A.ISDELETE = 0 
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND B.INSTT_IDX = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_CONFM_STATUS'">
+						AND A.CONFM_STATUS = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_DATE1'">
+						AND B.EDC_START_DATE ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'EDC_DATE2'">
+						AND B.EDC_END_DATE ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'RECPT_DATE1'">
+						AND B.RECPT_BGNDT ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'RECPT_DATE2'">
+						AND B.RECPT_ENDDT ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+				</choose>
+			</foreach>
+			<if test="edcCd != null">AND B.EDC_CD = #{edcCd}</if>
+		</where>
+		<include refid="COUNT_BOTTOM" />
+	</select>
+	
+	<select id="selectEdcListForExcel" parameterType="map" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT 
+			A.EDC_IDX, A.INSTT_IDX, A.EDC_NAME, A.EDC_CD, A.EDC_PLACE, A.TOT_EDC_TIME, A.EDC_START_DATE, A.EDC_END_DATE, A.INSTRCTR_NAME, A.OTHBC_YN, A.RECPT_BGNDT, A.RECPT_ENDDT, A.CTFHV_ISSUE_YN, A.MAX_RECPT_NMPR, A.ISDELETE, A.REGI_DATE,
+    		B.INSTT_NAME,
+			CASE 
+				WHEN OTHBC_YN = 'N' THEN '1'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE BETWEEN RECPT_BGNDT AND RECPT_ENDDT THEN '2' 
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ < ]]> RECPT_BGNDT THEN '3'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ > ]]> RECPT_ENDDT THEN '4'
+			END AS RECPT_STATUS,
+			C.OPTION_NAME AS RECPT_STATUS_NAME,
+			E.OPTION_NAME AS EDC_CD_NAME, 
+			(SELECT COUNT(D.EDC_IDX) 
+			FROM <include refid="SPTJ_EDC_MEMBER" /> D  
+			WHERE A.EDC_IDX=D.EDC_IDX AND D.ISDELETE != 1) AS EDC_MEMBER_COUNT 
+			<if test="myMemberIdx != null">
+				, (SELECT COUNT(E.MEMBER_IDX) FROM <include refid="SPTJ_EDC_MEMBER" /> E 
+				WHERE A.EDC_IDX=E.EDC_IDX AND E.ISDELETE=0 AND E.MEMBER_IDX=#{myMemberIdx}) AS EDC_MY_COUNT 
+			</if>
+			, LISTAGG(G.MEMBER_NAME, ',') WITHIN GROUP (ORDER BY G.MEMBER_NAME) AS EDC_REG_MEMBERS 
+		FROM <include refid="SPTJ_EDC" /> A 
+		LEFT JOIN <include refid="COM_INSTT" /> B ON A.INSTT_IDX=B.INSTT_IDX  
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> C 
+		ON C.MASTER_CODE='EDC_STATUS' AND 
+			(CASE 
+				WHEN OTHBC_YN = 'N' THEN '1'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE BETWEEN RECPT_BGNDT AND RECPT_ENDDT THEN '2' 
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ < ]]> RECPT_BGNDT THEN '3'
+				WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ > ]]> RECPT_ENDDT THEN '4'
+			END) = C.OPTION_CODE 
+		LEFT JOIN <include refid="RBS_OPTION_INFO" /> E 
+		ON E.MASTER_CODE='EDC_CD_NAME' AND A.EDC_CD=E.OPTION_CODE 
+		LEFT JOIN <include refid="SPTJ_EDC_MEMBER" /> F ON A.EDC_IDX=F.EDC_IDX AND F.ISDELETE = 0 
+		LEFT JOIN <include refid="VIEW_HRD_DOCTOR" /> G ON F.MEMBER_IDX = G.MEMBER_IDX 
+		<where>
+			AND A.ISDELETE != 1 
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'INSTT_IDX'">
+						AND A.INSTT_IDX = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_STATUS'">
+						AND (CASE 
+								WHEN OTHBC_YN = 'N' THEN '1'
+								WHEN OTHBC_YN = 'Y' AND SYSDATE BETWEEN RECPT_BGNDT AND RECPT_ENDDT THEN '2' 
+								WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ < ]]> RECPT_BGNDT THEN '3'
+								WHEN OTHBC_YN = 'Y' AND SYSDATE <![CDATA[ > ]]> RECPT_ENDDT THEN '4'
+							END) = #{searchItem.columnValue} 
+					</when>
+					<when test="searchItem.columnId == 'EDC_DATE1'">
+						AND A.EDC_START_DATE ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'EDC_DATE2'">
+						AND A.EDC_END_DATE ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'RECPT_DATE1'">
+						AND A.RECPT_BGNDT ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<when test="searchItem.columnId == 'RECPT_DATE2'">
+						AND A.RECPT_ENDDT ${searchItem.columnVFlag} #{searchItem.columnValue}
+					</when>
+					<otherwise>
+						AND A.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue} 
+					</otherwise>
+				</choose>
+			</foreach>
+			<if test="edcCd != null">AND A.EDC_CD = #{edcCd}</if>
+			<if test="siteId != null">AND A.OTHBC_YN = 'Y'</if>
+		</where>
+		GROUP BY 
+			A.EDC_IDX, A.INSTT_IDX, A.EDC_NAME, A.EDC_CD, A.EDC_PLACE, A.TOT_EDC_TIME, A.EDC_START_DATE, A.EDC_END_DATE, A.INSTRCTR_NAME, A.OTHBC_YN, A.RECPT_BGNDT, A.RECPT_ENDDT, A.CTFHV_ISSUE_YN, A.MAX_RECPT_NMPR, A.ISDELETE, A.REGI_DATE, A.LAST_MODI_DATE, 
+    		B.INSTT_NAME, C.OPTION_NAME, E.OPTION_NAME 
+		ORDER BY 
+				CASE 
+					WHEN A.RECPT_BGNDT IS NOT NULL THEN A.RECPT_BGNDT 
+		            WHEN A.RECPT_BGNDT IS NULL THEN A.EDC_START_DATE 
+		            WHEN A.LAST_MODI_DATE IS NULL THEN A.REGI_DATE 
+		            ELSE A.LAST_MODI_DATE 
+				END DESC 
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+	
+	<select id="selectMemberIdxById" parameterType="map" resultType="map">
+		SELECT * FROM VIEW_HRD_DOCTOR 
+		WHERE MEMBER_ID=#{memberId} 
+		FETCH FIRST 1 ROWS ONLY 
+	</select>
+	
+	<update id="insertEdcMembers" parameterType="map">
+		MERGE INTO <include refid="SPTJ_EDC_MEMBER" /> 
+		USING DUAL ON (MEMBER_IDX=#{memberIdx} AND EDC_IDX=#{edcIdx}) 
+		WHEN MATCHED THEN
+			UPDATE SET 
+			CONFM_STATUS = #{confmStatus},
+			ATT_YN = #{attYn},
+			ISDELETE = 0,
+			CTFHV_NO='',
+			CTFHV_ISSUE_DATE='',
+			LAST_MODI_IDX = #{LAST_MODI_IDX},
+			LAST_MODI_ID = #{LAST_MODI_ID},
+			LAST_MODI_NAME = #{LAST_MODI_NAME},
+			LAST_MODI_DATE = sysdate,
+			LAST_MODI_IP = #{REGI_IP} 
+		WHEN NOT MATCHED THEN 
+			INSERT (EDC_IDX, MEMBER_IDX, CONFM_STATUS, ATT_YN, REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP) 
+			VALUES (#{edcIdx}, #{memberIdx}, #{confmStatus}, #{attYn}, #{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP})
+	</update>
+	
+	<update id="deleteCertificate" parameterType="map">
+		UPDATE <include refid="SPTJ_EDC_MEMBER" /> 
+		SET CTFHV_NO='',
+			CTFHV_ISSUE_DATE='',
+			LAST_MODI_IDX = #{LAST_MODI_IDX},
+			LAST_MODI_ID = #{LAST_MODI_ID},
+			LAST_MODI_NAME = #{LAST_MODI_NAME},
+			LAST_MODI_DATE = sysdate,
+			LAST_MODI_IP = #{LAST_MODI_IP} 
+		WHERE MEMBER_IDX=#{memberIdx} AND EDC_IDX=#{edcIdx} 
+	</update>
+</mapper>

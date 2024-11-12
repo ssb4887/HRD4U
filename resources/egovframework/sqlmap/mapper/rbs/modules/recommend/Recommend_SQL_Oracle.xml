@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rbs.modules.recommend.recommendDummyMapper">
+	<select id="selectName" parameterType="java.util.HashMap" resultType="String">
+			SELECT name
+			FROM 
+				tmp_business
+			WHERE
+				type = #{type} and ranking = #{ranking}
+	</select>
+	<select id="sojtible" parameterType="java.util.HashMap" resultType="Integer">
+		SELECT sojt
+		FROM
+			tmp_industry_limit
+		WHERE
+			code = #{code}
+	</select>
+	<select id="diagnosisBizName" parameterType="java.util.HashMap" resultType="map">
+		SELECT
+			b.prtbiz_name, b.intro dc, b.consider as consideration
+		FROM
+			tmp_business a, hrd_dgns_prtbiz b
+		WHERE
+			a.name = b.prtbiz_name
+			and a.type = #{type}
+		ORDER BY RANKING
+	</select>
+	<select id="basicBizName" parameterType="long" resultType="map">
+		WITH BUSINESS AS(
+			SELECT
+			  NAME, SUM(VALUE) value, BSC_IDX
+			FROM (
+				select
+			    	a.question_IDX, a.question_answer, c.NAME, c.WEIGHT
+			    	, DECODE(a.question_IDX, 1, 4-TO_NUMBER(a.question_answer), DECODE(a.question_answer, 'Y', 1, -1)) mark
+			    	, c.weight * DECODE(a.question_idx, 1, 4-TO_NUMBER(a.question_answer), DECODE(a.question_answer, 'Y', 1, -1)) value
+            , b.bsc_idx
+				from
+  					hrd_dgns_qustnr_rslt_answer a, hrd_dgns_qustnr_rslt b, tmp_qustnr_weight c
+				where 
+					a.rslt_idx = b.rslt_idx
+					and a.qustnr_idx = b.qustnr_idx
+					and c.qustnr_idx = a.qustnr_idx
+					and c.question_idx = a.question_idx
+			    	and b.RSLT_IDX = #{rslt_idx}
+			)
+			group by NAME, BSC_IDX
+		)
+		SELECT
+			name, dc, consideration, rownum rank, PRTBIZ_IDX
+		FROM	
+		(SELECT
+			a.name, b.intro dc, b.consider as consideration, a.value, PRTBIZ_IDX
+		FROM
+			BUSINESS a, hrd_dgns_prtbiz b, hrd_dgns_bsc d
+		WHERE
+			a.name = b.prtbiz_name
+      		and a.bsc_idx = d.bsc_idx
+      		and bitand(b.pri_sup_bizcrp_type, d.PRI_SUP_CD) > 0
+    	ORDER BY a.value desc
+      	)
+	</select>
+	<select id="getBSKbyBPLNO" parameterType="String" resultType="map">
+		SELECT
+			BPL_NO, INDUTY_CD, TOT_EMP_CNT
+		FROM
+			HRD_BSK
+		WHERE
+			BPL_NO = #{BPL_NO}
+	</select>
+	<select id="getBSK" parameterType="String" resultType="map">
+		WITH LCLAS_TOP10 as (
+		  SELECT
+		    CHR(64 + LEVEL) AS LCLAS,
+		    CASE
+		      WHEN CHR(64 + LEVEL) NOT IN (SELECT DISTINCT INDUTY_CD FROM HRD_DGNS_TRAING_TRND_EXEC) THEN 'Z'
+		      ELSE CHR(64 + LEVEL)
+		    END AS VALUE
+		  FROM dual
+		  CONNECT BY LEVEL <![CDATA[<=]]> 21
+		)
+    	SELECT
+      		A.BPL_NM CORP_NAME, A.BPL_NO, A.BPL_ZIP, '(' || A.BPL_ZIP || ') ' || A.BPL_ADDR || ' ' || A.ADDR_DTL CORP_LOCATION, A.INDUTY_CD, B.NAME INDUTY_NAME
+      		,A.EMPLYM_FORMATN_DE EMPINS_START_DATE, TO_DATE(A.EMPLYM_FORMATN_DE, 'yyyy.mm.dd') INSURANCE_DT, A.LRSCL_CORP_SE PRI_SUP_CD, DECODE(A.LRSCL_CORP_SE, 1, '대규모기업', '우선지원대상기업') SCALE_CD
+      		, D.VALUE TREND_LCLAS, B.LCLAS LCLAS, NVL(A.TOT_WORK_CNT,0) TOT_WORK_CNT, sysdate
+		FROM 
+			HRD_BSK A, IFS_INDUSTRY_CODE B, LCLAS_TOP10 D
+		WHERE
+			D.LCLAS = B.LCLAS
+			AND B.CODE = A.INDUTY_CD
+			AND A.BPL_NO = #{BPL_NO}
+	</select>
+	<select id="getTrends" parameterType="java.util.HashMap" resultType="map">
+		SELECT
+		  A.NMCORP, A.TOTAL_NMPR, B.SPT_PAY, A.YEAR, A.INDUTY_CD
+		FROM
+		  HRD_DGNS_TRAING_TRND_EXEC A, HRD_DGNS_TRAING_TRND_SPRT B
+		WHERE
+		  A.INDUTY_CD = B.INDUTY_CD
+		  AND A.TOT_WORK_CNT_SCOPE = B.TOT_WORK_CNT_SCOPE
+		  AND A.YEAR = B.YEAR
+		  AND A.INDUTY_CD = #{TREND_LCLAS}
+		  AND A.TOT_WORK_CNT_SCOPE = #{RANGE}
+	</select>
+	<insert id="insertQR" parameterType="map">
+		INSERT INTO HRD_BSC_DGNS_QR_MANAGE(MANAGE_IDX, IMAGE, URL, TITLE, REGI_DATE)
+		VALUES(HRD_QR_SEQ.NEXTVAL, #{image}, #{url}, #{title}, sysdate)
+	</insert>
+	<select id="selectQR" resultType="rbs.modules.recommend.QrVO">
+		SELECT
+			IMAGE, URL, TITLE, MANAGE_IDX as manageIdx
+		FROM
+			HRD_DGNS_BSC_QR_MANAGE
+		WHERE
+			ISDELETE = 0
+		ORDER BY MANAGE_IDX
+	</select>
+	<select id="getDoc" parameterType="String" resultType="map">
+		SELECT * FROM (
+			SELECT DISTINCT
+			    D.INSTT_IDX, D.INSTT_NAME, 
+			    A.DOCTOR_OFCPS, A.DOCTOR_DEPT_NAME, A.MEMBER_NAME DOCTOR_NAME, A.MEMBER_EMAIL DOCTOR_EMAIL, A.DOCTOR_IDX, PKG_DGUARD.FN_DEC_TELNO(A.DOCTOR_TELNO) DOCTOR_TELNO 
+			FROM 
+			    (SELECT 
+			        A.INSTT_IDX, A.DOCTOR_OFCPS, A.DOCTOR_DEPT_NAME, PKG_DGUARD.FN_DEC_TELNO(A.DOCTOR_TELNO) DOCTOR_TELNO, A.DOCTOR_IDX,
+			        B.MEMBER_NAME, B.MEMBER_EMAIL  
+			    FROM HRD_COM_DOCTOR A, VIEW_HRD_DOCTOR B  
+			    WHERE A.MEMBER_IDX = B.MEMBER_IDX AND A.APPLY_YN='Y' AND A.ISDELETE = 0) A,
+			    HRD_BSK B, INF_ZIP_GROUP C, HRD_COM_INSTT D 
+			WHERE
+			  B.BPL_ZIP = C.ZIP 
+			  AND C.INSTT_IDX = D.INSTT_IDX 
+			  AND D.INSTT_IDX = A.INSTT_IDX (+)
+			  AND B.BPL_NO = #{BPL_NO} 
+			  AND A.DOCTOR_OFCPS != '부장' 
+			ORDER BY DBMS_RANDOM.VALUE
+			) 
+		WHERE rownum = 1 
+	</select>
+	
+	<select id="getIssue" parameterType="String" resultType="map">
+		SELECT DISTINCT 
+		    A.BPL_NO, A.INSTT_IDX, 
+		    B.INSTT_NAME,
+		    NVL(C.CNT,0) CNT,
+		    SUBSTR(TO_CHAR(sysdate, 'YYYY'),3,4) || '-' || B.INSTT_NO || '-' || LPAD(NVL(C.CNT,0)+1,5,'0') || '-' || '1' ISSUE_NO,
+		    TO_CHAR(sysdate, 'yyyy-mm-dd') ISSUE_DATE 
+		FROM HRD_BSK A, HRD_COM_INSTT B, (SELECT INSTT_IDX, COUNT(INSTT_NAME) CNT FROM HRD_DGNS_BSC GROUP BY INSTT_IDX) C  
+		WHERE 
+		    A.INSTT_IDX=B.INSTT_IDX AND 
+		    B.INSTT_IDX=C.INSTT_IDX(+) AND 
+		    A.BPL_NO=#{BPL_NO}
+	</select>
+	<insert id="insertBSC" parameterType="map" useGeneratedKeys="false">
+		INSERT INTO HRD_DGNS_BSC
+		(BSC_IDX, ISSUE_DATE, ISSUE_NO, BPL_NO, FTF_YN, INSTT_IDX, INSTT_NAME,
+		DOCTOR_IDX, DOCTOR_NAME, DOCTOR_OFCPS, DOCTOR_TELNO, DOCTOR_EMAIL, DOCTOR_DEPT_NAME, 
+		CORP_NAME, CORP_LOCATION, INDUTY_NAME, INDUTY_CD, EMPINS_START_DATE, PRI_SUP_CD, TOT_WORK_CNT, CORP_PIC_NAME, CORP_PIC_TELNO, CORP_PIC_EMAIL, CORP_PIC_OFCPS,
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES(SEQ_HRD_BSC.NEXTVAL, sysdate, #{issue.ISSUE_NO}, #{basket.BPL_NO}, #{bscInfo.submitMtd}, #{doc.INSTT_IDX}, #{doc.INSTT_NAME}, #{doc.DOCTOR_IDX}, #{doc.DOCTOR_NAME}, #{doc.DOCTOR_OFCPS}, PKG_DGUARD.FN_ENC_TELNO(#{doc.DOCTOR_TELNO}), #{doc.DOCTOR_EMAIL}, #{doc.DOCTOR_DEPT_NAME}, #{basket.CORP_NAME}, #{basket.CORP_LOCATION}, #{basket.INDUTY_NAME}, #{basket.INDUTY_CD}, #{basket.EMPINS_START_DATE}, #{basket.PRI_SUP_CD}, #{basket.TOT_WORK_CNT}
+				, #{corInfo.corpPicNm}, PKG_DGUARD.FN_ENC_TELNO(#{corInfo.corpPicTel}), #{corInfo.corpPicEmail}, #{corInfo.corpOfcps}
+				, #{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP})
+		<selectKey keyProperty="BSC_IDX" resultType="long" order="AFTER">
+			SELECT SEQ_HRD_BSC.CURRVAL FROM DUAL
+		</selectKey> 
+	</insert>
+	
+	<insert id="insertCandid" parameterType="map">
+		INSERT ALL
+		<foreach collection="recommend" item="recommend" index="index" separator=" ">
+			INTO HRD_DGNS_BSC_PRTBIZ(BSC_IDX, PRTBIZ_IDX, PRTBIZ_NAME, DC, CONSIDER)
+			VALUES(#{BSC_IDX}, #{index}, #{recommend.PRTBIZ_NAME}, #{recommend.DC, jdbcType=NVARCHAR, typeHandler=rbs.modules.recommend.NVarcharTypeHandler}, #{recommend.CONSIDERATION, jdbcType=NVARCHAR, typeHandler=rbs.modules.recommend.NVarcharTypeHandler})
+		</foreach>
+		<foreach collection="moneyHis" item="item" index="index">
+			INTO HRD_DGNS_BSC_FUND_HST(BSC_IDX, FUND_IDX, YEAR, FUND_LIMIT, SPT_PAY)
+			VALUES(#{BSC_IDX}, #{index}, #{item.YEAR}, #{item.MAX_PAY}, #{item.TOT_PAY})
+		</foreach>
+		<foreach collection="trainHis" item="item" index="index">
+		<if test="item != null">
+			INTO HRD_DGNS_BSC_TR_HST(BSC_IDX, TR_HST_IDX, RCTBIZ_NAME, TP_NAME, METHOD, PERIOD, YEAR)
+			VALUES(#{BSC_IDX}, #{index}, #{item.PROGRAM}, #{item.TRPR_NM}, #{item.TR_METH_CD}, #{item.DAY}, #{item.YEAR} )
+		</if>
+		</foreach>
+		<foreach collection="trends" item="item" index="index">
+			INTO HRD_DGNS_BSC_TRND_EXEC(BSC_IDX, EXEC_IDX, INDUTY_CD, YEAR, NMCORP, TOTAL_NMPR)
+			VALUES(#{BSC_IDX}, #{index}, #{item.INDUTY_CD}, #{item.YEAR}, #{item.NMCORP}, #{item.TOTAL_NMPR})
+		</foreach>
+		<foreach collection="trends" item="item" index="index">
+			INTO HRD_DGNS_BSC_TRND_SPRT(BSC_IDX, SPRT_IDX, INDUTY_CD, YEAR, SPT_PAY)
+			VALUES(#{BSC_IDX}, #{index}, #{item.INDUTY_CD}, #{item.YEAR}, #{item.SPT)PAY})
+		</foreach>
+		<foreach collection="qrs" item="item" separator=" ">
+			INTO HRD_DGNS_BSC_QR(BSC_IDX, MANAGE_IDX, IMAGE, URL, TITLE)
+			VALUES(#{BSC_IDX}, #{item.manageIdx}, #{item.image}, #{item.url}, #{item.title})
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	<select id="getBSCIDX" parameterType="long" resultType="String">
+		SELECT 
+			B.BPL_NO 
+		FROM 
+			HRD_DGNS_QUSTNR_RSLT A, HRD_DGNS_BSC B
+		WHERE
+			B.BSC_IDX = A.BSC_IDX 
+			AND A.RSLT_IDX = #{RSLT_IDX}
+	</select>
+	<select id="getNCSCODES" resultType="map">
+		select 
+			class_idx, class_name, parent_class_idx, class_level
+		from rbs_iclass_info
+			where master_code='NCS_CODE'
+		order by class_idx
+	</select>
+	<select id="getPRTBIZ" resultType="map">
+		--select prtbiz_idx, name from hrd_prtbiz order by prtbiz_idx
+		select prtbiz_idx, prtbiz_name name, pri_sup_bizcrp_type, url 
+		from hrd_dgns_prtbiz 
+		where isdelete = 0 
+	</select>
+	<select id="getPRTBIZTP" parameterType="rbs.modules.recommend.PrtbizVO" resultType="map">
+		SELECT 
+			TP_IDX, TP_NAME, TR_DAYCNT || '일(' || NVL(TRTM, 0) || '시간)' TR_DAYCNT, APPLY_INDUTY, PRTBIZ_IDX
+		FROM HRD_DGNS_PRTBIZ_TP
+		<where>
+			PRTBIZ_IDX = #{prtbiz} AND ISDELETE = 0 
+			<if test="lclas != null and lclas != ''">
+				AND NCS_LCLAS_CD = #{lclas}
+			</if>
+			<if test="mclas != null and mclas != ''">
+				AND NCS_MCLAS_CD = #{mclas}
+			</if>
+			<if test="sclas != null and sclas != ''">
+				AND NCS_SCLAS_CD = #{sclas}
+			</if>
+			<if test="name != null and name != ''">
+				AND TP_NAME like '%' || #{name} || '%'
+			</if>
+		</where>
+		UNION ALL 
+		SELECT
+		    TP_IDX, TP_NAME, TR_DAYCNT || '일(' || NVL(TRTM, 0) || '시간)' TR_DAYCNT, APPLY_INDUTY, PRTBIZ_IDX 
+		FROM IFS_HRDNET_TR_TP 
+		<where>
+			PRTBIZ_IDX = #{prtbiz} 
+			<if test="lclas != null and lclas != ''">
+				AND NCS_LCLAS_CD = #{lclas}
+			</if>
+			<if test="mclas != null and mclas != ''">
+				AND NCS_MCLAS_CD = #{mclas}
+			</if>
+			<if test="sclas != null and sclas != ''">
+				AND NCS_SCLAS_CD = #{sclas}
+			</if>
+			<if test="name != null and name != ''">
+				AND TP_NAME like '%' || #{name} || '%'
+			</if>
+		</where>
+	</select>
+	<insert id="insertBSISOthers" parameterType="map">
+		INSERT ALL 
+		<foreach collection="recommend" item="recommend" index="index" separator=" ">
+			<if test="recommend != null">
+				INTO HRD_DGNS_BSISCNSL_RCTR_BIZ(BSISCNSL_IDX, BIZ_IDX, RANK, RCTR_NAME, INTRO, CONSIDER, PRTBIZ_IDX)
+				VALUES(#{BSISCNSL_IDX}, #{index}, #{recommend.RANK}, #{recommend.NAME}, #{recommend.DC, jdbcType=NVARCHAR, typeHandler=rbs.modules.recommend.NVarcharTypeHandler}, #{recommend.CONSIDERATION, jdbcType=NVARCHAR, typeHandler=rbs.modules.recommend.NVarcharTypeHandler}, #{recommend.PRTBIZ_IDX})
+			</if>
+		</foreach>
+		<foreach collection="moneyHis" item="item" index="index">
+			<if test="item != null">
+				INTO HRD_DGNS_BSISCNSL_FUND_HST(BSISCNSL_IDX, FUND_IDX, YEAR, FUND_LIMIT, SPT_PAY)
+				VALUES(#{BSISCNSL_IDX}, #{index}, #{item.YEAR}, #{item.MAX_PAY}, #{item.TOT_PAY})
+			</if>
+		</foreach>
+		<foreach collection="trainHis" item="item" index="index">
+			<if test="item != null">
+				INTO HRD_DGNS_BSISCNSL_TR_HST(BSISCNSL_IDX, TR_HST_IDX, RCTBIZ_NAME, TP_NAME, METHOD, PERIOD, YEAR)
+				VALUES(#{BSISCNSL_IDX}, #{index}, #{item.PROGRAM}, #{item.TRPR_NM}, #{item.TR_METH_CD}, #{item.DAY}, #{item.YEAR} )			
+			</if>
+		</foreach>
+		<foreach collection="trends" item="item" index="index">
+			<if test="item != null">
+				INTO HRD_DGNS_BSISCNSL_TRND_EXEC(BSISCNSL_IDX, EXEC_IDX, INDUTY_CD, YEAR, NMCORP, TOTAL_NMPR)
+				VALUES(#{BSISCNSL_IDX}, #{index}, #{item.INDUTY_CD}, #{item.YEAR}, #{item.NMCORP}, #{item.TOTAL_NMPR})
+			</if>
+		</foreach>
+		<foreach collection="trends" item="item" index="index">
+			<if test="item != null">
+				INTO HRD_DGNS_BSISCNSL_TRND_SPRT(BSISCNSL_IDX, SPRT_IDX, INDUTY_CD, YEAR, SPT_PAY)
+				VALUES(#{BSISCNSL_IDX}, #{index}, #{item.INDUTY_CD}, #{item.YEAR}, #{item.SPT_PAY})
+			</if>
+		</foreach>
+		SELECT * FROM DUAL 
+	</insert>
+	
+	<update id="saveBSIS" parameterType="map">
+		<foreach collection="recommend" item="recommend" open="DECLARE BEGIN" separator=";" close="; END;">
+			UPDATE HRD_DGNS_BSISCNSL_RCTR_BIZ
+			SET
+				RCTR_NAME = #{recommend.NAME}
+				, INTRO = #{recommend.DESCRIPTION}
+				, CONSIDER = #{recommend.CONSIDERATION}
+				, HRD_SGST = #{recommend.sgst}
+				, FUTR_SPRT_PROC = #{recommend.proc}
+				, PRTBIZ_IDX = #{recommend.PRTBIZ}
+			WHERE
+				RANK = #{recommend.RANK}	
+		</foreach>
+	</update>
+	<insert id="insertCharts" parameterType="map">
+		INSERT INTO HRD_DGNS_REPORTING_CHART(CHART_IDX, BSC_IDX, EXECCHART, SPRTCHART)
+		VALUES(HRD_CHART_SEQ.NEXTVAL, #{bsc_idx}, #{exec_pic}, #{sprt_pic})
+	</insert>
+	<select id="getBSCIDXbyISSUE" parameterType="String" resultType="int">
+		SELECT bsc_idx FROM HRD_DGNS_BSC
+		WHERE issue_no = #{issue_no}
+	</select>
+	<select id="getIssueBSISCNSL" parameterType="long" resultType="map">
+	  	SELECT
+		    A.BPL_NO, A.BPL_ZIP,
+		    G.INSTT_NAME, 
+		    NVL(D.CNT,0) CNT, 
+		    SUBSTR(TO_CHAR(sysdate, 'YYYY'),3,4) || '-' || G.INSTT_NO || '-' || LPAD(NVL(D.CNT,0)+1,5,'0') || '-' || '3' ISSUE_NO, 
+		    to_char(sysdate, 'yyyy-mm-dd') ISSUE_DATE
+		FROM 
+		    HRD_BSK A,
+		    (SELECT INSTT_IDX, COUNT(INSTT_IDX) CNT FROM HRD_DGNS_BSISCNSL GROUP BY INSTT_IDX) D, 
+		    HRD_DGNS_QUSTNR_RSLT E, 
+		    HRD_DGNS_BSC F, 
+		    HRD_COM_INSTT G
+			WHERE 
+		        A.INSTT_IDX = D.INSTT_IDX(+) 
+		        AND A.INSTT_IDX = G.INSTT_IDX 
+		        AND A.BPL_NO = F.BPL_NO 
+		        AND E.BSC_IDX = F.BSC_IDX 
+		        AND E.RSLT_IDX = #{rslt_idx} 
+	</select>
+	
+	<select id="getBsisByRSLT" parameterType="long" resultType="map">
+		SELECT
+			A.BSISCNSL_IDX, A.BPL_NO, A.ISSUE_NO, TO_CHAR(A.ISSUE_DATE, 'yyyy-mm-dd') ISSUE_DATE, A.INSTT_IDX, A.INSTT_NAME,
+			A.DOCTOR_IDX, A.DOCTOR_NAME, A.DOCTOR_DEPT_NAME, A.DOCTOR_OFCPS, PKG_DGUARD.FN_DEC_TELNO(A.DOCTOR_TELNO) DOCTOR_TELNO, A.DOCTOR_EMAIL,
+			A.CORP_NAME, A.CORP_LOCATION, A.INDUTY_NAME, A.INDUTY_CD, A.EMPINS_START_DATE, TO_DATE(A.EMPINS_START_DATE, 'yyyy.mm.dd') INSURANCE_DT, A.TOT_WORK_CNT, DECODE(A.PRI_SUP_CD, 1, '대규모기업', '우선지원대상기업') SCALE_CD,
+			A.CORP_PIC_NAME, A.CORP_PIC_OFCPS, PKG_DGUARD.FN_DEC_TELNO(A.CORP_PIC_TELNO) CORP_PIC_TELNO, A.CORP_PIC_EMAIL, A.STATUS, A.FTF_YN 
+		FROM
+			HRD_DGNS_BSISCNSL A
+		WHERE
+			A.RSLT_IDX = #{RSLT_IDX}
+	</select>	
+	
+	<select id="getRCTRBizs" parameterType="long" resultType="map">
+		SELECT
+			RANK, RCTR_NAME, INTRO, CONSIDER as CONSIDERATION, HRD_SGST, FUTR_SPRT_PROC, BIZ_IDX
+		FROM
+			HRD_DGNS_BSISCNSL_RCTR_BIZ
+		WHERE
+			BSISCNSL_IDX = #{BSISCNSL_IDX}
+		ORDER BY RANK
+	</select>
+	<select id="getRCTRCourses" parameterType="long" resultType="map">
+		SELECT
+			BIZ_IDX, TP_NAME, COURSE_IDX
+		FROM
+			HRD_DGNS_BSISCNSL_RCTR_COURSE
+		WHERE
+			BSISCNSL_IDX = #{BSISCNSL_IDX}
+	</select>
+	<select id="getTrendsByBsis" parameterType="long" resultType="map">
+		SELECT
+			A.INDUTY_CD, A.YEAR, A.NMCORP, A.TOTAL_NMPR, B.SPT_PAY
+		FROM
+			HRD_DGNS_BSISCNSL_TRND_EXEC A, HRD_DGNS_BSISCNSL_TRND_SPRT B
+		WHERE
+			A.BSISCNSL_IDX = B.BSISCNSL_IDX
+			AND A.YEAR = B.YEAR
+			AND A.BSISCNSL_IDX = #{BSISCNSL_IDX}
+	</select>
+	<select id="trainHistoryBsis" parameterType="long" resultType="map">
+		SELECT
+			RCTBIZ_NAME program, TP_NAME TRPR_NM, METHOD TR_METH_CD, PERIOD day, YEAR
+		FROM
+			HRD_DGNS_BSISCNSL_TR_HST
+		WHERE
+			BSISCNSL_IDX = #{BSISCNSL_IDX}
+		ORDER BY
+			TR_HST_IDX
+	</select>
+	<select id="moneyHistoryBsis" parameterType="long" resultType="map">
+		SELECT
+			B.YEAR, A.FUND_LIMIT MAX_PAY, A.SPT_PAY TOT_PAY
+		FROM
+			HRD_DGNS_BSISCNSL_FUND_HST A,
+			(SELECT to_char(add_months(sysdate, (rownum-4)*12), 'yyyy') year from dual connect by rownum <![CDATA[<=]]> 4) B
+		WHERE
+			B.YEAR = A.YEAR(+)
+			AND A.BSISCNSL_IDX = #{BSISCNSL_IDX}
+		ORDER BY YEAR DESC
+	</select>
+	<select id="getDoctorBsis" parameterType="long" resultType="map">
+		SELECT
+			DOCTOR_IDX, DOCTOR_NAME, DOCTOR_DEPT_NAME, DOCTOR_OFCPS, PKG_DGUARD.FN_DEC_TELNO(DOCTOR_TELNO) DOCTOR_TELNO, DOCTOR_EMAIL, DOCTOR_ETC_OPINION, INSTT_NAME
+		FROM
+			HRD_DGNS_BSISCNSL
+		WHERE
+			BSISCNSL_IDX = #{BSISCNSL_IDX}
+	</select>
+	<insert id="insertBSISCNSLinform" parameterType="map">
+		INSERT INTO HRD_DGNS_BSISCNSL(
+			BSISCNSL_IDX, RSLT_IDX, BPL_NO, ISSUE_NO, ISSUE_DATE, INSTT_IDX, INSTT_NAME, 
+			DOCTOR_IDX, DOCTOR_NAME, DOCTOR_DEPT_NAME, DOCTOR_OFCPS, DOCTOR_TELNO, DOCTOR_EMAIL, 
+			CORP_NAME, CORP_LOCATION, INDUTY_NAME, INDUTY_CD, EMPINS_START_DATE, PRI_SUP_CD, TOT_WORK_CNT, STATUS, 
+			CORP_PIC_NAME, CORP_PIC_OFCPS, CORP_PIC_TELNO, CORP_PIC_EMAIL,
+			REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES (
+			HRD_BSISCNSL_SEQ.NEXTVAL, #{RSLT_IDX}, #{basket.BPL_NO}, #{issue.ISSUE_NO}, sysdate, #{doc.INSTT_IDX}, #{doc.INSTT_NAME}, 
+			#{doc.DOCTOR_IDX}, #{doc.DOCTOR_NAME}, #{doc.DOCTOR_DEPT_NAME}, #{doc.DOCTOR_OFCPS}, PKG_DGUARD.FN_ENC_TELNO(#{doc.DOCTOR_TELNO}), #{doc.DOCTOR_EMAIL}, 
+			#{basket.CORP_NAME}, #{basket.CORP_LOCATION}, #{basket.INDUTY_NAME}, #{basket.INDUTY_CD}, #{basket.EMPINS_START_DATE}, #{basket.PRI_SUP_CD}, #{basket.TOT_WORK_CNT}, 0, 
+			#{corpPIC.CORP_PIC_NAME}, #{corpPIC.CORP_PIC_OFCPS}, PKG_DGUARD.FN_ENC_TELNO(#{corpPIC.CORP_PIC_TELNO}), #{corpPIC.CORP_PIC_EMAIL},
+			#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP})
+		<selectKey keyProperty="BSISCNSL_IDX" resultType="long">
+			SELECT BSISCNSL_IDX FROM HRD_DGNS_BSISCNSL WHERE RSLT_IDX = #{RSLT_IDX}
+		</selectKey>
+	</insert>
+	<select id="bsisList" resultType="map">
+		SELECT BSISCNSL_IDX, ISSUE_NO, ISSUE_DATE, CORP_NAME, BPL_NO, STATUS
+		FROM HRD_DGNS_BSISCNSL
+	</select>
+		<select id="getRSLTbyBsis" parameterType="long" resultType="long">
+		SELECT
+			RSLT_IDX
+		FROM
+			HRD_DGNS_BSISCNSL
+		WHERE
+			BSISCNSL_IDX = #{BSISCNSL_IDX}
+	</select>
+	<select id="bsisRecom" parameterType="long" resultType="map">
+		SELECT 
+		    A.PRTBIZ_IDX, A.INTRO, A.CONSIDER, 
+		    B.BIZ_IDX, B.RANK, A.PRTBIZ_NAME AS RCTR_NAME, B.HRD_SGST, B.FUTR_SPRT_PROC 
+		FROM HRD_DGNS_PRTBIZ A 
+		LEFT JOIN HRD_DGNS_BSISCNSL_RCTR_BIZ B 
+		ON A.PRTBIZ_IDX = B.PRTBIZ_IDX AND B.BSISCNSL_IDX = #{bsiscnsl_idx} 
+		WHERE 
+			A.ISDELETE=0 
+		ORDER BY B.RANK, A.PRTBIZ_IDX 
+	</select>
+	<update id="updateDoc" parameterType="map">
+		UPDATE HRD_DGNS_BSISCNSL
+		SET
+			INSTT_IDX = #{instt_idx}
+			, INSTT_NAME = (SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = #{instt_idx})
+			, DOCTOR_NAME = #{doctor_name}
+			, DOCTOR_EMAIL = #{doctor_email}
+			, DOCTOR_OFCPS = #{doctor_ofcps}
+			, DOCTOR_TELNO = PKG_DGUARD.FN_ENC_TELNO(#{doctor_telno})
+			, DOCTOR_DEPT_NAME = #{doctor_dept_name}
+			, DOCTOR_ETC_OPINION = #{etc_opinion}
+			, STATUS = #{status}
+			, CORP_PIC_NAME = #{corp_pic_name}
+			, CORP_PIC_OFCPS = #{corp_pic_ofcps}
+			, CORP_PIC_TELNO = PKG_DGUARD.FN_ENC_TELNO(#{corp_pic_tel})
+			, CORP_PIC_EMAIL = #{corp_pic_email}
+			, FTF_YN = #{ftf_yn}
+			, LAST_MODI_IDX = #{LAST_MODI_IDX}
+			, LAST_MODI_ID = #{LAST_MODI_ID}
+			, LAST_MODI_NAME = #{LAST_MODI_NAME}
+			, LAST_MODI_DATE = SYSDATE
+			, LAST_MODI_IP = #{LAST_MODI_IP} 
+		WHERE
+			BSISCNSL_IDX = #{bsis_idx}
+	</update>
+	<update id="updateRCTRbiz" parameterType="map">
+		MERGE INTO HRD_DGNS_BSISCNSL_RCTR_BIZ A 
+		USING DUAL 
+		ON (BSISCNSL_IDX=#{bsiscnsl_idx} AND BIZ_IDX=#{BIZ_IDX})
+		WHEN MATCHED THEN
+			UPDATE SET
+				CONSIDER = #{CONSIDER, jdbcType=NVARCHAR, typeHandler=rbs.modules.recommend.NVarcharTypeHandler}
+				, INTRO = #{INTRO, jdbcType=NVARCHAR, typeHandler=rbs.modules.recommend.NVarcharTypeHandler}
+				, RCTR_NAME = #{RCTR_NAME}
+				, RANK = #{RANK}
+				, HRD_SGST = #{HRD_SGST}
+				, FUTR_SPRT_PROC = #{FUTR_SPRT_PROC}
+				, PRTBIZ_IDX=#{PRTBIZ_IDX} 
+		WHEN NOT MATCHED THEN 
+			INSERT (BSISCNSL_IDX, BIZ_IDX, PRTBIZ_IDX, CONSIDER, INTRO, RCTR_NAME, RANK, HRD_SGST, FUTR_SPRT_PROC) 
+			VALUES (
+				#{bsiscnsl_idx}, #{BIZ_IDX}, #{PRTBIZ_IDX},
+				#{CONSIDER, jdbcType=NVARCHAR, typeHandler=rbs.modules.recommend.NVarcharTypeHandler},
+				#{INTRO, jdbcType=NVARCHAR, typeHandler=rbs.modules.recommend.NVarcharTypeHandler}, 
+				#{RCTR_NAME}, #{RANK}, #{HRD_SGST}, #{FUTR_SPRT_PROC})
+	</update>
+	<select id="getMaxPay" parameterType="String" resultType="map">
+		SELECT
+			a.bpl_no, c.year, NVL(b.insurance,0), a.lrscl_corp_se, 
+			TRUNC(CASE 
+				WHEN NVL(DECODE(a.lrscl_corp_se, 1, b.insurance, trunc(b.insurance*2.4)),0) <![CDATA[<]]> 5000000 THEN 5000000 
+				ELSE DECODE(a.lrscl_corp_se, 1, b.insurance, b.insurance*2.4) 
+			END) as max_pay  
+		FROM 
+			hrd_bsk a, tmp_calc_insurance b,
+			(
+				SELECT to_char(add_months(sysdate, (rownum-4)*12), 'yyyy') year from dual connect by rownum <![CDATA[<=]]> 4
+			) c
+		WHERE
+			a.BPL_NO = b.BPL_NO(+)
+			AND c.year = b.year(+)
+			AND a.BPL_NO = #{bpl_no}
+		order by c.year desc
+	</select>
+	<select id="getCorpPIC" parameterType="long" resultType="map">
+		SELECT
+			corp_pic_name, corp_pic_ofcps, PKG_DGUARD.FN_DEC_TELNO(corp_pic_telno) corp_pic_telno, corp_pic_email
+		FROM hrd_dgns_bsc a, hrd_dgns_qustnr_rslt b
+		WHERE
+			b.BSC_IDX = a.BSC_IDX
+			AND b.RSLT_IDX = #{RLST_IDX}
+	</select>
+	<update id="updateMaxBSC" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" separator=";" open="DECLARE BEGIN" close="; END;">
+			UPDATE HRD_DGNS_BSC_FUND_HST SET
+				FUND_LIMIT = #{item.FUND_LIMIT}
+			WHERE
+				BSC_IDX = #{item.IDX} AND YEAR = #{item.YEAR} 
+		</foreach>
+	</update>
+		<update id="updateMaxBSIS" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" separator=";" open="DECLARE BEGIN" close="; END;">
+			UPDATE HRD_DGNS_BSISCNSL_FUND_HST SET
+				FUND_LIMIT = #{item.FUND_LIMIT}
+			WHERE
+				BSISCNSL_IDX = #{item.IDX} AND YEAR = #{item.YEAR} 
+		</foreach>
+	</update>
+	<select id="getLimitInduty" parameterType="String" resultType="map">
+		SELECT
+			B.NAME, B.CODE, B.SOJT, B.LEARNING, B.WORKNLEARN
+		FROM
+			HRD_BSK A, TMP_INDUSTRY_LIMIT B
+		WHERE
+			A.INDUTY_CD = B.CODE
+			AND A.BPL_NO = #{BPL_NO}
+	</select> 
+	<update id="updateQR" parameterType="rbs.modules.recommend.QrVO">
+		UPDATE
+			HRD_DGNS_BSC_QR_MANAGE
+		SET
+			IMAGE = #{image, jdbcType=NCLOB, typeHandler=rbs.modules.report.mapper.NCLOBTypeHandler}
+			, URL = #{url}
+			, TITLE = #{title}
+		WHERE
+			MANAGE_IDX = #{manageIdx}
+</update>
+	<update id="updateRCTbizTP" parameterType="map">
+		MERGE INTO HRD_DGNS_BSISCNSL_RCTR_COURSE A
+		USING DUAL 
+		ON (A.BSISCNSL_IDX = #{bsiscnsl_idx} AND A.BIZ_IDX = #{biz_idx} AND PRTBIZ_IDX = #{prtbiz_idx} AND COURSE_IDX = #{course_idx})
+		WHEN MATCHED THEN
+			UPDATE SET
+				A.TP_NAME = #{TP_NAME},
+				A.TP_IDX = #{TP_IDX}
+		WHEN NOT MATCHED THEN
+			INSERT (BSISCNSL_IDX, BIZ_IDX, PRTBIZ_IDX, COURSE_IDX, TP_NAME, TP_IDX)
+			VALUES (#{bsiscnsl_idx}, #{biz_idx}, #{PRTBIZ_IDX}, #{course_idx}, #{TP_NAME}, #{TP_IDX})
+	</update>
+	<delete id="cleanupRCTbizTP" parameterType="map">
+		DELETE FROM HRD_DGNS_BSISCNSL_RCTR_COURSE
+		WHERE
+			BSISCNSL_IDX = #{bsiscnsl_idx}
+			AND BIZ_IDX = #{BIZ_IDX}
+	</delete>
+	<select id="bsisRecomCourse" parameterType="map" resultType="map">
+		SELECT
+			TP_IDX, PRTBIZ_IDX, TP_NAME
+		FROM
+			HRD_DGNS_BSISCNSL_RCTR_COURSE
+		WHERE
+			BSISCNSL_IDX = #{BSISCNSL_IDX}
+			AND BIZ_IDX = #{BIZ_IDX}
+	</select>
+	<select id="getInsttList" resultType="String">
+		SELECT INSTT_NAME FROM HRD_COM_INSTT ORDER BY INSTT_IDX
+	</select>
+	<select id="searchDoc" parameterType="rbs.modules.recommend.DoctorVO" resultType="map">
+		SELECT 
+	    	A.DOCTOR_IDX, A.MEMBER_IDX, B.MEMBER_NAME AS DOCTOR_NAME, A.INSTT_IDX, A.DOCTOR_YN,
+	    	C.INSTT_NAME, A.DOCTOR_OFCPS, A.DOCTOR_DEPT_NAME, PKG_DGUARD.FN_DEC_TELNO(A.DOCTOR_TELNO) AS DOCTOR_TELNO 
+		FROM HRD_COM_DOCTOR A 
+		JOIN VIEW_HRD_DOCTOR B ON A.MEMBER_IDX=B.MEMBER_IDX 
+		JOIN HRD_COM_INSTT C ON A.INSTT_IDX=C.INSTT_IDX 
+		<where>
+			A.DOCTOR_YN = 'Y' 
+			<if test="insttName != null and insttName != ''">
+		    	AND C.INSTT_NAME = #{insttName}
+		    </if>
+		    <if test="doctorName != null and doctorName != ''">
+		  		AND B.MEMBER_NAME = #{doctorName}
+		  	</if>
+		</where>
+	</select>
+	
+	<select id="getBplNo" parameterType="String" resultType="map">
+		SELECT * FROM HRD_BSK WHERE BIZR_NO=#{bizNum} FETCH FIRST 1 ROWS ONLY
+	</select>
+	<select id="getMoneyHis" parameterType="String" resultType="map">
+		SELECT B.year, NVL(A.TOT_PAY, 0) TOT_PAY
+	    FROM
+			(
+	      SELECT year, sum(TOT_PAY) TOT_PAY
+	      FROM (
+	        select to_char(tr_start_date, 'YYYY') year, sum(TOT_TR_CT) TOT_PAY FROM HRD_BSK_BPR WHERE BPL_NO = #{BPL_NO} and to_char(tr_start_date, 'YYYY') between to_char(sysdate, 'yyyy')-3 and to_char(sysdate, 'yyyy') GROUP BY to_char(tr_start_date, 'YYYY')
+	        union all
+	        select to_char(tr_start_date, 'YYYY') year, sum(TOT_TR_CT) TOT_PAY FROM HRD_BSK_CON WHERE BPL_NO = #{BPL_NO} and to_char(tr_start_date, 'YYYY') between to_char(sysdate, 'yyyy')-3 and to_char(sysdate, 'yyyy') GROUP BY to_char(tr_start_date, 'YYYY')
+	        union all
+	        select to_char(tr_start_date, 'YYYY') year, sum(TOT_TR_CT) TOT_PAY FROM HRD_BSK_REG WHERE BPL_NO = #{BPL_NO} and to_char(tr_start_date, 'YYYY') between to_char(sysdate, 'yyyy')-3 and to_char(sysdate, 'yyyy') GROUP BY to_char(tr_start_date, 'YYYY')
+	      )
+	      GROUP BY year
+	    ) A,
+	    (
+	        select to_char(add_months(sysdate, (rownum-4)*12), 'YYYY') year
+	        from dual
+	        connect by rownum <![CDATA[<=]]> 4 
+	    ) B
+	        WHERE B.YEAR = A.YEAR(+)
+		ORDER BY B.year DESC
+	</select>
+	<select id="getTrainHis" parameterType="String" resultType="map">
+		SELECT
+		  NVL(A.PROGRAM, '-') PROGRAM, NVL(A.TRPR_NM, '-') TRPR_NM, NVL(A.TRPR_CD, '-') TRPR_CD, A.TRPR_DEGR, NVL(A.TR_METH_CD, '-') TR_METH_CD, A.TR_STA_DT, A.TR_END_DT, day, NVL(substr(A.tr_sta_dt, 1,4), '-') year, A.RNUM
+		FROM
+		  (
+		  SELECT 
+		    PROGRAM, TP_NM TRPR_NM, TP_CD TRPR_CD, TP_TME TRPR_DEGR, TR_MTH TR_METH_CD, TR_START_DATE TR_STA_DT, TR_END_DATE TR_END_DT, day, rownum rnum
+		  FROM (SELECT
+		          PROGRAM, TP_NM, TP_CD, TP_TME, TR_MTH, to_char(TR_START_DATE, 'YYYYMMDD') TR_START_DATE, to_char(TR_END_DATE, 'YYYYMMDD') TR_END_DATE, to_char(TR_END_DATE, 'YYYYMMDD') - to_char(TR_START_DATE, 'YYYYMMDD')+1 day
+		        FROM
+		          (SELECT '사업주 훈련' program, A.* FROM (select distinct TP_NM, TP_CD, TP_TME, TR_MTH, tr_start_date, tr_end_date FROM HRD_BSK_BPR WHERE BPL_NO = #{BPL_NO} AND TR_START_DATE is not null AND TOT_TR_CT > 0) A
+		            union all
+		          SELECT '컨소시엄' program, B.* FROM (SELECT distinct TP_NM, TP_CD, TP_TME, TR_MTH, tr_start_date, tr_end_date FROM HRD_BSK_CON WHERE BPL_NO = #{BPL_NO} AND TR_START_DATE is not null AND TOT_TR_CT > 0) B
+		            union all
+		          SELECT '지역산업맞춤 훈련' program, C.* FROM (SELECT DISTINCT TP_NM, TP_CD, TP_TME, TR_MTH, tr_start_date, tr_end_date FROM HRD_BSK_REG WHERE BPL_NO = #{BPL_NO} AND TR_START_DATE is not null AND TOT_TR_CT > 0) C
+		          ) ORDER BY TR_START_DATE desc
+		        )
+		  ) A,
+		  (select level rnum from dual connect by level <![CDATA[<=]]> 3) B
+		WHERE
+		  B.rnum = A.rnum(+)
+		ORDER BY RNUM
+	</select>
+	<select id="getChartsCount" parameterType="map" resultType="Integer">
+		SELECT COUNT(chart_idx) 
+		FROM HRD_DGNS_REPORTING_CHART
+		WHERE BSC_IDX = #{bsc_idx}
+	</select>
+	<update id="updateCharts" parameterType="map">
+		UPDATE HRD_DGNS_REPORTING_CHART
+		SET
+			EXECCHART = #{exec_pic}
+			, SPRTCHART = #{sprt_pic}
+		WHERE
+			BSC_IDX = #{bsc_idx}
+	</update>
+	<select id="getDocByMemberidx" parameterType="String" resultType="map">
+		SELECT 
+		    A.INSTT_IDX, A.DOCTOR_IDX, A.DOCTOR_OFCPS, A.DOCTOR_DEPT_NAME, PKG_DGUARD.FN_DEC_TELNO(A.DOCTOR_TELNO) DOCTOR_TELNO, 
+		    B.MEMBER_NAME AS DOCTOR_NAME, B.MEMBER_EMAIL AS DOCTOR_EMAIL,
+		    C.INSTT_NAME 
+		FROM HRD_COM_DOCTOR A, VIEW_HRD_DOCTOR B, HRD_COM_INSTT C 
+		WHERE 
+		    A.MEMBER_IDX=B.MEMBER_IDX AND 
+		    A.INSTT_IDX=C.INSTT_IDX AND
+		    A.APPLY_YN='Y' AND A.ISDELETE = 0 AND 
+		    A.MEMBER_IDX=#{member_idx} 
+		ORDER BY A.DOCTOR_IDX DESC
+	</select>
+	<select id="getDocByZipcode" parameterType="String" resultType="map">
+		 SELECT
+		    F.INSTT_IDX, F.INSTT_NAME, D.DOCTOR_IDX, D.DOCTOR_OFCPS, D.DOCTOR_DEPT_NAME, PKG_DGUARD.FN_DEC_TELNO(D.DOCTOR_TELNO) DOCTOR_TELNO, 
+		    E.MEMBER_NAME AS DOCTOR_NAME, E.MEMBER_EMAIL AS DOCTOR_EMAIL 
+		 FROM 
+		    HRD_BSK A, HRD_COM_DOCTOR_BLOCK C, HRD_COM_DOCTOR D, VIEW_HRD_DOCTOR E, HRD_COM_INSTT F,
+		    (
+		        SELECT 
+		            A.ZIP, A.SIGNGU SIGUNGU, A.INSTT_IDX, B.CLASS_IDX BLOCK_CD 
+		        FROM INF_ZIP_GROUP A, RBS_ICLASS_INFO B, RBS_ICLASS_INFO C
+		        WHERE A.SIGNGU = B.CLASS_NAME
+		            AND B.PARENT_CLASS_IDX = C.CLASS_IDX
+		            AND A.CTPRVN = C.CLASS_NAME
+		            AND B.MASTER_CODE = 'SIDO_SIGUNGU'
+		    ) B 
+		  WHERE B.BLOCK_CD = C.BLOCK_CD 
+		  AND C.DOCTOR_IDX = D.DOCTOR_IDX
+		  AND D.MEMBER_IDX = E.MEMBER_IDX
+		  AND D.INSTT_IDX = F.INSTT_IDX 
+		  AND A.BPL_ZIP = B.ZIP
+		  AND A.BPL_NO = #{bpl_no} 
+	</select>
+	<insert id="insertBSIStps" parameterType="map">
+		INSERT ALL
+		<foreach collection="recommend" item="rec" separator=" ">
+			<foreach collection="rec.TPS" item="tpsItem" index="index">
+				INTO HRD_DGNS_BSISCNSL_RCTR_COURSE (BSISCNSL_IDX, BIZ_IDX, COURSE_IDX, PRTBIZ_IDX, TP_NAME, TP_IDX)
+				VALUES (#{BSISCNSL_IDX}, #{rec.RANK}-1, #{index}, #{tpsItem.PRTBIZ_IDX}, #{tpsItem.TP_NAME}, #{tpsItem.TP_IDX})	
+			</foreach>
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	
+	<select id="getPicDoctor" parameterType="String" resultType="map">
+		SELECT 
+			A.DOCTOR_IDX, A.BPL_NO, A.CLI_DOCTOR_YN,
+		    B.MEMBER_IDX, B.INSTT_IDX, B.CLSF_CD, B.STATUS, B.DOCTOR_OFCPS, B.DOCTOR_DEPT_NAME, PKG_DGUARD.FN_DEC_TELNO(B.DOCTOR_TELNO) DOCTOR_TELNO,
+		    C.MEMBER_ID, C.MEMBER_NAME AS DOCTOR_NAME, C.MEMBER_EMAIL AS DOCTOR_EMAIL, C.USERTYPE_IDX, C.GROUP_CODES,
+		    D.INSTT_NAME 
+		FROM HRD_COM_DOCTOR_CORP A 
+		LEFT OUTER JOIN HRD_COM_DOCTOR B ON A.DOCTOR_IDX = B.DOCTOR_IDX 
+		LEFT OUTER JOIN VIEW_HRD_DOCTOR C ON B.MEMBER_IDX = C.MEMBER_IDX 
+		LEFT JOIN HRD_COM_INSTT D ON B.INSTT_IDX=D.INSTT_IDX  
+		<where>
+			A.BPL_NO=#{bpl_no} AND A.ISDELETE = 0 AND
+		    B.APPLY_YN='Y' AND B.ISDELETE = 0 AND
+		    C.ISDELETE = 0
+		</where>		
+	</select>
+	
+	<select id="getDoctorInPicInstt" parameterType="String" resultType="map">
+		SELECT * FROM (
+		    SELECT 
+		        A.BPL_NO, A.BPL_NM, A.INSTT_IDX, 
+		        B.INSTT_NAME,
+		        C.DOCTOR_IDX, C.MEMBER_IDX, C.APPLY_YN, C.DOCTOR_OFCPS, C.DOCTOR_DEPT_NAME, PKG_DGUARD.FN_DEC_TELNO(C.DOCTOR_TELNO) DOCTOR_TELNO,
+		        D.MEMBER_NAME AS DOCTOR_NAME, D.MEMBER_EMAIL AS DOCTOR_EMAIL 
+		    FROM HRD_BSK A 
+		    LEFT JOIN HRD_COM_INSTT B ON A.INSTT_IDX=B.INSTT_IDX 
+		    RIGHT OUTER JOIN HRD_COM_DOCTOR C ON A.INSTT_IDX=C.INSTT_IDX 
+		    LEFT JOIN VIEW_HRD_DOCTOR D ON C.MEMBER_IDX=D.MEMBER_IDX 
+		    WHERE 
+		    	A.BPL_NO=#{bpl_no} AND 
+		    	C.DOCTOR_OFCPS != '부장' AND 
+		    	C.APPLY_YN='Y' AND 
+		    	C.ISDELETE=0 
+		    ORDER BY DBMS_RANDOM.VALUE) 
+		FETCH FIRST 1 ROW ONLY
+	</select>
+	
+	<select id="getCoreDoctor" parameterType="String" resultType="map">
+		SELECT * FROM (
+		    SELECT 
+		        A.BPL_NO, A.BPL_NM, A.INSTT_IDX, 
+		        B.INSTT_NAME,
+		        C.DOCTOR_IDX, C.MEMBER_IDX, C.APPLY_YN, C.DOCTOR_OFCPS, C.DOCTOR_DEPT_NAME, PKG_DGUARD.FN_DEC_TELNO(C.DOCTOR_TELNO) DOCTOR_TELNO,
+		        D.MEMBER_NAME AS DOCTOR_NAME, D.MEMBER_EMAIL AS DOCTOR_EMAIL 
+		    FROM HRD_BSK A 
+		    LEFT JOIN HRD_COM_INSTT B ON A.INSTT_IDX=B.INSTT_IDX 
+		    RIGHT OUTER JOIN HRD_COM_DOCTOR C ON A.INSTT_IDX=C.INSTT_IDX 
+		    LEFT JOIN VIEW_HRD_DOCTOR D ON C.MEMBER_IDX=D.MEMBER_IDX 
+		    WHERE 
+		    	A.BPL_NO=#{bpl_no} AND 
+		    	C.DOCTOR_YN='Y' AND 
+		    	C.APPLY_YN='Y' AND 
+		    	C.ISDELETE=0 
+		    ORDER BY DBMS_RANDOM.VALUE) 
+		FETCH FIRST 1 ROW ONLY
+	</select>
+	
+	<select id="getIssueByDoc" parameterType="map" resultType="map">
+		SELECT 
+			A.INSTT_IDX, A.INSTT_NO,
+	    	NVL(B.CNT,0) CNT,
+		    SUBSTR(TO_CHAR(sysdate, 'YYYY'),3,4) || '-' || A.INSTT_NO || '-' || LPAD(NVL(B.CNT,0)+1,5,'0') || '-' || '1' ISSUE_NO,
+		    TO_CHAR(sysdate, 'yyyy-mm-dd') ISSUE_DATE 
+		FROM HRD_COM_INSTT A, (SELECT INSTT_IDX, COUNT(INSTT_NAME) CNT FROM HRD_DGNS_BSC GROUP BY INSTT_IDX) B 
+		WHERE 
+		    A.INSTT_IDX=B.INSTT_IDX AND 
+		    A.INSTT_IDX=#{INSTT_IDX}
+	</select>
+	
+	<select id="getIssueBSISCNSLByDoc" parameterType="map" resultType="map">
+		SELECT 
+			A.INSTT_IDX, A.INSTT_NO,
+	    	NVL(B.CNT,0) CNT,
+		    SUBSTR(TO_CHAR(sysdate, 'YYYY'),3,4) || '-' || A.INSTT_NO || '-' || LPAD(NVL(B.CNT,0)+1,5,'0') || '-' || '1' ISSUE_NO,
+		    TO_CHAR(sysdate, 'yyyy-mm-dd') ISSUE_DATE 
+		FROM HRD_COM_INSTT A, (SELECT INSTT_IDX, COUNT(INSTT_IDX) CNT FROM HRD_DGNS_BSISCNSL GROUP BY INSTT_IDX) B 
+		WHERE 
+		    A.INSTT_IDX=B.INSTT_IDX AND 
+		    A.INSTT_IDX=#{INSTT_IDX}
+	</select>
+	
+	<select id="getBscDoc" parameterType="long" resultType="map">
+		SELECT 
+			A.INSTT_IDX, A.INSTT_NAME, A.DOCTOR_IDX, A.DOCTOR_OFCPS, A.DOCTOR_DEPT_NAME, PKG_DGUARD.FN_DEC_TELNO(A.DOCTOR_TELNO) DOCTOR_TELNO,
+    		A.DOCTOR_NAME, A.DOCTOR_EMAIL
+		FROM HRD_DGNS_BSC A 
+		INNER JOIN HRD_DGNS_QUSTNR_RSLT B ON A.BSC_IDX=B.BSC_IDX 
+		WHERE B.RSLT_IDX=#{rslt_idx} 
+	</select>
+</mapper>

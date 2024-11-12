@@ -1,0 +1,563 @@
+{
+	"item_info":{
+		"items":{
+		    "hrdPic":{
+				"column_id":"HRD_PIC_ABLTDEVLP_PLAN"
+				, "item_name":"클리닉 운영 계획 탭의 HRD담당자 역량개발계획"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "slftr":{
+				"column_id":"SLFTR_PLAN"
+				, "item_name":"클리닉 운영 계획 탭의 자체훈련계획"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "is_exist":1
+ 			},
+		    "sfdgPeple":{
+				"column_id":"SLFTR_SFDGSPSCDG_OPRPRENGER_CO"
+				, "item_name":"설문조사 계획 탭의 자체훈련 만족도·현업성취도 실시 예정자 수"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "sfdgCourse":{
+				"column_id":"SLFTR_SFDGSPSCDG_OPRCRSE_CO"
+				, "item_name":"설문조사 계획 탭의 자체훈련 만족도·현업성취도 실시 예정 과정 수"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 
+ 			"spapPeople":{
+				"column_id":"SLFTR_SPAPPLCDG_OPRREARNGER_CO"
+				, "item_name":"설문조사 계획 탭의 자체훈련 현업적용도 실시 예정자 수"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 
+ 			"spapCourse":{
+				"column_id":"SLFTR_SPAPPLCDG_OPRCRSE_CO"
+				, "item_name":"설문조사 계획 탭의 자체훈련 현업적용도 실시 과정 수"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 			 			 			 			 			 			 			 			
+		    "fyerTr":{
+				"column_id":"FYER_TR_PLAN_TR_DTY"
+				, "item_name":"연간 훈련계획 탭의 훈련직무"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"gvrnSport":{
+				"column_id":"GVRN_SPORT_CRSE_CO"
+				, "item_name":"연간 훈련계획 탭의 정부 지원 과정 수"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			} 			 			 			 			 			 			 			 			
+		    , "gvrnUnSport":{
+				"column_id":"GVRN_UN_SPORT_CRSE_CO"
+				, "item_name":"연간 훈련계획 탭의 정부 미지원 과정 수"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}
+ 			, "corpType":{
+				"column_id":"CORP_TYPE"
+				, "item_name":"기업유형"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":5
+				, "master_code":"CORP_TYPE"
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}
+		}, "list_order":[
+			"gvrnUnSport"
+		]
+		, "view_order":[
+			"hrdPic"
+			, "slftr"
+			, "slftrStsfdg"
+			, "slftrStprt"
+			, "fyerTr"
+			, "gvrnSport"
+			, "gvrnUnSport"
+			, "corpType"
+			, "sfdgPeple"
+			, "sfdgCourse"
+			, "spapPeople"
+			, "spapCourse"
+		]
+		, "write_order":[
+		    "hrdPic"
+			, "slftr"
+			, "slftrStsfdg"
+			, "slftrStprt"
+			, "fyerTr"
+			, "gvrnSport"
+			, "gvrnUnSport"
+			, "corpType"
+			, "sfdgPeple"
+			, "sfdgCourse"
+			, "spapPeople"
+			, "spapCourse"
+		]
+		, "modify_order":[
+			"hrdPic"
+			, "slftr"
+			, "slftrStsfdg"
+			, "slftrStprt"
+			, "fyerTr"
+			, "gvrnSport"
+			, "gvrnUnSport"
+			, "corpType"
+			, "sfdgPeple"
+			, "sfdgCourse"
+			, "spapPeople"
+			, "spapCourse"
+		]
+		, "plan_insert_column_order":[
+		    "hrdPic"
+			, "slftr"
+			, "slftrStsfdg"
+			, "slftrStprt"
+			, "fyerTr"
+			, "gvrnSport"
+			, "gvrnUnSport"
+			, "sfdgPeple"
+			, "sfdgCourse"
+			, "spapPeople"
+			, "spapCourse"
+		]
+		, "plan_update_column_order":[
+			"hrdPic"
+			, "slftr"
+			, "slftrStsfdg"
+			, "slftrStprt"
+			, "fyerTr"
+			, "gvrnSport"
+			, "gvrnUnSport"
+			, "sfdgPeple"
+			, "sfdgCourse"
+			, "spapPeople"
+			, "spapCourse"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "subject":{
+						"column_id":"SUBJECT"
+						, "item_name":"제목"
+					},
+					 "contents":{
+						"column_id":"CONTENTS"
+						, "item_name":"내용"
+					}
+				}, "select_order":[
+				    "subject"
+					, "contents"
+				]
+			}, "searchForm_order":[
+				 "keyField"
+			], "search_order":[
+				 "keyField"
+			]
+		}
+	}, 
+	
+	"clinicDct_item_info":{
+		"items":{
+		    "hrdPic":{
+				"column_id":"HRD_PIC_ABLTDEVLP_PLAN"
+				, "item_name":"클리닉 운영 계획 탭의 HRD담당자 역량개발계획"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "slftr":{
+				"column_id":"SLFTR_PLAN"
+				, "item_name":"클리닉 운영 계획 탭의 자체훈련계획"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "is_exist":1
+ 			},
+		    "sfdgPeple":{
+				"column_id":"SLFTR_SFDGSPSCDG_OPRPRENGER_CO"
+				, "item_name":"설문조사 계획 탭의 자체훈련 만족도·현업성취도 실시 예정자 수"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "sfdgCourse":{
+				"column_id":"SLFTR_SFDGSPSCDG_OPRCRSE_CO"
+				, "item_name":"설문조사 계획 탭의 자체훈련 만족도·현업성취도 실시 예정 과정 수"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 
+ 			"spapPeople":{
+				"column_id":"SLFTR_SPAPPLCDG_OPRREARNGER_CO"
+				, "item_name":"설문조사 계획 탭의 자체훈련 현업적용도 실시 예정자 수"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 
+ 			"spapCourse":{
+				"column_id":"SLFTR_SPAPPLCDG_OPRCRSE_CO"
+				, "item_name":"설문조사 계획 탭의 자체훈련 현업적용도 실시 과정 수"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 			 			 			 			 			 			 			 			
+		    "fyerTr":{
+				"column_id":"FYER_TR_PLAN_TR_DTY"
+				, "item_name":"연간 훈련계획 탭의 훈련직무"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"gvrnSport":{
+				"column_id":"GVRN_SPORT_CRSE_CO"
+				, "item_name":"연간 훈련계획 탭의 정부 지원 과정 수"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			} 			 			 			 			 			 			 			 			
+		    , "gvrnUnSport":{
+				"column_id":"GVRN_UN_SPORT_CRSE_CO"
+				, "item_name":"연간 훈련계획 탭의 정부 미지원 과정 수"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}
+ 			, "confmStatus":{
+				"column_id":"CONFM_STATUS"
+				, "item_name":"신청상태"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"CONFM_STATUS"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "doctorOpinion":{
+				"column_id":"DOCTOR_OPINION"
+				, "item_name":"주치의 의견"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "corpType":{
+				"column_id":"CORP_TYPE"
+				, "item_name":"기업유형"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":5
+				, "master_code":"CORP_TYPE"
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}
+		}, "list_order":[
+			"hrdPic"
+		]
+		, "view_order":[
+			"hrdPic"
+			, "slftr"
+			, "slftrStsfdg"
+			, "slftrStprt"
+			, "fyerTr"
+			, "gvrnSport"
+			, "gvrnUnSport"
+			, "sfdgPeple"
+			, "sfdgCourse"
+			, "spapPeople"
+			, "spapCourse"
+			, "doctorOpinion"
+			, "corpType"
+		]
+		, "write_order":[
+		    "hrdPic"
+			, "slftr"
+			, "slftrStsfdg"
+			, "slftrStprt"
+			, "fyerTr"
+			, "gvrnSport"
+			, "gvrnUnSport"
+			, "sfdgPeple"
+			, "sfdgCourse"
+			, "spapPeople"
+			, "spapCourse"
+			, "corpType"
+		]
+		, "write_proc_order":[
+			"hrdPic"
+			, "slftr"
+			, "slftrStsfdg"
+			, "slftrStprt"
+			, "fyerTr"
+			, "gvrnSport"
+			, "gvrnUnSport"
+			, "sfdgPeple"
+			, "sfdgCourse"
+			, "spapPeople"
+			, "spapCourse"
+		]
+		, "modify_order":[
+			"hrdPic"
+			, "slftr"
+			, "slftrStsfdg"
+			, "slftrStprt"
+			, "fyerTr"
+			, "gvrnSport"
+			, "gvrnUnSport"
+			, "sfdgPeple"
+			, "sfdgCourse"
+			, "spapPeople"
+			, "spapCourse"
+			, "corpType"
+		]
+		, "modifyproc_order":[
+		    "hrdPic"
+			, "slftr"
+			, "slftrStsfdg"
+			, "slftrStprt"
+			, "fyerTr"
+			, "gvrnSport"
+			, "gvrnUnSport"
+			, "doctorOpinion"
+			, "sfdgPeple"
+			, "sfdgCourse"
+			, "spapPeople"
+			, "spapCourse"
+		]
+		, "status_modify_order":[
+			"confmStatus"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "bplNo":{
+						"column_id":"B.BPL_NO"
+						, "item_name":"사업장관리번호"
+						, "use_full_value":1 
+					}, 
+				 "bplNm":{
+						"column_id":"(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = B.BPL_NO)"
+						, "item_name":"기업명"
+					}
+				}, "select_order":[
+				    "bplNo"
+					, "bplNm"
+				]
+			}, "key":{
+				"items":{
+					"confmStatus":{
+						"column_id":"A.CONFM_STATUS"
+						, "item_name":"상태"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CONFM_STATUS"
+					},
+					"year":{
+						"column_id":"YEAR"
+						, "item_name":"연차"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CLINIC_YEAR"
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "confmStatus"
+				 , "year"
+			], "search_order":[
+				 "keyField"
+				 , "confmStatus"
+			]
+		}
+		, "list_search_head":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "bplNo":{
+						"column_id":"B.BPL_NO"
+						, "item_name":"사업장관리번호"
+						, "use_full_value":1 
+					}, 
+				 "bplNm":{
+						"column_id":"(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = B.BPL_NO)"
+						, "item_name":"기업명"
+					}
+				}, "select_order":[
+				    "bplNo"
+					, "bplNm"
+				]
+			}, "key":{
+				"items":{
+					"confmStatus":{
+						"column_id":"A.CONFM_STATUS"
+						, "item_name":"상태"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CONFM_STATUS"
+					},"cliInsttIdx":{
+						"column_id":"B.CLI_INSTT_IDX"
+						, "item_name":"지부지사"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"ORG_CODE"
+					},"year":{
+						"column_id":"YEAR"
+						, "item_name":"연차"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CLINIC_YEAR"
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "cliInsttIdx"
+				 , "confmStatus"
+				 , "year"
+			], "search_order":[
+				 "keyField"
+				 , "confmStatus"
+				 , "cliInsttIdx"
+			]
+		}
+	}
+	
+}

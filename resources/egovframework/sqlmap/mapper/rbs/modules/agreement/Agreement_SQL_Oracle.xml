@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. AGREM_IDX, <include refid="AGREEMENT_TABLE_NAME"/>, [목록에 사용할 컬럼], A.AGREM_IDX, 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.agreement.agreementMapper">
+	<!-- 테이블명 -->
+	<sql id="AGREEMENT_TABLE_NAME"><trim>HRD_SPTJ_AGREM</trim></sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(AGREM_IDX), 0)</trim> + 1 MAXID
+		FROM 
+		<include refid="AGREEMENT_TABLE_NAME"/> A
+	</select>
+	
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.AGREM_IDX), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		<include refid="AGREEMENT_TABLE_NAME"/> A 
+		WHERE A.AGREM_IDX LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT * FROM (
+			SELECT 
+				A.AGREM_IDX, A.AGREM_NO, A.YEAR, A.CNCLS_DATE, A.END_DATE, A.BPL_NO, B.BPL_NM, A.JURIRNO, A.MEMBER_IDX, A.DOCTOR_IDX, A.STATUS, A.REGI_DATE, B.LRSCL_CORP_SE 
+				, D.INSTT_NAME, D.INSTT_IDX, E.FLE_IDX, B.BIZR_NO, F.PRVTCNTR_NAME 
+				, ROW_NUMBER() OVER(order by A.AGREM_IDX DESC) as rn
+				, COUNT(*) OVER() as TOTAL_COUNT
+				, CEIL((COUNT(*) OVER())/10) as TOTAL_PAGE
+			FROM HRD_SPTJ_AGREM A, HRD_BSK B, HRD_COM_DOCTOR C, HRD_COM_INSTT D, HRD_SPTJ_AGREEMENT_FILE E, HRD_COM_PRVTCNTR F
+				<if test="type_name == 'instt'">
+				, INF_ZIP_GROUP Z
+				</if>
+			WHERE
+				A.ISDELETE = '0' AND A.BPL_NO = B.BPL_NO
+				AND A.DOCTOR_IDX = C.DOCTOR_IDX(+)
+				AND C.INSTT_IDX = D.INSTT_IDX(+)
+				AND A.AGREM_IDX = E.AGREM_IDX(+)
+				AND F.MEMBER_IDX = A.MEMBER_IDX(+)
+			<if test="bpl_no != null and bpl_no.trim().length() != 0">
+				AND A.BPL_NO = #{bpl_no}
+			</if>
+			<if test="bpl_nm != null and bpl_nm.trim().length() != 0">
+				AND A.BPL_NM = #{bpl_nm}
+			</if>
+			<if test="instt_name != null and instt_name.trim().length() != 0">
+				AND D.INSTT_NAME = #{instt_name}
+			</if>
+			<if test="center_name != null and center_name.trim().length() != 0">
+				AND F.PRVTCNTR_NAME = #{center_name}
+			</if>
+			<if test="sign_yn != null and sign_yn.trim().length() != 0 and sign_yn == 'Y'.toString()">
+				AND A.STATUS = 55
+			</if>
+			<if test="sign_yn != null and sign_yn.trim().length() != 0 and sign_yn == 'N'.toString()">
+				AND A.STATUS != 55
+			</if>
+			<if test="start_dt != null and start_dt.trim().length() != 0">
+				AND CNCLS_DATE <![CDATA[>=]]> TO_DATE(#{start_dt})
+			</if>
+			<if test="end_dt != null and end_dt.trim().length() != 0">
+				AND CNCLS_DATE <![CDATA[<=]]> TO_DATE(#{end_dt})+1
+			</if>
+			<if test="member_idx != null and member_idx.trim().length() != 0">
+				AND A.MEMBER_IDX = #{member_idx}
+			</if>
+			<if test="is_instt != null and is_instt.trim().length() != 0">
+				AND A.STATUS >= 10
+			</if>
+			<if test="type_name == 'instt'">
+				AND Z.zip = B.BPL_ZIP
+				AND Z.instt_idx = #{instt_idx}
+			</if>
+			)
+		<if test="useExcel == null">	
+		WHERE RN BETWEEN (#{page}-1)*10 and #{page}*10
+		</if>
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*
+			<include refid="editAuthListQuery"/>
+		FROM 
+		<include refid="AGREEMENT_TABLE_NAME"/> A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			<include refid="AGREEMENT_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="map" resultType="dataMap">
+			SELECT 
+				FILE_SAVED_NAME, FILE_ORIGIN_NAME
+			FROM 
+				HRD_SPTJ_AGREEMENT_FILE 
+			WHERE
+				AGREM_IDX = #{agrem_idx}
+				AND FLE_IDX = #{fle_idx}
+	</select>
+	
+	<update id="updateFileDown" parameterType="map">
+		UPDATE HRD_SPTJ_AGREEMENT_FILE SET DWN_CNT = DWN_CNT + 1 
+		WHERE 
+			AGREM_IDX = #{agrem_idx}
+			AND FLE_IDX = #{fle_idx}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="AGREEMENT_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		A.* 
+		FROM 
+		<include refid="AGREEMENT_TABLE_NAME"/> A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="AGREEMENT_TABLE_NAME"/> (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE <include refid="AGREEMENT_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.AGREM_IDX, [목록에 사용할 컬럼], A.LAST_MODI_NAME, A.LAST_MODI_ID, A.REGI_DATE, A.LAST_MODI_DATE 
+			FROM 
+			<include refid="AGREEMENT_TABLE_NAME"/> A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			ORDER BY A.AGREM_IDX
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		<include refid="AGREEMENT_TABLE_NAME"/> A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE <include refid="AGREEMENT_TABLE_NAME"/> SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE <include refid="AGREEMENT_TABLE_NAME"/> SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="AGREEMENT_TABLE_NAME"/>  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	<select id="getCenters" parameterType="String" resultType="map">
+		SELECT
+			PRVTCNTR_IDX, MEMBER_IDX, PRVTCNTR_NAME, SPNT_SE, PRVTCNTR_NO
+		FROM
+			HRD_COM_PRVTCNTR
+		WHERE
+			SPNT_SE = #{name}
+		AND
+			PRVTCNTR_IDX NOT IN (34)
+	</select>
+	<insert id="requestAgreement" parameterType="map">
+		INSERT INTO HRD_SPTJ_AGREM(AGREM_IDX, BPL_NO, MEMBER_IDX, STATUS, REGI_IDX, REGI_ID, REGI_NAME, REGI_IP, LAST_MODI_IDX, LAST_MODI_ID, LAST_MODI_DATE, LAST_MODI_IP)
+		VALUES(#{agrem_idx}, #{bpl_no}, #{member_idx}, #{status}, #{regi_idx}, #{regi_id}, #{regi_name}, #{regi_ip}, #{regi_idx}, #{regi_id}, sysdate, #{regi_ip})
+	</insert>
+	<select id="getAgremNo" parameterType="map" resultType="String">
+		select 
+			to_char(sysdate,'YYYY')|| LPAD(B.prvtcntr_no,2,'0') || LPAD(NVL(cnt,0)+1,4,'0') agrem_no 
+		FROM 
+		  (SELECT member_idx, count(member_idx) cnt FROM hrd_sptj_agrem WHERE isdelete = 0 and status > 7 GROUP BY member_idx) A
+		  , HRD_COM_PRVTCNTR B
+		WHERE 
+		  B.MEMBER_IDX = A.MEMBER_IDX(+)
+		  AND B.member_idx = #{member_idx}
+	</select>
+	<select id="getMemberIdxByPrvtcntrno" parameterType="map" resultType="String">
+		SELECT member_idx
+		FROM
+			hrd_com_prvtcntr
+		WHERE
+			prvtcntr_no = #{prvtcntr_no}
+	</select>
+	<insert id="fileUpload" parameterType="map">
+		MERGE INTO HRD_SPTJ_AGREEMENT_FILE a
+		USING dual
+		ON (a.agrem_idx = #{agrem_idx} and a.fle_idx = #{fle_idx})
+		WHEN MATCHED THEN
+			UPDATE SET
+				FILE_SAVED_NAME = #{file_saved_name}
+				, FILE_ORIGIN_NAME = #{file_origin_name}
+				, LAST_MODI_IDX = #{regi_idx}
+				, LAST_MODI_ID = #{regi_id}
+				, LAST_MODI_NAME = #{regi_name}
+				, LAST_MODI_IP = #{regi_ip}
+				, LAST_MODI_DATE = sysdate
+		WHEN NOT MATCHED THEN
+			INSERT (AGREM_IDX, FLE_IDX, ITEM_ID, FILE_SAVED_NAME, FILE_ORIGIN_NAME, REGI_IDX, REGI_ID, REGI_NAME, REGI_IP, LAST_MODI_IDX, LAST_MODI_ID, LAST_MODI_NAME, LAST_MODI_DATE, LAST_MODI_IP)
+			VALUES(#{agrem_idx}, #{fle_idx}, 'agreement', #{file_saved_name}, #{file_origin_name}, #{regi_dix}, #{regi_id}, #{regi_name}, #{regi_ip}, #{regi_idx,}, #{regi_id}, #{regi_name}, sysdate, #{regi_ip})
+	</insert>
+	<select id="getRegister" parameterType="map" resultType="map">
+		SELECT to_char(sysdate, 'YYYY') year, B.prvtcntr_name, to_char(sysdate,'YYYY')|| LPAD(B.prvtcntr_no,2,'0') || LPAD(NVL(cnt,0)+1,4,'0') agrem_no
+		FROM HRD_COM_PRVTCNTR B, (SELECT member_idx, count(member_idx) cnt FROM hrd_sptj_agrem WHERE isdelete = 0 and agrem_no is not null GROUP BY member_idx) A
+		WHERE 
+		  B.MEMBER_IDX = A.MEMBER_IDX(+)
+		  AND B.member_idx = #{member_idx}
+	</select>
+	<update id="updateRequest" parameterType="map">
+		UPDATE HRD_SPTJ_AGREM
+		SET
+			AGREM_NO = #{agrem_no}
+			, BPL_NO = #{bpl_no}
+			, status = 10
+		WHERE
+			AGREM_IDX = #{agrem_idx}
+	</update>
+	<update id="confirmAgreement" parameterType="map">
+		UPDATE hrd_sptj_agrem
+		SET
+			STATUS = #{status}
+			, YEAR = to_char(sysdate, 'YYYY')
+			<if test="status != 20">
+			, cncls_date = sysdate
+			, end_date = (SELECT LAST_DAY(ADD_MONTHS(TRUNC(SYSDATE, 'Y'),11)) AS end_date FROM DUAL)
+			</if>
+			, doctor_idx = (SELECT DOCTOR_IDX FROM HRD_COM_DOCTOR WHERE MEMBER_IDX = #{member_idx})
+			, last_modi_idx = #{member_idx}
+			, last_modi_id = #{member_id}
+			, last_modi_name = #{member_name}
+			, last_modi_ip = #{ip}
+			, last_modi_date = sysdate 
+		WHERE
+			agrem_idx = #{agrem_idx}
+	</update>
+	<select id="getBsk" parameterType="String" resultType="map">
+		SELECT bpl_no, bpl_nm, lrscl_corp_se
+		FROM HRD_BSK
+		WHERE bpl_no = #{bpl_no}
+	</select>
+	<insert id="requestAgreementbyCenter" parameterType="map">
+		INSERT INTO HRD_SPTJ_AGREM(AGREM_IDX, AGREM_NO, BPL_NO, MEMBER_IDX, STATUS, YEAR, CNCLS_DATE, END_DATE, REGI_IDX, REGI_ID, REGI_NAME, REGI_IP, LAST_MODI_IDX, LAST_MODI_ID, LAST_MODI_DATE, LAST_MODI_IP)
+		VALUES(#{agrem_idx}, #{agrem_no}, #{bpl_no}, #{member_idx}, 10, to_char(sysdate,'YYYY'), sysdate, add_months(sysdate,12), #{regi_idx}, #{regi_id}, #{regi_name}, #{regi_ip}, #{regi_idx}, #{regi_id}, sysdate, #{regi_ip})
+	</insert>
+	
+	<update id="mergeAgremByCnsl">
+		MERGE INTO HRD_SPTJ_AGREM
+		USING DUAL ON
+		(
+			BPL_NO = #{bplNo} 
+			AND MEMBER_IDX = (SELECT MEMBER_IDX FROM HRD_COM_PRVTCNTR WHERE PRVTCNTR_NO = #{spntNm})
+		)
+		WHEN MATCHED THEN
+			UPDATE SET
+				YEAR = EXTRACT(YEAR FROM SYSDATE),
+				CNCLS_DATE = SYSDATE,
+				END_DATE = (SELECT LAST_DAY(TO_DATE(EXTRACT(YEAR FROM SYSDATE) || '-12-01', 'YYYY-MM-DD'))FROM DUAL),
+				LAST_MODI_IDX = #{regiIdx},
+				LAST_MODI_ID = #{regiId},
+				LAST_MODI_NAME = #{regiName},
+				LAST_MODI_DATE = SYSDATE,
+				LAST_MODI_IP = #{regiIp}
+		WHEN NOT MATCHED THEN
+			INSERT(
+				AGREM_IDX,
+				<!-- AGREM_NO, -->
+				YEAR,
+				CNCLS_DATE,
+				END_DATE,
+				BPL_NO,
+				MEMBER_IDX,
+				STATUS,
+				ISDELETE,
+				REGI_IDX,
+				REGI_ID,
+				REGI_NAME,
+				REGI_DATE,
+				REGI_IP
+				)VALUES(
+				(SELECT NVL(MAX(AGREM_IDX), 0) + 1 FROM HRD_SPTJ_AGREM),
+				<!-- AGREM_NO, -->
+				EXTRACT(YEAR FROM SYSDATE),
+				SYSDATE,
+				(SELECT LAST_DAY(TO_DATE(EXTRACT(YEAR FROM SYSDATE) || '-12-01', 'YYYY-MM-DD'))FROM DUAL),
+				#{bplNo},
+				(SELECT MEMBER_IDX FROM HRD_COM_PRVTCNTR WHERE PRVTCNTR_NO = #{spntNm}),
+				'55',
+				'0',
+				#{regiIdx},
+				#{regiId},
+				#{regiName},
+				#{regiDate},
+				#{regiIp}
+		)
+	</update>
+	
+	
+	<select id="getAgremCount" resultType="Int">
+		SELECT COUNT(1) FROM HRD_SPTJ_AGREM
+		WHERE BPL_NO = #{bplNo}
+		AND ISDELETE = 0
+		AND STATUS = 55
+	</select>
+	
+	<select id="getCompltedAgremList" resultType="HashMap">    
+		SELECT A.*, B.* FROM HRD_SPTJ_AGREM A
+		LEFT JOIN HRD_COM_PRVTCNTR B ON A.MEMBER_IDX = B.MEMBER_IDX
+		WHERE A.BPL_NO = #{bplNo}
+		AND A.ISDELETE = 0
+		AND A.STATUS = 55
+	</select>
+	
+</mapper>            

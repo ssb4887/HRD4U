@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="rbs.modules.ntwrk.ntwrkExpertMapper">
+	<!-- 테이블명 -->
+	<sql id="NTWRK_EXPERT">HRD_NTWRK_EXPERT</sql>
+	<sql id="NTWRK_EXPERT_INSTT">HRD_NTWRK_EXPERT_INSTT</sql>
+	<sql id="NTWRK_EXPERT_FILE">HRD_NTWRK_EXPERT_FILE</sql>
+	<sql id="COM_INSTT">HRD_COM_INSTT</sql>
+	
+	<sql id="COUNT_TOP">
+		<trim>SELECT COUNT(rn) FROM( SELECT rownum rn, TB.* FROM (</trim>
+	</sql>
+	
+	<sql id="COUNT_BOTTOM">
+		<trim>) TB )</trim>
+	</sql>
+	
+	<insert id="insertExpert" parameterType="map" useGeneratedKeys="true" keyProperty="expertIdx">
+		<selectKey keyProperty="expertIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_NTWRK_EXPERT_IDX.NEXTVAL FROM DUAL 
+		</selectKey>
+		INSERT INTO <include refid="NTWRK_EXPERT" /> 
+		(EXPERT_IDX, NAME, BRTHDY, PSITN_GRP_NAME, PSITN_GRP_TYPE, ZIP, ADDR, ADDR_DTL, SPCLTY_REALM, DEPT, OFCPS, MBTLNUM, 
+		EMAIL, REMARKS, INSTT_IDX, REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP) 
+		VALUES 
+		(#{expertIdx}, #{name}, PKG_DGUARD.FN_ENC_JUMIN(#{brthdy}), #{psitnGrpName}, #{psitnGrpType}, #{zip}, #{addr}, #{addrDtl}, #{spcltyRealm}, #{dept}, #{ofcps}, PKG_DGUARD.FN_ENC_TELNO(#{mbtlnum}), 
+		#{email}, #{remarks}, #{insttIdx}, #{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP})
+	</insert>
+	
+	<update id="updateExpert" parameterType="map">
+		UPDATE <include refid="NTWRK_EXPERT" /> 
+		SET NAME=#{name}, BRTHDY=PKG_DGUARD.FN_ENC_JUMIN(#{brthdy}), PSITN_GRP_NAME=#{psitnGrpName}, PSITN_GRP_TYPE=#{psitnGrpType}, ZIP=#{zip}, ADDR=#{addr}, ADDR_DTL=#{addrDtl}, SPCLTY_REALM=#{spcltyRealm}, DEPT=#{dept}, OFCPS=#{ofcps}, MBTLNUM = PKG_DGUARD.FN_ENC_TELNO(#{mbtlnum}), 
+		EMAIL=#{email}, REMARKS=#{remarks}, INSTT_IDX=#{insttIdx},
+		LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE EXPERT_IDX=#{expertIdx} 
+	</update>
+	
+	<insert id="insertExpertPartnerInstt" parameterType="map">
+		INSERT INTO <include refid="NTWRK_EXPERT_INSTT" /> 
+		(EXPERT_IDX, INSTT_IDX, REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES 
+		(#{expertIdx}, #{partnerInsttIdx}, #{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP}) 
+	</insert>
+	
+	<update id="updateExpertPartnerInstt" parameterType="map">
+		UPDATE <include refid="NTWRK_EXPERT_INSTT" /> 
+		SET ISDELETE=#{isdelete}, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE EXPERT_IDX=#{expertIdx} AND INSTT_IDX=#{partnerInsttIdx}
+	</update>
+	
+	<select id="selectExpertPartnerInstts" parameterType="map" resultType="dataMap">
+		SELECT 
+			A.*,  
+			B.INSTT_NAME  
+		FROM <include refid="NTWRK_EXPERT_INSTT" /> A 
+		LEFT JOIN <include refid="COM_INSTT" /> B 
+		ON A.INSTT_IDX=B.INSTT_IDX  
+		WHERE A.EXPERT_IDX=#{expertIdx} 
+		<if test="ALL == null">AND A.ISDELETE != 1</if>
+	</select>
+	
+	<select id="selectExpertList" parameterType="map" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT 
+			A.EXPERT_IDX, A.NAME, A.PSITN_GRP_NAME, A.PSITN_GRP_TYPE, A.SPCLTY_REALM, A.INSTT_IDX,
+			C.INSTT_NAME,
+			LISTAGG(B.INSTT_IDX, ',') WITHIN GROUP (ORDER BY B.INSTT_IDX) AS PARTNER_INSTT_IDXS,
+			LISTAGG(C2.INSTT_NAME, ',') WITHIN GROUP (ORDER BY B.INSTT_IDX) AS PARTNER_INSTT_NAMES 
+		FROM <include refid="NTWRK_EXPERT" /> A 
+		LEFT OUTER JOIN <include refid="NTWRK_EXPERT_INSTT" /> B ON A.EXPERT_IDX=B.EXPERT_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> C ON A.INSTT_IDX = C.INSTT_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> C2 ON B.INSTT_IDX = C2.INSTT_IDX 
+		<where>
+			A.ISDELETE != 1 AND (B.ISDELETE != 1 OR B.EXPERT_IDX IS NULL) 
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'NAME' or searchItem.columnId == 'PSITN_GRP_NAME'">
+						AND A.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue} 
+					</when>
+				</choose>
+			</foreach>
+		</where>
+		GROUP BY 
+			A.EXPERT_IDX, A.NAME, A.PSITN_GRP_NAME, A.PSITN_GRP_TYPE, A.SPCLTY_REALM, A.INSTT_IDX, A.REGI_DATE, A.LAST_MODI_DATE, 
+			C.INSTT_NAME 
+		<choose>
+			<when test="userType >= 40">
+				<if test="searchList != null and searchList.size() > 0">
+					HAVING 
+					<foreach collection="searchList" item="searchItem" separator=" AND ">
+						<choose>
+							<when test="searchItem.columnId == 'INSTT_IDX'">A.INSTT_IDX=#{searchItem.columnValue}</when>
+							<when test="searchItem.columnId == 'PARTNER_INSTT_IDX'">MAX(CASE WHEN B.INSTT_IDX=#{searchItem.columnValue} THEN 1 ELSE 0 END) > 0</when>
+							<otherwise>1=1</otherwise>
+						</choose>
+					</foreach>
+				</if>
+			</when>
+			<when test="userType >= 30">
+				HAVING 
+					A.INSTT_IDX=(SELECT INSTT_IDX FROM HRD_COM_INSTT WHERE BRFFC_CD=#{regiCode}) OR 
+					MAX(CASE WHEN B.INSTT_IDX=(SELECT INSTT_IDX FROM HRD_COM_INSTT WHERE BRFFC_CD=#{regiCode}) THEN 1 ELSE 0 END) > 0  
+			</when>
+		</choose>
+		ORDER BY 
+				CASE 
+					WHEN A.LAST_MODI_DATE IS NOT NULL THEN A.LAST_MODI_DATE 
+					ELSE A.REGI_DATE
+				END DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+	
+	<select id="selectExpertTotalCount" parameterType="map" resultType="int">
+		<include refid="COUNT_TOP" />
+		SELECT 
+			A.EXPERT_IDX, A.NAME, A.PSITN_GRP_NAME, A.PSITN_GRP_TYPE, A.SPCLTY_REALM, A.INSTT_IDX,
+			C.INSTT_NAME,
+			LISTAGG(B.INSTT_IDX, ',') WITHIN GROUP (ORDER BY B.INSTT_IDX) AS PARTNER_INSTT_IDXS,
+			LISTAGG(C2.INSTT_NAME, ',') WITHIN GROUP (ORDER BY B.INSTT_IDX) AS PARTNER_INSTT_NAMES 
+		FROM <include refid="NTWRK_EXPERT" /> A 
+		LEFT OUTER JOIN <include refid="NTWRK_EXPERT_INSTT" /> B ON A.EXPERT_IDX=B.EXPERT_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> C ON A.INSTT_IDX = C.INSTT_IDX 
+		LEFT JOIN <include refid="COM_INSTT" /> C2 ON B.INSTT_IDX = C2.INSTT_IDX 
+		<where>
+			A.ISDELETE != 1 AND (B.ISDELETE != 1 OR B.EXPERT_IDX IS NULL) 
+			<foreach collection="searchList" item="searchItem" index="i">
+				<choose>
+					<when test="searchItem.columnId == 'NAME' or searchItem.columnId == 'PSITN_GRP_NAME'">
+						AND A.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue} 
+					</when>
+				</choose>
+			</foreach>
+		</where>
+		GROUP BY 
+			A.EXPERT_IDX, A.NAME, A.PSITN_GRP_NAME, A.PSITN_GRP_TYPE, A.SPCLTY_REALM, A.INSTT_IDX, A.REGI_DATE, A.LAST_MODI_DATE, 
+			C.INSTT_NAME 
+		<choose>
+			<when test="userType >= 40">
+				<if test="searchList != null and searchList.size() > 0">
+					HAVING 
+					<foreach collection="searchList" item="searchItem" separator=" AND ">
+						<choose>
+							<when test="searchItem.columnId == 'INSTT_IDX'">A.INSTT_IDX=#{searchItem.columnValue}</when>
+							<when test="searchItem.columnId == 'PARTNER_INSTT_IDX'">MAX(CASE WHEN B.INSTT_IDX=#{searchItem.columnValue} THEN 1 ELSE 0 END) > 0</when>
+							<otherwise>1=1</otherwise>
+						</choose>
+					</foreach>
+				</if>
+			</when>
+			<when test="userType >= 30">
+				HAVING 
+					A.INSTT_IDX=(SELECT INSTT_IDX FROM HRD_COM_INSTT WHERE BRFFC_CD=#{regiCode}) OR 
+					MAX(CASE WHEN B.INSTT_IDX=(SELECT INSTT_IDX FROM HRD_COM_INSTT WHERE BRFFC_CD=#{regiCode}) THEN 1 ELSE 0 END) > 0  
+			</when>
+		</choose>
+		ORDER BY 
+				CASE 
+					WHEN A.LAST_MODI_DATE IS NOT NULL THEN A.LAST_MODI_DATE 
+					ELSE A.REGI_DATE
+				END DESC
+		<include refid="COUNT_BOTTOM" />
+	</select>
+	
+	<update id="updateExpertFileData" parameterType="map">
+		UPDATE <include refid="NTWRK_EXPERT_FILE" /> 
+		SET ORDER_IDX=#{orderIdx}, ISDELETE=#{isdelete}, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_IP=#{LAST_MODI_IP}, LAST_MODI_DATE = sysdate  
+		WHERE FLE_IDX=#{fleIdx} 
+	</update>
+	
+	<insert id="insertExpertFileData" parameterType="map" useGeneratedKeys="true" keyProperty="fleIdx">
+		<selectKey keyProperty="fleIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_NTWRK_EXPERT_FILE_IDX.NEXTVAL FROM DUAL 
+		</selectKey>
+		INSERT INTO <include refid="NTWRK_EXPERT_FILE" /> 
+		(EXPERT_IDX, FLE_IDX, ITEM_ID, FILE_SAVED_NAME, FILE_ORIGIN_NAME, FILE_SIZE, REPLC_TEXT, ORDER_IDX, 
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES 
+		(#{expertIdx}, #{fleIdx}, 'FILE', #{fileSavedName}, #{fileOriginName}, #{fileSize}, #{replcText}, #{orderIdx}, 
+		#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, sysdate, #{REGI_IP}) 
+	</insert>
+	
+	<select id="selectExpertFileList" parameterType="map" resultType="dataMap">
+		SELECT A.* FROM <include refid="NTWRK_EXPERT_FILE" /> A 
+		WHERE A.EXPERT_IDX=#{expertIdx} 
+		AND ISDELETE != 1 
+		ORDER BY ORDER_IDX ASC, FLE_IDX DESC 
+	</select>
+	
+	<select id="selectExpertOne" parameterType="map" resultType="dataMap">
+		SELECT 
+			A.EXPERT_IDX, A.NAME, PKG_DGUARD.FN_DEC_JUMIN(A.BRTHDY) AS BRTHDY, A.PSITN_GRP_NAME, A.PSITN_GRP_TYPE, A.ZIP, A.ADDR, A.ADDR_DTL, A.SPCLTY_REALM, A.DEPT, A.OFCPS, PKG_DGUARD.FN_DEC_TELNO(A.MBTLNUM) AS MBTLNUM, A.EMAIL, A.REMARKS, A.INSTT_IDX, A.ISDELETE, A.REGI_IDX, A.REGI_ID, A.REGI_NAME, A.REGI_DATE  
+		FROM <include refid="NTWRK_EXPERT" /> A 
+		WHERE A.EXPERT_IDX=#{expertIdx} 
+	</select>
+	
+	<update id="deleteExpert" parameterType="map">
+		UPDATE <include refid="NTWRK_EXPERT" /> 
+		SET ISDELETE = 1, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=sysdate, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE EXPERT_IDX IN 
+		<foreach collection="deleteIdxs" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+</mapper>

@@ -1,0 +1,2484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 1. BPL_NO, <include refid="BASKET_TABLE_NAME"/>, [목록에 사용할 컬럼], [기본정렬쿼리], 
+	테이블명 등 변경해서 사용 2. 그 외 필요에 따라 쿼리 수정하여 사용 -->
+<mapper namespace="rbs.modules.basket.basketMapper">
+	<!-- 테이블명 -->
+	<sql id="BASKET_TABLE_NAME">
+		<choose>
+			<when test="fnIdx == 2">
+				<trim>HRD_BSK_CL_SCLAS</trim>
+			</when>
+			<when test="fnIdx == 3">
+				<trim>HRD_BSK_CL_RESVE</trim>
+			</when>
+			<when test="fnIdx == 4">
+				<trim>HRD_BSK_HASHTAG_CODE</trim>
+			</when>
+			<otherwise>
+				<trim>HRD_BSK</trim>
+			</otherwise>
+		</choose>
+	</sql>
+	<sql id="TR1_TABLE_NAME">
+		<trim>HRD_BSK_BPR</trim>
+	</sql>
+	<sql id="TR2_TABLE_NAME">
+		<trim>HRD_BSK_REG</trim>
+	</sql>
+	<sql id="TR3_TABLE_NAME">
+		<trim>HRD_BSK_CON</trim>
+	</sql>
+
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT
+		<trim>
+			<include refid="rbs.commonDBMSMapper.nullFn" />
+			(MAX(BPL_NO), 0)
+		</trim>
+		+ 1 MAXID
+		FROM
+		<include refid="BASKET_TABLE_NAME" />
+		A
+	</select>
+
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 <select id="nextId" parameterType="java.util.HashMap" 
+		resultType="java.lang.String"> SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> 
+		|| LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.BPL_NO), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> 
+		|| '0'), 7)) + 1, 4, '0') MAXID FROM <include refid="BASKET_TABLE_NAME"/> 
+		A WHERE A.BPL_NO LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> 
+		|| '%' </select> -->
+	<!-- 수정/삭제 권한 : 등록자 -->
+	<!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+			, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE
+			'0' END AS
+			AUTH_MNG
+		</if>
+	</sql>
+
+	<!-- 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+			AND A.REGI_IDX = #{AUTH_MEMBER_IDX}
+		</if>
+	</sql>
+
+	<select id="selectList"
+		resultType="rbs.modules.basket.dto.Basket" fetchSize="2000">
+		SELECT A.BPL_NO, A.BIZR_NO, A.PRI_SUP_CD, A.PRI_SUP_CHG_CD,
+		A.SELFEMP_CD, A.BPL_ORGBK_NO, A.JURIRNO, A.HEADBPL_CD,
+		A.HEDOFC_BPL_NO,
+		A.BPL_NM, A.BPL_ZIP, A.BPL_ADDR, A.ADDR_DTL,
+		A.INDUTY_CD,
+		A.EMPLYM_FORMATN_DE, A.EMPINS_EXTSH_DE, A.BPL_STATUS_CD,
+		A.TOT_WORK_CNT, A.TOT_BPL_CNT, A.TOT_EMP_CNT, A.OCCP_TR_YN,
+		A.LRSCL_CORP_SE,
+		A.EMAIL, A.BPL_EMAIL, A.BPL_AREA_NO, A.BPL_FAX_NO1,
+		A.BPL_FAX_NO2,
+		A.BPL_TELNO1, A.BPL_TELNO2, A.BPL_URL,
+		A.SPEMPLYM_APPLC_SE,
+		A.PRI_SUP_START_DATE, A.ARTBPL_YN ,
+		P.NAME AS BPL_INDUST_NM,
+		(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE BPL_NO = A.BPL_NO AND STATUS ='1' AND APPLY_YN ='Y')) AS INSTT_IDX
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if test='item.equals("우량기업 유무")'>,K.EXCENT_YN</if>
+				<if test='item.equals("BEST HRD 선정 유무")'>,K.BESTHRD_YN</if>
+				<if test='item.equals("산업단지기업 유무")'>,K.IDSCPX_YN</if>
+				<if test='item.equals("산재다발")'>,K.INDACMT_YN</if>
+				<if test='item.equals("임금체불")'>,K.WGDLY_YN</if>
+				<if test='item.equals("채용제목")'>,REC.TITLE</if>
+				<if test='item.equals("임금형태")'>,REC.SALARY_STLE</if>
+				<if test='item.equals("급여")'>,REC.SALARY_SCOPE</if>
+				<if test='item.equals("지역 ")'>,REC.REGION</if>
+				<if test='item.equals("근무형태")'>,REC.WORK_STLE</if>
+				<if test='item.equals("일학습 참여 여부(횟수)")'>,A.PDMS_COUNT</if>
+				<if test='item.equals("학습조직화 참여 여부")'>,A.EG_COUNT</if>
+				<if test='item.equals("우수기관 인증 여부")'>,A.CERT_COUNT</if>
+				<if test='item.equals("사업주 참여 여부(횟수)")'>,A.BPR_COUNT</if>
+				<if test='item.equals("S-OJT 참여 여부(횟수)")'>,A.SOJT_COUNT</if>
+				<if test='item.equals("컨소시엄 참여 여부(횟수)")'>,A.CON_COUNT</if>
+				<if test='item.equals("지산맞 참여 여부(횟수)")'>,A.REG_COUNT</if>
+				<if test='item.equals("강소기업 여부")'>,A.SG_COUNT</if>
+				<if test='item.equals("청년친화 강소기업 여부")'>,A.YF_COUNT</if>
+				<if test='item.equals("대분류")'>,A.LCLAS_NM</if>
+				<if test='item.equals("소분류")'>,A.SCLAS_NM</if>
+				<if test='item.equals("기업신용등급")'>,CRE.CREDT_GRAD</if>
+				
+				<if test='item.equals("자산총계(2022년)")'>,Q.TOT_ASSETS as TOT_ASSETS_2022</if>
+				<if test='item.equals("자산총계(2021년)")'>,R.TOT_ASSETS as TOT_ASSETS_2021</if>
+				<if test='item.equals("자산총계(2020년)")'>,S.TOT_ASSETS as TOT_ASSETS_2020</if>
+				<if test='item.equals("자산총계(2019년)")'>,T.TOT_ASSETS as TOT_ASSETS_2019</if>
+				
+				<if test='item.equals("자본총계(2022년)")'>,Q.TOT_CAPL_AMT as TOT_CAPL_AMT_2022</if>
+				<if test='item.equals("자본총계(2021년)")'>,R.TOT_CAPL_AMT as TOT_CAPL_AMT_2021</if>
+				<if test='item.equals("자본총계(2020년)")'>,S.TOT_CAPL_AMT as TOT_CAPL_AMT_2020</if>
+				<if test='item.equals("자본총계(2019년)")'>,T.TOT_CAPL_AMT as TOT_CAPL_AMT_2019</if>
+				
+				<if test='item.equals("매출액(2022년)")'>,Q.SELNG_AMT as SELNG_AMT_2022</if>
+				<if test='item.equals("매출액(2021년)")'>,R.SELNG_AMT as SELNG_AMT_2021</if>
+				<if test='item.equals("매출액(2020년)")'>,S.SELNG_AMT as SELNG_AMT_2020</if>
+				<if test='item.equals("매출액(2019년)")'>,T.SELNG_AMT as SELNG_AMT_2019</if>
+				
+				<if test='item.equals("영업이익(2022년)")'>,Q.BSN_PROFIT as BSN_PROFIT_2022</if>
+				<if test='item.equals("영업이익(2021년)")'>,R.BSN_PROFIT as BSN_PROFIT_2021</if>
+				<if test='item.equals("영업이익(2020년)")'>,S.BSN_PROFIT as BSN_PROFIT_2020</if>
+				<if test='item.equals("영업이익(2019년)")'>,T.BSN_PROFIT as BSN_PROFIT_2019</if>
+				
+				<if test='item.equals("당기순이익(2022년)")'>,Q.THSTRM_NTPF as THSTRM_NTPF_2022</if>
+				<if test='item.equals("당기순이익(2021년)")'>,R.THSTRM_NTPF as THSTRM_NTPF_2021</if>
+				<if test='item.equals("당기순이익(2020년)")'>,S.THSTRM_NTPF as THSTRM_NTPF_2020</if>
+				<if test='item.equals("당기순이익(2019년)")'>,T.THSTRM_NTPF as THSTRM_NTPF_2019</if>
+			</foreach>
+			
+		</if>
+		FROM
+		(SELECT *
+		FROM
+		(SELECT ROWNUM as RN , BSK.* from
+		(SELECT
+		HRD_BSK.*
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if test='item.equals("일학습 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_PDMS P WHERE
+					HRD_BSK.BPL_NO = P.BPL_NO) AS PDMS_COUNT
+				</if>
+				<if test='item.equals("학습조직화 참여 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_EG L WHERE
+					HRD_BSK.BIZR_NO = L.BIZR_NO) AS EG_COUNT
+				</if>
+				<if test='item.equals("우수기관 인증 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_CERT M WHERE
+					HRD_BSK.BIZR_NO = M.BIZR_NO) AS CERT_COUNT
+				</if>
+				<if test='item.equals("사업주 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_BPR G WHERE
+					HRD_BSK.BPL_NO = G.BPL_NO) AS BPR_COUNT
+				</if>
+				<if test='item.equals("S-OJT 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_SOJT H WHERE
+					HRD_BSK.BPL_NO = H.BPL_NO) AS SOJT_COUNT
+				</if>
+				<if test='item.equals("컨소시엄 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_CON I WHERE
+					HRD_BSK.BPL_NO = I.BPL_NO) AS CON_COUNT
+				</if>
+				<if test='item.equals("지산맞 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_REG J WHERE
+					HRD_BSK.BPL_NO = J.BPL_NO) AS REG_COUNT
+				</if>
+				<if test='item.equals("강소기업 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_SG N WHERE
+					HRD_BSK.BIZR_NO = N.BIZR_NO) AS SG_COUNT
+				</if>
+				<if test='item.equals("청년친화 강소기업 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_YF O WHERE
+					HRD_BSK.BIZR_NO = O.BIZR_NO) AS YF_COUNT
+				</if>
+				<if test='item.equals("대분류")'>
+					,(
+					SELECT HRD_BSK_CL_LCLAS.LCLAS_NM FROM (SELECT
+					LCLAS_CD, BPL_NO FROM HRD_BSK_CL_PASSIV_LCLAS WHERE
+					STATUS = 'Y'
+					UNION ALL
+					SELECT LCLAS_CD, BPL_NO FROM HRD_BSK_CL_ATMC_LCLAS WHERE
+					STATUS = 'Y' AND
+					BPL_NO NOT IN (SELECT BPL_NO FROM
+					HRD_BSK_CL_PASSIV_LCLAS WHERE STATUS = 'Y'))Q
+					LEFT JOIN
+					HRD_BSK_CL_LCLAS ON Q.LCLAS_CD = HRD_BSK_CL_LCLAS.LCLAS_CD
+					WHERE
+					HRD_BSK.BPL_NO = Q.BPL_NO) as LCLAS_NM
+				</if>
+				<if test='item.equals("소분류")'> ,(
+					SELECT LISTAGG(SCLAS_NM, ',') WITHIN GROUP(ORDER BY
+					SCLAS_NM) AS SCLAS_NM
+					FROM (SELECT DISTINCT(SCLAS_NM) FROM
+					(SELECT
+					SCLAS_CD, BPL_NO FROM HRD_BSK_CL_PASSIV_SCLAS WHERE STATUS = 'Y'
+					UNION ALL
+					SELECT SCLAS_CD, BPL_NO FROM HRD_BSK_CL_ATMC_SCLAS
+					WHERE
+					STATUS = 'Y' AND BPL_NO NOT IN (SELECT BPL_NO FROM
+					HRD_BSK_CL_PASSIV_SCLAS WHERE STATUS = 'Y'))R
+					LEFT JOIN
+					HRD_BSK_CL_SCLAS ON R.SCLAS_CD = HRD_BSK_CL_SCLAS.SCLAS_CD
+					WHERE
+					R.BPL_NO = HRD_BSK.BPL_NO)) as SCLAS_NM
+				</if>
+			</foreach>
+		</if>
+
+		
+		FROM HRD_BSK 
+		LEFT JOIN
+		HRD_BSK_PSITN_INSTT Q ON HRD_BSK.BPL_NO = Q.BPL_NO AND Q.APPLY_YN = 'Y'
+		WHERE BPL_STATUS_CD = '1'
+		<if test="isDoctorIdx != null and isDoctorIdx != ''">
+		 AND HRD_BSK.BPL_NO IN (SELECT BPL_NO FROM HRD_COM_DOCTOR_CORP WHERE DOCTOR_IDX = #{isDoctorIdx})
+		</if>
+		<if test="insttIdx != null and insttIdx != ''"> AND (Q.INSTT_IDX = #{insttIdx})
+		</if>
+		<if test="isInsttIdx != null and isInsttIdx != ''">AND (Q.INSTT_IDX = #{isInsttIdx})</if>
+
+		<if test="isBplNo != null and isBplNo != ''">AND (HRD_BSK.BPL_NO = #{isBplNo}) </if>
+		<if test="isBizrNo != null and isBizrNo != ''">AND (HRD_BSK.BIZR_NO = #{isBizrNo}) </if>
+		<if test="isPriSupCd != null and isPriSupCd != ''">AND (HRD_BSK.PRI_SUP_CD = #{isPriSupCd}) </if>
+		<if test="isBplNm != null and isBplNm != ''">AND (HRD_BSK.BPL_NM Like '%' || #{isBplNm} || '%') </if>
+
+
+
+		<if test="isIndustCd != null and isIndustCd != ''">AND (SUBSTR(HRD_BSK.INDUTY_CD, 1, 3) = #{isIndustCd})
+		</if>
+		<if test="isTrRecord1 != null and isTrRecord1 != ''">AND (HRD_BSK.BPL_NO IN (SELECT BPL_NO FROM HRD_BSK_BPR))</if>
+		<if test="isTrRecord2 != null and isTrRecord2 != ''">AND (HRD_BSK.BPL_NO IN (SELECT BPL_NO FROM HRD_BSK_REG))</if>
+		<if test="isTrRecord3 != null and isTrRecord3 != ''">AND (HRD_BSK.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_CON))</if>
+		<if test="isSclas != null and isSclas != ''"> AND (HRD_BSK.BPL_NO IN(
+			SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_SCLAS
+			WHERE STATUS = 'Y' AND SCLAS_CD = #{isSclas}
+			UNION ALL
+			SELECT BPL_NO
+			FROM HRD_BSK_CL_ATMC_SCLAS WHERE STATUS = 'Y' AND
+			SCLAS_CD =
+			#{isSclas} AND
+
+			BPL_NO NOT IN (SELECT BPL_NO FROM
+			HRD_BSK_CL_PASSIV_SCLAS WHERE STATUS =
+			'Y' AND SCLAS_CD = #{isSclas})
+			))
+		</if>
+		<if test="isLclas != null and isLclas != ''"> AND (HRD_BSK.BPL_NO IN(
+			SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_LCLAS
+			WHERE STATUS = 'Y' AND LCLAS_CD = #{isLclas}
+			UNION ALL
+			SELECT BPL_NO
+			FROM HRD_BSK_CL_ATMC_LCLAS WHERE STATUS = 'Y' AND
+			LCLAS_CD =
+			#{isLclas} AND
+			BPL_NO NOT IN (SELECT BPL_NO FROM
+			HRD_BSK_CL_PASSIV_LCLAS
+			WHERE STATUS = 'Y' AND LCLAS_CD = #{isLclas})
+
+			))
+		</if>
+		<if test="isHashTag != null and isHashTag != ''"> AND (HRD_BSK.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_HASHTAG WHERE
+			HASHTAG_CD = #{isHashTag} AND ISDELETE = 0))
+		</if>
+		<if test="isCtprvn != null and isCtprvn != ''">
+			AND (HRD_BSK.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN
+			=
+			#{isCtprvn}))
+		</if>
+
+		<if
+			test="isCtprvn != null and isCtprvn != '' and isSigngu != null and isSigngu != '' ">
+			AND (HRD_BSK.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN =
+			#{isCtprvn} AND SIGNGU = #{isSigngu} ))
+		</if>
+		<if test="(isTotEmpCntMin != null and isTotEmpCntMin != '')">
+		<![CDATA[
+		AND (HRD_BSK.TOT_EMP_CNT >= #{isTotEmpCntMin}) ]]>
+		</if>
+		<if test="(isTotEmpCntMax != null and isTotEmpCntMax != '')">
+			<![CDATA[
+			AND (HRD_BSK.TOT_EMP_CNT <= #{isTotEmpCntMax})
+			]]>
+		</if>
+
+
+		)BSK
+        <![CDATA[
+		WHERE ROWNUM <= #{pageNum} * #{amount} )HRD_BSK
+		WHERE HRD_BSK.RN > (#{pageNum}-1) * #{amount} ]]>
+
+		) A
+
+		LEFT JOIN TMP_INDUSTRY_LIMIT P ON A.INDUTY_CD = P.CODE
+		
+
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if
+					test='item.equals("우량기업 유무")  or item.equals("BEST HRD 선정 유무") or item.equals("산업단지기업 유무")  or item.equals("산재다발") or item.equals("임금체불")'>
+					LEFT JOIN HRD_BSK_UPLOAD K ON A.BPL_NO = K.BPL_NO
+				</if>
+				<if
+					test='item.equals("채용제목")  or item.equals("임금형태")  or item.equals("급여")  or item.equals("지역") or item.equals("근무형태")'>
+					LEFT JOIN (SELECT BIZR_NO, TITLE, SALARY_STLE, SALARY_SCOPE,
+					REGION,
+					WORK_STLE FROM (SELECT BIZR_NO, TITLE, SALARY_STLE,
+					SALARY_SCOPE, REGION,
+					WORK_STLE, REG_DT,ROW_NUMBER()
+					OVER (PARTITION
+					BY BIZR_NO ORDER BY
+					REG_DT DESC ) AS rn
+					FROM
+					HRD_BSK_BIZR_REC) ranked
+					WHERE rn = '1'
+					)REC
+					ON A.BIZR_NO =REC.BIZR_NO
+				</if>
+				
+				
+
+
+			</foreach>
+					LEFT JOIN HRD_BSK_KED_FNC Q ON A.BIZR_NO = Q.BIZR_NO AND TO_DATE(Q.STACNT_STDR_DE, 'YYYYMMDD') BETWEEN TO_DATE ('20220101', 'YYYYMMDD') AND TO_DATE('20221231', 'YYYYMMDD')
+					LEFT JOIN HRD_BSK_KED_FNC R ON A.BIZR_NO = R.BIZR_NO AND TO_DATE(R.STACNT_STDR_DE, 'YYYYMMDD') BETWEEN TO_DATE ('20210101', 'YYYYMMDD') AND TO_DATE('20211231', 'YYYYMMDD')
+					LEFT JOIN HRD_BSK_KED_FNC S ON A.BIZR_NO = S.BIZR_NO AND TO_DATE(S.STACNT_STDR_DE, 'YYYYMMDD') BETWEEN TO_DATE ('20200101', 'YYYYMMDD') AND TO_DATE('20201231', 'YYYYMMDD')
+					LEFT JOIN HRD_BSK_KED_FNC T ON A.BIZR_NO = T.BIZR_NO AND TO_DATE(T.STACNT_STDR_DE, 'YYYYMMDD') BETWEEN TO_DATE ('20190101', 'YYYYMMDD') AND TO_DATE('20191231', 'YYYYMMDD')
+			
+		</if>
+		
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if
+					test='item.equals("기업신용등급")'>
+					LEFT JOIN 
+						(SELECT CREDT_GRAD, BIZR_NO FROM (SELECT CREDT_GRAD, BIZR_NO, REG_DT,ROW_NUMBER()
+					OVER (PARTITION
+					BY BIZR_NO ORDER BY
+					REG_DT DESC ) AS rn
+					FROM
+					HRD_BSK_KED_CRE) ranked
+					WHERE rn = '1'
+					)CRE
+					ON A.BIZR_NO = CRE.BIZR_NO
+				</if>
+			</foreach>
+		</if>
+	</select>
+
+	<select id="selectAllList"
+		resultType="rbs.modules.basket.dto.Basket" fetchSize="2000">
+		SELECT ROWNUM AS SEQ, A.BPL_NO, A.BIZR_NO, A.PRI_SUP_CD, A.PRI_SUP_CHG_CD,
+		A.SELFEMP_CD, A.BPL_ORGBK_NO, A.JURIRNO, A.HEADBPL_CD,
+		A.HEDOFC_BPL_NO,
+		A.BPL_NM, A.BPL_ZIP, A.BPL_ADDR, A.ADDR_DTL,
+		A.INDUTY_CD,
+		A.EMPLYM_FORMATN_DE, A.EMPINS_EXTSH_DE, A.BPL_STATUS_CD,
+		A.TOT_WORK_CNT, A.TOT_BPL_CNT, A.TOT_EMP_CNT, A.OCCP_TR_YN,
+		A.LRSCL_CORP_SE,
+		A.EMAIL, A.BPL_EMAIL, A.BPL_AREA_NO, A.BPL_FAX_NO1,
+		A.BPL_FAX_NO2,
+		A.BPL_TELNO1, A.BPL_TELNO2,
+		A.BPL_AREA_NO||'-'||A.BPL_TELNO1||'-'||A.BPL_TELNO2 AS BPL_TELNO,
+		A.BPL_AREA_NO||'-'||A.BPL_FAX_NO1||'-'||A.BPL_FAX_NO2 AS BPL_FAX_NO,
+		A.BPL_URL,
+		A.SPEMPLYM_APPLC_SE,
+		A.PRI_SUP_START_DATE, A.ARTBPL_YN ,
+		P.NAME AS
+		BPL_INDUST_NM,
+		(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE BPL_NO = A.BPL_NO AND STATUS ='1' AND APPLY_YN ='Y')) AS INSTT_IDX
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if test='item.equals("우량기업 유무")'>,K.EXCENT_YN</if>
+				<if test='item.equals("BEST HRD 선정 유무")'>,K.BESTHRD_YN</if>
+				<if test='item.equals("산업단지기업 유무")'>,K.IDSCPX_YN</if>
+				<if test='item.equals("산재다발")'>,K.INDACMT_YN</if>
+				<if test='item.equals("임금체불")'>,K.WGDLY_YN</if>
+				<if test='item.equals("채용제목")'>,REC.TITLE</if>
+				<if test='item.equals("임금형태")'>,REC.SALARY_STLE</if>
+				<if test='item.equals("급여")'>,REC.SALARY_SCOPE</if>
+				<if test='item.equals("지역 ")'>,REC.REGION</if>
+				<if test='item.equals("근무형태")'>,REC.WORK_STLE</if>
+				<if test='item.equals("일학습 참여 여부(횟수)")'>,A.PDMS_COUNT</if>
+				<if test='item.equals("학습조직화 참여 여부")'>,A.EG_COUNT</if>
+				<if test='item.equals("우수기관 인증 여부")'>,A.CERT_COUNT</if>
+				<if test='item.equals("사업주 참여 여부(횟수)")'>,A.BPR_COUNT</if>
+				<if test='item.equals("S-OJT 참여 여부(횟수)")'>,A.SOJT_COUNT</if>
+				<if test='item.equals("컨소시엄 참여 여부(횟수)")'>,A.CON_COUNT</if>
+				<if test='item.equals("지산맞 참여 여부(횟수)")'>,A.REG_COUNT</if>
+				<if test='item.equals("강소기업 여부")'>,A.SG_COUNT</if>
+				<if test='item.equals("청년친화 강소기업 여부")'>,A.YF_COUNT</if>
+				<if test='item.equals("대분류")'>,A.LCLAS_NM</if>
+				<if test='item.equals("소분류")'>,A.SCLAS_NM</if>
+				<if test='item.equals("기업신용등급")'>,CRE.CREDT_GRAD</if>
+				
+				<if test='item.equals("자산총계(2022년)")'>,Q.TOT_ASSETS as TOT_ASSETS_2022</if>
+				<if test='item.equals("자산총계(2021년)")'>,R.TOT_ASSETS as TOT_ASSETS_2021</if>
+				<if test='item.equals("자산총계(2020년)")'>,S.TOT_ASSETS as TOT_ASSETS_2020</if>
+				<if test='item.equals("자산총계(2019년)")'>,T.TOT_ASSETS as TOT_ASSETS_2019</if>
+				
+				<if test='item.equals("자본총계(2022년)")'>,Q.TOT_CAPL_AMT as TOT_CAPL_AMT_2022</if>
+				<if test='item.equals("자본총계(2021년)")'>,R.TOT_CAPL_AMT as TOT_CAPL_AMT_2021</if>
+				<if test='item.equals("자본총계(2020년)")'>,S.TOT_CAPL_AMT as TOT_CAPL_AMT_2020</if>
+				<if test='item.equals("자본총계(2019년)")'>,T.TOT_CAPL_AMT as TOT_CAPL_AMT_2019</if>
+				
+				<if test='item.equals("매출액(2022년)")'>,Q.SELNG_AMT as SELNG_AMT_2022</if>
+				<if test='item.equals("매출액(2021년)")'>,R.SELNG_AMT as SELNG_AMT_2021</if>
+				<if test='item.equals("매출액(2020년)")'>,S.SELNG_AMT as SELNG_AMT_2020</if>
+				<if test='item.equals("매출액(2019년)")'>,T.SELNG_AMT as SELNG_AMT_2019</if>
+				
+				<if test='item.equals("영업이익(2022년)")'>,Q.BSN_PROFIT as BSN_PROFIT_2022</if>
+				<if test='item.equals("영업이익(2021년)")'>,R.BSN_PROFIT as BSN_PROFIT_2021</if>
+				<if test='item.equals("영업이익(2020년)")'>,S.BSN_PROFIT as BSN_PROFIT_2020</if>
+				<if test='item.equals("영업이익(2019년)")'>,T.BSN_PROFIT as BSN_PROFIT_2019</if>
+				
+				<if test='item.equals("당기순이익(2022년)")'>,Q.THSTRM_NTPF as THSTRM_NTPF_2022</if>
+				<if test='item.equals("당기순이익(2021년)")'>,R.THSTRM_NTPF as THSTRM_NTPF_2021</if>
+				<if test='item.equals("당기순이익(2020년)")'>,S.THSTRM_NTPF as THSTRM_NTPF_2020</if>
+				<if test='item.equals("당기순이익(2019년)")'>,T.THSTRM_NTPF as THSTRM_NTPF_2019</if>
+
+			</foreach>
+		</if>
+		FROM
+		(SELECT *
+		FROM
+		(SELECT BSK.* from
+		(SELECT
+		HRD_BSK.*
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if test='item.equals("일학습 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_PDMS P WHERE
+					HRD_BSK.BPL_NO = P.BPL_NO) AS PDMS_COUNT
+				</if>
+				<if test='item.equals("학습조직화 참여 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_EG L WHERE
+					HRD_BSK.BIZR_NO = L.BIZR_NO) AS EG_COUNT
+				</if>
+				<if test='item.equals("우수기관 인증 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_CERT M WHERE
+					HRD_BSK.BIZR_NO = M.BIZR_NO) AS CERT_COUNT
+				</if>
+				<if test='item.equals("사업주 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_BPR G WHERE
+					HRD_BSK.BPL_NO = G.BPL_NO) AS BPR_COUNT
+				</if>
+				<if test='item.equals("S-OJT 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_SOJT H WHERE
+					HRD_BSK.BPL_NO = H.BPL_NO) AS SOJT_COUNT
+				</if>
+				<if test='item.equals("컨소시엄 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_CON I WHERE
+					HRD_BSK.BPL_NO = I.BPL_NO) AS CON_COUNT
+				</if>
+				<if test='item.equals("지산맞 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_REG J WHERE
+					HRD_BSK.BPL_NO = J.BPL_NO) AS REG_COUNT
+				</if>
+				<if test='item.equals("강소기업 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_SG N WHERE
+					HRD_BSK.BIZR_NO = N.BIZR_NO) AS SG_COUNT
+				</if>
+				<if test='item.equals("청년친화 강소기업 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_YF O WHERE
+					HRD_BSK.BIZR_NO = O.BIZR_NO) AS YF_COUNT
+				</if>
+				<if test='item.equals("대분류")'>
+					,(
+					SELECT HRD_BSK_CL_LCLAS.LCLAS_NM FROM (SELECT
+					LCLAS_CD, BPL_NO FROM HRD_BSK_CL_PASSIV_LCLAS WHERE
+					STATUS = 'Y'
+					UNION ALL
+					SELECT LCLAS_CD, BPL_NO FROM HRD_BSK_CL_ATMC_LCLAS WHERE
+					STATUS = 'Y' AND
+					BPL_NO NOT IN (SELECT BPL_NO FROM
+					HRD_BSK_CL_PASSIV_LCLAS WHERE STATUS = 'Y'))Q
+					LEFT JOIN
+					HRD_BSK_CL_LCLAS ON Q.LCLAS_CD = HRD_BSK_CL_LCLAS.LCLAS_CD
+					WHERE
+					HRD_BSK.BPL_NO = Q.BPL_NO) as LCLAS_NM
+				</if>
+				<if test='item.equals("소분류")'> ,(
+					SELECT LISTAGG(SCLAS_NM, ',') WITHIN GROUP(ORDER BY
+					SCLAS_NM) AS SCLAS_NM
+					FROM (SELECT DISTINCT(SCLAS_NM) FROM
+					(SELECT
+					SCLAS_CD, BPL_NO FROM HRD_BSK_CL_PASSIV_SCLAS WHERE STATUS = 'Y'
+					UNION ALL
+					SELECT SCLAS_CD, BPL_NO FROM HRD_BSK_CL_ATMC_SCLAS
+					WHERE
+					STATUS = 'Y' AND BPL_NO NOT IN (SELECT BPL_NO FROM
+					HRD_BSK_CL_PASSIV_SCLAS WHERE STATUS = 'Y'))R
+					LEFT JOIN
+					HRD_BSK_CL_SCLAS ON R.SCLAS_CD = HRD_BSK_CL_SCLAS.SCLAS_CD
+					WHERE
+					R.BPL_NO = HRD_BSK.BPL_NO)) as SCLAS_NM
+				</if>
+			</foreach>
+		</if>
+
+
+		
+		FROM HRD_BSK 
+		LEFT JOIN
+		HRD_BSK_PSITN_INSTT Q ON HRD_BSK.BPL_NO = Q.BPL_NO AND Q.APPLY_YN = 'Y'
+		WHERE BPL_STATUS_CD = '1'
+		<if test="insttIdx != null and insttIdx != ''"> AND (Q.INSTT_IDX = #{insttIdx})
+		</if>
+		<if test="isInsttIdx != null and isInsttIdx != ''">AND (Q.INSTT_IDX = #{isInsttIdx})</if>
+
+
+		<if test="isBplNo != null and isBplNo != ''">AND (HRD_BSK.BPL_NO = #{isBplNo}) </if>
+		<if test="isBplNm != null and isBplNm != ''">AND (HRD_BSK.BPL_NM Like '%' || #{isBplNm} || '%') </if>
+		<if test="isBizrNo != null and isBizrNo != ''">AND (HRD_BSK.BIZR_NO = #{isBizrNo}) </if>
+		<if test="isPriSupCd != null and isPriSupCd != ''">AND (HRD_BSK.PRI_SUP_CD = #{isPriSupCd}) </if>
+
+		<if test="isIndustCd != null and isIndustCd != ''">AND (SUBSTR(HRD_BSK.INDUTY_CD, 1, 3) = #{isIndustCd})
+		</if>
+		<if test="isTrRecord1 != null and isTrRecord1 != ''">AND (HRD_BSK.BPL_NO IN (SELECT BPL_NO FROM HRD_BSK_BPR))</if>
+		<if test="isTrRecord2 != null and isTrRecord2 != ''">AND (HRD_BSK.BPL_NO IN (SELECT BPL_NO FROM HRD_BSK_REG))</if>
+		<if test="isTrRecord3 != null and isTrRecord3 != ''">AND (HRD_BSK.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_CON))</if>
+		<if test="isSclas != null and isSclas != ''"> AND (HRD_BSK.BPL_NO IN(
+			SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_SCLAS
+			WHERE STATUS = 'Y' AND SCLAS_CD = #{isSclas}
+			UNION ALL
+			SELECT BPL_NO
+			FROM HRD_BSK_CL_ATMC_SCLAS WHERE STATUS = 'Y' AND
+			SCLAS_CD =
+			#{isSclas} AND
+
+			BPL_NO NOT IN (SELECT BPL_NO FROM
+			HRD_BSK_CL_PASSIV_SCLAS WHERE STATUS =
+			'Y' AND SCLAS_CD = #{isSclas})
+			))
+		</if>
+		<if test="isLclas != null and isLclas != ''"> AND (HRD_BSK.BPL_NO IN(
+			SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_LCLAS
+			WHERE STATUS = 'Y' AND LCLAS_CD = #{isLclas}
+			UNION ALL
+			SELECT BPL_NO
+			FROM HRD_BSK_CL_ATMC_LCLAS WHERE STATUS = 'Y' AND
+			LCLAS_CD =
+			#{isLclas} AND
+			BPL_NO NOT IN (SELECT BPL_NO FROM
+			HRD_BSK_CL_PASSIV_LCLAS
+			WHERE STATUS = 'Y' AND LCLAS_CD = #{isLclas})
+
+			))
+		</if>
+		<if test="isHashTag != null and isHashTag != ''"> AND (HRD_BSK.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_HASHTAG WHERE
+			HASHTAG_CD = #{isHashTag} AND ISDELETE = 0))
+		</if>
+		<if test="isCtprvn != null and isCtprvn != ''">
+			AND (HRD_BSK.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN
+			=
+			#{isCtprvn}))
+		</if>
+
+		<if
+			test="isCtprvn != null and isCtprvn != '' and isSigngu != null and isSigngu != '' ">
+			AND (HRD_BSK.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN =
+			#{isCtprvn} AND SIGNGU = #{isSigngu} ))
+		</if>
+		<if test="(isTotEmpCntMin != null and isTotEmpCntMin != '')">
+		<![CDATA[
+		AND (HRD_BSK.TOT_EMP_CNT >= #{isTotEmpCntMin}) ]]>
+		</if>
+		<if test="(isTotEmpCntMax != null and isTotEmpCntMax != '')">
+			<![CDATA[
+			AND (HRD_BSK.TOT_EMP_CNT <= #{isTotEmpCntMax})
+			]]>
+		</if>
+
+
+		)BSK
+        <![CDATA[
+		 )HRD_BSK
+		 ]]>
+
+		) A
+
+		LEFT JOIN TMP_INDUSTRY_LIMIT P ON A.INDUTY_CD = P.CODE
+		
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if
+					test='item.equals("우량기업 유무")  or item.equals("BEST HRD 선정 유무") or item.equals("산업단지기업 유무")  or item.equals("산재다발") or item.equals("임금체불")'>
+					LEFT JOIN HRD_BSK_UPLOAD K ON A.BPL_NO = K.BPL_NO
+				</if>
+				<if
+					test='item.equals("채용제목")  or item.equals("임금형태")  or item.equals("급여")  or item.equals("지역") or item.equals("근무형태")'>
+					LEFT JOIN (SELECT BIZR_NO, TITLE, SALARY_STLE, SALARY_SCOPE,
+					REGION,
+					WORK_STLE FROM (SELECT BIZR_NO, TITLE, SALARY_STLE,
+					SALARY_SCOPE, REGION,
+					WORK_STLE, REG_DT,ROW_NUMBER()
+					OVER (PARTITION
+					BY BIZR_NO ORDER BY
+					REG_DT DESC ) AS rn
+					FROM
+					HRD_BSK_BIZR_REC) ranked
+					WHERE rn = '1'
+					)REC
+					ON A.BIZR_NO =REC.BIZR_NO
+				</if>
+				
+				
+
+
+			</foreach>
+					LEFT JOIN HRD_BSK_KED_FNC Q ON A.BIZR_NO = Q.BIZR_NO AND TO_DATE(Q.STACNT_STDR_DE, 'YYYYMMDD') BETWEEN TO_DATE ('20220101', 'YYYYMMDD') AND TO_DATE('20221231', 'YYYYMMDD')
+					LEFT JOIN HRD_BSK_KED_FNC R ON A.BIZR_NO = R.BIZR_NO AND TO_DATE(R.STACNT_STDR_DE, 'YYYYMMDD') BETWEEN TO_DATE ('20210101', 'YYYYMMDD') AND TO_DATE('20211231', 'YYYYMMDD')
+					LEFT JOIN HRD_BSK_KED_FNC S ON A.BIZR_NO = S.BIZR_NO AND TO_DATE(S.STACNT_STDR_DE, 'YYYYMMDD') BETWEEN TO_DATE ('20200101', 'YYYYMMDD') AND TO_DATE('20201231', 'YYYYMMDD')
+					LEFT JOIN HRD_BSK_KED_FNC T ON A.BIZR_NO = T.BIZR_NO AND TO_DATE(T.STACNT_STDR_DE, 'YYYYMMDD') BETWEEN TO_DATE ('20190101', 'YYYYMMDD') AND TO_DATE('20191231', 'YYYYMMDD')
+			
+		</if>
+		
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if
+					test='item.equals("기업신용등급")'>
+					LEFT JOIN 
+						(SELECT CREDT_GRAD, BIZR_NO FROM (SELECT CREDT_GRAD, BIZR_NO, REG_DT,ROW_NUMBER()
+					OVER (PARTITION
+					BY BIZR_NO ORDER BY
+					REG_DT DESC ) AS rn
+					FROM
+					HRD_BSK_KED_CRE) ranked
+					WHERE rn = '1'
+					)CRE
+					ON A.BIZR_NO = CRE.BIZR_NO
+				</if>
+			</foreach>
+		</if>
+	</select>
+
+	 <select id="selectWebList"
+		resultType="rbs.modules.basket.dto.Basket" fetchSize="2000">
+		SELECT A.BPL_NO, A.BIZR_NO, A.PRI_SUP_CD, A.PRI_SUP_CHG_CD,
+		A.SELFEMP_CD, A.BPL_ORGBK_NO, A.JURIRNO, A.HEADBPL_CD,
+		A.HEDOFC_BPL_NO,
+		A.BPL_NM, A.BPL_ZIP, A.BPL_ADDR, A.ADDR_DTL,
+		A.INDUTY_CD,
+		A.EMPLYM_FORMATN_DE, A.EMPINS_EXTSH_DE, A.BPL_STATUS_CD,
+		A.TOT_WORK_CNT, A.TOT_BPL_CNT, A.TOT_EMP_CNT, A.OCCP_TR_YN,
+		A.LRSCL_CORP_SE,
+		A.EMAIL, A.BPL_EMAIL, A.BPL_AREA_NO, A.BPL_FAX_NO1,
+		A.BPL_FAX_NO2,
+		A.BPL_TELNO1, A.BPL_TELNO2, A.BPL_URL,
+		A.SPEMPLYM_APPLC_SE,
+		A.PRI_SUP_START_DATE, A.ARTBPL_YN ,
+		P.NAME AS
+		BPL_INDUST_NM,
+		(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE BPL_NO = A.BPL_NO AND STATUS ='1' AND APPLY_YN ='Y')) AS INSTT_IDX
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if test='item.equals("우량기업 유무")'>,K.EXCENT_YN</if>
+				<if test='item.equals("BEST HRD 선정 유무")'>,K.BESTHRD_YN</if>
+				<if test='item.equals("산업단지기업 유무")'>,K.IDSCPX_YN</if>
+				<if test='item.equals("산재다발")'>,K.INDACMT_YN</if>
+				<if test='item.equals("임금체불")'>,K.WGDLY_YN</if>
+				<if test='item.equals("채용제목")'>,REC.TITLE</if>
+				<if test='item.equals("임금형태")'>,REC.SALARY_STLE</if>
+				<if test='item.equals("급여")'>,REC.SALARY_SCOPE</if>
+				<if test='item.equals("지역 ")'>,REC.REGION</if>
+				<if test='item.equals("근무형태")'>,REC.WORK_STLE</if>
+				<if test='item.equals("일학습 참여 여부(횟수)")'>,A.PDMS_COUNT</if>
+				<if test='item.equals("학습조직화 참여 여부")'>,A.EG_COUNT</if>
+				<if test='item.equals("우수기관 인증 여부")'>,A.CERT_COUNT</if>
+				<if test='item.equals("사업주 참여 여부(횟수)")'>,A.BPR_COUNT</if>
+				<if test='item.equals("S-OJT 참여 여부(횟수)")'>,A.SOJT_COUNT</if>
+				<if test='item.equals("컨소시엄 참여 여부(횟수)")'>,A.CON_COUNT</if>
+				<if test='item.equals("지산맞 참여 여부(횟수)")'>,A.REG_COUNT</if>
+				<if test='item.equals("강소기업 여부")'>,A.SG_COUNT</if>
+				<if test='item.equals("청년친화 강소기업 여부")'>,A.YF_COUNT</if>
+				<if test='item.equals("대분류")'>,A.LCLAS_NM</if>
+				<if test='item.equals("소분류")'>,A.SCLAS_NM</if>
+			</foreach>
+		</if>
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if test='item.equals("기업신용등급")'>,CRE.CREDT_GRAD</if>
+			</foreach>
+		</if>
+		FROM
+		(SELECT *
+		FROM
+		(SELECT ROWNUM as RN , BSK.* from
+		(SELECT
+		HRD_BSK.*
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if test='item.equals("일학습 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_PDMS P WHERE
+					HRD_BSK.BPL_NO = P.BPL_NO) AS PDMS_COUNT
+				</if>
+				<if test='item.equals("학습조직화 참여 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_EG L WHERE
+					HRD_BSK.BIZR_NO = L.BIZR_NO) AS EG_COUNT
+				</if>
+				<if test='item.equals("우수기관 인증 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_CERT M WHERE
+					HRD_BSK.BIZR_NO = M.BIZR_NO) AS CERT_COUNT
+				</if>
+				<if test='item.equals("사업주 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_BPR G WHERE
+					HRD_BSK.BPL_NO = G.BPL_NO) AS BPR_COUNT
+				</if>
+				<if test='item.equals("S-OJT 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_SOJT H WHERE
+					HRD_BSK.BPL_NO = H.BPL_NO) AS SOJT_COUNT
+				</if>
+				<if test='item.equals("컨소시엄 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_CON I WHERE
+					HRD_BSK.BPL_NO = I.BPL_NO) AS CON_COUNT
+				</if>
+				<if test='item.equals("지산맞 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_REG J WHERE
+					HRD_BSK.BPL_NO = J.BPL_NO) AS REG_COUNT
+				</if>
+				<if test='item.equals("강소기업 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_SG N WHERE
+					HRD_BSK.BIZR_NO = N.BIZR_NO) AS SG_COUNT
+				</if>
+				<if test='item.equals("청년친화 강소기업 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_YF O WHERE
+					HRD_BSK.BIZR_NO = O.BIZR_NO) AS YF_COUNT
+				</if>
+				<if test='item.equals("대분류")'>
+					,(
+					SELECT HRD_BSK_CL_LCLAS.LCLAS_NM FROM (SELECT
+					LCLAS_CD, BPL_NO FROM HRD_BSK_CL_PASSIV_LCLAS WHERE
+					STATUS = 'Y'
+					UNION ALL
+					SELECT LCLAS_CD, BPL_NO FROM HRD_BSK_CL_ATMC_LCLAS WHERE
+					STATUS = 'Y' AND
+					BPL_NO NOT IN (SELECT BPL_NO FROM
+					HRD_BSK_CL_PASSIV_LCLAS WHERE STATUS = 'Y'))Q
+					LEFT JOIN
+					HRD_BSK_CL_LCLAS ON Q.LCLAS_CD = HRD_BSK_CL_LCLAS.LCLAS_CD
+					WHERE
+					HRD_BSK.BPL_NO = Q.BPL_NO) as LCLAS_NM
+				</if>
+				<if test='item.equals("소분류")'> ,(
+					SELECT LISTAGG(SCLAS_NM, ',') WITHIN GROUP(ORDER BY
+					SCLAS_NM) AS SCLAS_NM
+					FROM (SELECT DISTINCT(SCLAS_NM) FROM
+					(SELECT
+					SCLAS_CD, BPL_NO FROM HRD_BSK_CL_PASSIV_SCLAS WHERE STATUS = 'Y'
+					UNION ALL
+					SELECT SCLAS_CD, BPL_NO FROM HRD_BSK_CL_ATMC_SCLAS
+					WHERE
+					STATUS = 'Y' AND BPL_NO NOT IN (SELECT BPL_NO FROM
+					HRD_BSK_CL_PASSIV_SCLAS WHERE STATUS = 'Y'))R
+					LEFT JOIN
+					HRD_BSK_CL_SCLAS ON R.SCLAS_CD = HRD_BSK_CL_SCLAS.SCLAS_CD
+					WHERE
+					R.BPL_NO = HRD_BSK.BPL_NO)) as SCLAS_NM
+				</if>
+			</foreach>
+		</if>
+
+		
+		FROM HRD_BSK 
+		LEFT JOIN
+		HRD_BSK_PSITN_INSTT Q ON HRD_BSK.BPL_NO = Q.BPL_NO AND Q.APPLY_YN = 'Y'
+		WHERE BPL_STATUS_CD = '1'
+		 AND HRD_BSK.BPL_NO IN (SELECT BPL_NO FROM HRD_SPTJ_AGREM WHERE MEMBER_IDX = #{memberId})
+		<if test="isDoctorIdx != null and isDoctorIdx != ''">
+		 AND HRD_BSK.BPL_NO IN (SELECT BPL_NO FROM HRD_COM_DOCTOR_CORP WHERE DOCTOR_IDX = #{isDoctorIdx})
+		</if>
+		<if test="insttIdx != null and insttIdx != ''"> AND (Q.INSTT_IDX = #{insttIdx})
+		</if>
+		<if test="isInsttIdx != null and isInsttIdx != ''">AND (Q.INSTT_IDX = #{isInsttIdx})</if>
+
+		<if test="isBplNo != null and isBplNo != ''">AND (HRD_BSK.BPL_NO = #{isBplNo}) </if>
+		<if test="isBplNm != null and isBplNm != ''">AND (HRD_BSK.BPL_NM Like '%' || #{isBplNm} || '%') </if>
+		<if test="isPriSupCd != null and isPriSupCd != ''">AND (HRD_BSK.PRI_SUP_CD = #{isPriSupCd}) </if>
+		<if test="isBplNm != null and isBplNm != ''">AND (HRD_BSK.BPL_NM Like '%' || #{isBplNm} || '%') </if>
+
+
+
+		<if test="isIndustCd != null and isIndustCd != ''">AND (SUBSTR(HRD_BSK.INDUTY_CD, 1, 3) = #{isIndustCd})
+		</if>
+		<if test="isTrRecord1 != null and isTrRecord1 != ''">AND (HRD_BSK.BPL_NO IN (SELECT BPL_NO FROM HRD_BSK_BPR))</if>
+		<if test="isTrRecord2 != null and isTrRecord2 != ''">AND (HRD_BSK.BPL_NO IN (SELECT BPL_NO FROM HRD_BSK_REG))</if>
+		<if test="isTrRecord3 != null and isTrRecord3 != ''">AND (HRD_BSK.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_CON))</if>
+		<if test="isSclas != null and isSclas != ''"> AND (HRD_BSK.BPL_NO IN(
+			SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_SCLAS
+			WHERE STATUS = 'Y' AND SCLAS_CD = #{isSclas}
+			UNION ALL
+			SELECT BPL_NO
+			FROM HRD_BSK_CL_ATMC_SCLAS WHERE STATUS = 'Y' AND
+			SCLAS_CD =
+			#{isSclas} AND
+
+			BPL_NO NOT IN (SELECT BPL_NO FROM
+			HRD_BSK_CL_PASSIV_SCLAS WHERE STATUS =
+			'Y' AND SCLAS_CD = #{isSclas})
+			))
+		</if>
+		<if test="isLclas != null and isLclas != ''"> AND (HRD_BSK.BPL_NO IN(
+			SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_LCLAS
+			WHERE STATUS = 'Y' AND LCLAS_CD = #{isLclas}
+			UNION ALL
+			SELECT BPL_NO
+			FROM HRD_BSK_CL_ATMC_LCLAS WHERE STATUS = 'Y' AND
+			LCLAS_CD =
+			#{isLclas} AND
+			BPL_NO NOT IN (SELECT BPL_NO FROM
+			HRD_BSK_CL_PASSIV_LCLAS
+			WHERE STATUS = 'Y' AND LCLAS_CD = #{isLclas})
+
+			))
+		</if>
+		<if test="isHashTag != null and isHashTag != ''"> AND (HRD_BSK.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_HASHTAG WHERE
+			HASHTAG_CD = #{isHashTag} AND ISDELETE = 0))
+		</if>
+		<if test="isCtprvn != null and isCtprvn != ''">
+			AND (HRD_BSK.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN
+			=
+			#{isCtprvn}))
+		</if>
+
+		<if
+			test="isCtprvn != null and isCtprvn != '' and isSigngu != null and isSigngu != '' ">
+			AND (HRD_BSK.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN =
+			#{isCtprvn} AND SIGNGU = #{isSigngu} ))
+		</if>
+		<if test="(isTotEmpCntMin != null and isTotEmpCntMin != '')">
+		<![CDATA[
+		AND (HRD_BSK.TOT_EMP_CNT >= #{isTotEmpCntMin}) ]]>
+		</if>
+		<if test="(isTotEmpCntMax != null and isTotEmpCntMax != '')">
+			<![CDATA[
+			AND (HRD_BSK.TOT_EMP_CNT <= #{isTotEmpCntMax})
+			]]>
+		</if>
+
+
+		)BSK
+        <![CDATA[
+		WHERE ROWNUM <= #{pageNum} * #{amount} )HRD_BSK
+		WHERE HRD_BSK.RN > (#{pageNum}-1) * #{amount} ]]>
+
+		) A
+
+		LEFT JOIN TMP_INDUSTRY_LIMIT P ON A.INDUTY_CD = P.CODE
+		
+
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if
+					test='item.equals("우량기업 유무")  or item.equals("BEST HRD 선정 유무") or item.equals("산업단지기업 유무")  or item.equals("산재다발") or item.equals("임금체불")'>
+					LEFT JOIN HRD_BSK_UPLOAD K ON A.BPL_NO = K.BPL_NO
+				</if>
+				<if
+					test='item.equals("채용제목")  or item.equals("임금형태")  or item.equals("급여")  or item.equals("지역") or item.equals("근무형태")'>
+					LEFT JOIN (SELECT BIZR_NO, TITLE, SALARY_STLE, SALARY_SCOPE,
+					REGION,
+					WORK_STLE FROM (SELECT BIZR_NO, TITLE, SALARY_STLE,
+					SALARY_SCOPE, REGION,
+					WORK_STLE, REG_DT,ROW_NUMBER()
+					OVER (PARTITION
+					BY BIZR_NO ORDER BY
+					REG_DT DESC ) AS rn
+					FROM
+					HRD_BSK_BIZR_REC) ranked
+					WHERE rn = '1'
+					)REC
+					ON A.BIZR_NO =REC.BIZR_NO
+				</if>
+
+			</foreach>
+		</if>
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if
+					test='item.equals("기업신용등급")'>
+					LEFT JOIN 
+						(SELECT CREDT_GRAD, BIZR_NO FROM (SELECT CREDT_GRAD, BIZR_NO, REG_DT,ROW_NUMBER()
+					OVER (PARTITION
+					BY BIZR_NO ORDER BY
+					REG_DT DESC ) AS rn
+					FROM
+					HRD_BSK_KED_CRE) ranked
+					WHERE rn = '1'
+					)CRE
+					ON A.BIZR_NO = CRE.BIZR_NO
+				</if>
+			</foreach>
+		</if>
+	</select>
+
+
+
+	<select id="selectWebAllList"
+		resultType="rbs.modules.basket.dto.Basket" fetchSize="2000">
+		SELECT A.BPL_NO, A.BIZR_NO, A.PRI_SUP_CD, A.PRI_SUP_CHG_CD,
+		A.SELFEMP_CD, A.BPL_ORGBK_NO, A.JURIRNO, A.HEADBPL_CD,
+		A.HEDOFC_BPL_NO,
+		A.BPL_NM, A.BPL_ZIP, A.BPL_ADDR, A.ADDR_DTL,
+		A.INDUTY_CD,
+		A.EMPLYM_FORMATN_DE, A.EMPINS_EXTSH_DE, A.BPL_STATUS_CD,
+		A.TOT_WORK_CNT, A.TOT_BPL_CNT, A.TOT_EMP_CNT, A.OCCP_TR_YN,
+		A.LRSCL_CORP_SE,
+		A.EMAIL, A.BPL_EMAIL, A.BPL_AREA_NO, A.BPL_FAX_NO1,
+		A.BPL_FAX_NO2,
+		A.BPL_TELNO1, A.BPL_TELNO2, A.BPL_URL,
+		A.SPEMPLYM_APPLC_SE,
+		A.PRI_SUP_START_DATE, A.ARTBPL_YN,
+		P.NAME AS
+		BPL_INDUST_NM,
+		(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = (SELECT INSTT_IDX FROM HRD_BSK_PSITN_INSTT WHERE BPL_NO = A.BPL_NO AND STATUS ='1' AND APPLY_YN ='Y')) AS INSTT_IDX
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if test='item.equals("우량기업 유무")'>,K.EXCENT_YN</if>
+				<if test='item.equals("BEST HRD 선정 유무")'>,K.BESTHRD_YN</if>
+				<if test='item.equals("산업단지기업 유무")'>,K.IDSCPX_YN</if>
+				<if test='item.equals("산재다발")'>,K.INDACMT_YN</if>
+				<if test='item.equals("임금체불")'>,K.WGDLY_YN</if>
+				<if test='item.equals("채용제목")'>,REC.TITLE</if>
+				<if test='item.equals("임금형태")'>,REC.SALARY_STLE</if>
+				<if test='item.equals("급여")'>,REC.SALARY_SCOPE</if>
+				<if test='item.equals("지역 ")'>,REC.REGION</if>
+				<if test='item.equals("근무형태")'>,REC.WORK_STLE</if>
+				<if test='item.equals("일학습 참여 여부(횟수)")'>,A.PDMS_COUNT</if>
+				<if test='item.equals("학습조직화 참여 여부")'>,A.EG_COUNT</if>
+				<if test='item.equals("우수기관 인증 여부")'>,A.CERT_COUNT</if>
+				<if test='item.equals("사업주 참여 여부(횟수)")'>,A.BPR_COUNT</if>
+				<if test='item.equals("S-OJT 참여 여부(횟수)")'>,A.SOJT_COUNT</if>
+				<if test='item.equals("컨소시엄 참여 여부(횟수)")'>,A.CON_COUNT</if>
+				<if test='item.equals("지산맞 참여 여부(횟수)")'>,A.REG_COUNT</if>
+				<if test='item.equals("강소기업 여부")'>,A.SG_COUNT</if>
+				<if test='item.equals("청년친화 강소기업 여부")'>,A.YF_COUNT</if>
+			</foreach>
+		</if>
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if test='item.equals("기업신용등급")'>,CRE.CREDT_GRAD</if>
+			</foreach>
+		</if>
+		FROM
+		(SELECT *
+		FROM
+		(SELECT BSK.* from
+		(SELECT
+		HRD_BSK.*
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if test='item.equals("일학습 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_PDMS P WHERE
+					HRD_BSK.BPL_NO = P.BPL_NO) AS PDMS_COUNT
+				</if>
+				<if test='item.equals("학습조직화 참여 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_EG L WHERE
+					HRD_BSK.BIZR_NO = L.BIZR_NO) AS EG_COUNT
+				</if>
+				<if test='item.equals("우수기관 인증 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_CERT M WHERE
+					HRD_BSK.BIZR_NO = M.BIZR_NO) AS CERT_COUNT
+				</if>
+				<if test='item.equals("사업주 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_BPR G WHERE
+					HRD_BSK.BPL_NO = G.BPL_NO) AS BPR_COUNT
+				</if>
+				<if test='item.equals("S-OJT 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_SOJT H WHERE
+					HRD_BSK.BPL_NO = H.BPL_NO) AS SOJT_COUNT
+				</if>
+				<if test='item.equals("컨소시엄 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_CON I WHERE
+					HRD_BSK.BPL_NO = I.BPL_NO) AS CON_COUNT
+				</if>
+				<if test='item.equals("지산맞 참여 여부(횟수)")'>,(SELECT COUNT(*) FROM HRD_BSK_REG J WHERE
+					HRD_BSK.BPL_NO = J.BPL_NO) AS REG_COUNT
+				</if>
+				<if test='item.equals("강소기업 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_SG N WHERE
+					HRD_BSK.BIZR_NO = N.BIZR_NO) AS SG_COUNT
+				</if>
+				<if test='item.equals("청년친화 강소기업 여부")'>,(SELECT COUNT(*) FROM HRD_BSK_BIZR_YF O WHERE
+					HRD_BSK.BIZR_NO = O.BIZR_NO) AS YF_COUNT
+				</if>
+			</foreach>
+		</if>
+		
+		
+
+		FROM HRD_BSK 
+			LEFT JOIN
+		HRD_BSK_PSITN_INSTT Q ON HRD_BSK.BPL_NO = Q.BPL_NO AND Q.APPLY_YN = 'Y'
+		
+		WHERE BPL_STATUS_CD = '1' AND
+		(BPL_NO = (SELECT BPL_NO
+		FROM
+		HRD_SPTJ_AGREM WHERE MEMBER_IDX =
+		#{memberId}))
+
+		<if test="insttIdx != null and insttIdx != ''"> AND (Q.INSTT_IDX = #{insttIdx})
+		</if>
+		<if test="isInsttIdx != null and isInsttIdx != ''">AND (Q.INSTT_IDX = #{isInsttIdx})</if>
+
+
+		<if test="isBplNo != null and isBplNo != ''">AND (HRD_BSK.BPL_NO Like '%' || #{isBplNo} || '%') </if>
+		<if test="isBplNm != null and isBplNm != ''">AND (HRD_BSK.BPL_NM Like '%' || #{isBplNm} || '%') </if>
+
+		<if test="isIndustCd != null and isIndustCd != ''">AND (SUBSTR(HRD_BSK.INDUTY_CD, 1, 3) = #{isIndustCd})
+		</if>
+		<if test="isTrRecord1 != null and isTrRecord1 != ''">AND (HRD_BSK.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_BPR))</if>
+		<if test="isTrRecord2 != null and isTrRecord2 != ''">AND (HRD_BSK.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_REG))</if>
+		<if test="isTrRecord3 != null and isTrRecord3 != ''">AND (HRD_BSK.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_CON))</if>
+		<if test="isSclas != null and isSclas != ''"> AND (HRD_BSK.BPL_NO IN(
+			SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_SCLAS
+			WHERE STATUS = 'Y' AND SCLAS_CD = #{isSclas}
+			UNION ALL
+			SELECT BPL_NO
+			FROM HRD_BSK_CL_ATMC_SCLAS WHERE STATUS = 'Y' AND
+			SCLAS_CD =
+			#{isSclas} AND BPL_NO NOT IN (SELECT BPL_NO FROM
+			HRD_BSK_CL_PASSIV_SCLAS
+			WHERE STATUS = 'Y' AND SCLAS_CD = #{isSclas})
+
+			))
+		</if>
+		<if test="isLclas != null and isLclas != ''"> AND (HRD_BSK.BPL_NO IN(
+			SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_LCLAS
+			WHERE STATUS = 'Y' AND LCLAS_CD = #{isLclas}
+			UNION ALL
+			SELECT BPL_NO
+			FROM HRD_BSK_CL_ATMC_LCLAS WHERE STATUS = 'Y' AND
+			LCLAS_CD =
+			#{isLclas} AND BPL_NO NOT IN (SELECT BPL_NO FROM
+			HRD_BSK_CL_PASSIV_LCLAS
+			WHERE STATUS = 'Y' AND LCLAS_CD = #{isLclas})
+
+			))
+		</if>
+		<if test="isHashTag != null and isHashTag != ''"> AND (HRD_BSK.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_HASHTAG WHERE
+			HASHTAG_CD = #{isHashTag} AND ISDELETE = 0))
+		</if>
+		<if test="isCtprvn != null and isCtprvn != ''">
+			AND (HRD_BSK.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN
+			=
+			#{isCtprvn}))
+		</if>
+
+		<if
+			test="isCtprvn != null and isCtprvn != '' and isSigngu != null and isSigngu != '' ">
+			AND (HRD_BSK.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN =
+			#{isCtprvn} AND SIGNGU = #{isSigngu} ))
+		</if>
+		<if test="(isTotEmpCntMin != null and isTotEmpCntMin != '')">
+		<![CDATA[
+		AND (HRD_BSK.TOT_EMP_CNT >= #{isTotEmpCntMin}) ]]>
+		</if>
+		<if test="(isTotEmpCntMax != null and isTotEmpCntMax != '')">
+			<![CDATA[
+			AND (HRD_BSK.TOT_EMP_CNT <= #{isTotEmpCntMax})
+			]]>
+		</if>
+
+		)BSK
+
+		)HRD_BSK
+
+
+		) A
+
+
+		LEFT JOIN TMP_INDUSTRY_LIMIT P ON A.INDUTY_CD = P.CODE
+	
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if
+					test='item.equals("우량기업 유무")  or item.equals("BEST HRD 선정 유무") or item.equals("산업단지기업 유무")  or item.equals("산재다발") or item.equals("임금체불")'>
+					LEFT JOIN HRD_BSK_UPLOAD K ON A.BPL_NO = K.BPL_NO
+				</if>
+				<if
+					test='item.equals("채용제목")  or item.equals("임금형태")  or item.equals("급여")  or item.equals("지역") or item.equals("근무형태")'>
+					LEFT JOIN (SELECT BIZR_NO, TITLE, SALARY_STLE, SALARY_SCOPE,
+					REGION,
+					WORK_STLE FROM (SELECT BIZR_NO, TITLE, SALARY_STLE, SALARY,
+					REGION,
+					WORK_STLE, REG_DT,ROW_NUMBER()
+					OVER (PARTITION BY BIZR_NO
+					ORDER BY
+					REG_DT DESC ) AS rn
+					FROM
+					HRD_BSK_BIZR_REC) ranked WHERE rn =
+					'1'
+					)REC
+					ON A.BIZR_NO =REC.BIZR_NO
+				</if>
+
+			</foreach>
+		</if>
+		<if test="showColumn != null and showColumn != ''">
+			<foreach collection="showColumn" item="item">
+				<if
+					test='item.equals("기업신용등급")'>
+					LEFT JOIN 
+						(SELECT CREDT_GRAD, BIZR_NO FROM (SELECT CREDT_GRAD, BIZR_NO, REG_DT,ROW_NUMBER()
+					OVER (PARTITION
+					BY BIZR_NO ORDER BY
+					REG_DT DESC ) AS rn
+					FROM
+					HRD_BSK_KED_CRE) ranked
+					WHERE rn = '1'
+					)CRE
+					ON A.BIZR_NO = CRE.BIZR_NO
+				</if>
+			</foreach>
+		</if>
+	</select>
+
+
+
+	<select id="selectCount" resultType="java.lang.Integer"
+		fetchSize="2000">
+		SELECT COUNT(*) as total 
+		from HRD_BSK H
+		<if test="isLclas != null and isLclas != ''">
+			JOIN VIEW_CL_LCLAS L ON L.BPL_NO = H.BPL_NO AND L.LCLAS_CD
+			= #{isLclas}
+		</if>
+		LEFT JOIN HRD_BSK_PSITN_INSTT Q ON H.BPL_NO = Q.BPL_NO AND Q.APPLY_YN = 'Y'
+
+
+		WHERE BPL_STATUS_CD = '1'
+		<if test="isDoctorIdx != null and isDoctorIdx != ''">
+		 AND H.BPL_NO IN (SELECT BPL_NO FROM HRD_COM_DOCTOR_CORP WHERE DOCTOR_IDX = #{isDoctorIdx})
+		</if>
+		<if test="insttIdx != null and insttIdx != ''"> AND (Q.INSTT_IDX = #{insttIdx})
+		</if>
+		<if test="isInsttIdx != null and isInsttIdx != ''">AND (Q.INSTT_IDX =
+			#{isInsttIdx})
+		</if>
+
+
+
+		<if test="isBplNo != null and isBplNo != ''">AND (H.BPL_NO = #{isBplNo}) </if>
+		<if test="isBplNm != null and isBplNm != ''">AND (H.BPL_NM Like '%' || #{isBplNm}
+			|| '%') </if>
+		<if test="isBizrNo != null and isBizrNo != ''">AND (H.BIZR_NO = #{isBizrNo}) </if>
+		<if test="isPriSupCd != null and isPriSupCd != ''">AND (H.PRI_SUP_CD = #{isPriSupCd}) </if>
+
+		<if test="isIndustCd != null and isIndustCd != ''">AND (SUBSTR(H.INDUTY_CD, 1, 3) = #{isIndustCd})
+		</if>
+		<if test="isTrRecord1 != null and isTrRecord1 != ''">AND (H.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_BPR))</if>
+		<if test="isTrRecord2 != null and isTrRecord2 != ''">AND (H.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_REG))</if>
+		<if test="isTrRecord3 != null and isTrRecord3 != ''">AND (H.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_CON))</if>
+		<if test="isSclas != null and isSclas != ''"> AND (H.BPL_NO IN(
+			SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_SCLAS
+			WHERE STATUS = 'Y' AND SCLAS_CD = #{isSclas}
+			UNION ALL
+			SELECT BPL_NO
+			FROM HRD_BSK_CL_ATMC_SCLAS WHERE STATUS = 'Y' AND
+			SCLAS_CD =
+			#{isSclas} AND BPL_NO NOT IN (SELECT BPL_NO FROM
+			HRD_BSK_CL_PASSIV_SCLAS
+			WHERE STATUS = 'Y' AND SCLAS_CD = #{isSclas})
+
+			))
+		</if>
+
+		<if test="isHashTag != null and isHashTag != ''"> AND (H.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_HASHTAG
+			WHERE
+			HASHTAG_CD = #{isHashTag}))
+		</if>
+
+		<if test="isCtprvn != null and isCtprvn != ''">
+			AND (H.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN
+			=
+			#{isCtprvn}))
+		</if>
+
+		<if test="isSigngu != null and isSigngu != ''">
+			AND (H.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN
+			=
+			#{isCtprvn} AND SIGNGU = #{isSigngu} ))
+		</if>
+
+		<if test="(isTotEmpCntMin != null and isTotEmpCntMin != '')">
+		<![CDATA[
+		AND (H.TOT_EMP_CNT >= #{isTotEmpCntMin}) ]]>
+		</if>
+		<if test="(isTotEmpCntMax != null and isTotEmpCntMax != '')">
+			<![CDATA[
+			AND (H.TOT_EMP_CNT <= #{isTotEmpCntMax})
+			]]>
+		</if>
+
+
+	</select>
+
+	<select id="selectWebCount" resultType="java.lang.Integer"
+		fetchSize="2000">
+	SELECT COUNT(*) as total 
+		from HRD_BSK H
+		<if test="isLclas != null and isLclas != ''">
+			JOIN VIEW_CL_LCLAS L ON L.BPL_NO = H.BPL_NO AND L.LCLAS_CD
+			= #{isLclas}
+		</if>
+		LEFT JOIN HRD_BSK_PSITN_INSTT Q ON H.BPL_NO = Q.BPL_NO AND Q.APPLY_YN = 'Y'
+
+
+		WHERE BPL_STATUS_CD = '1'
+		AND H.BPL_NO IN (SELECT BPL_NO FROM HRD_SPTJ_AGREM WHERE MEMBER_IDX = #{memberId})
+		<if test="isInsttIdx != null and isInsttIdx != ''">AND (Q.INSTT_IDX =
+			#{isInsttIdx})
+		</if>
+
+
+
+		<if test="isBplNo != null and isBplNo != ''">AND (H.BPL_NO = #{isBplNo}) </if>
+		<if test="isBplNm != null and isBplNm != ''">AND (H.BPL_NM Like '%' || #{isBplNm}
+			|| '%') </if>
+		<if test="isBizrNo != null and isBizrNo != ''">AND (H.BIZR_NO = #{isBizrNo}) </if>
+		<if test="isPriSupCd != null and isPriSupCd != ''">AND (H.PRI_SUP_CD = #{isPriSupCd}) </if>
+
+		<if test="isIndustCd != null and isIndustCd != ''">AND (SUBSTR(H.INDUTY_CD, 1, 3) = #{isIndustCd})
+		</if>
+		<if test="isTrRecord1 != null and isTrRecord1 != ''">AND (H.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_BPR))</if>
+		<if test="isTrRecord2 != null and isTrRecord2 != ''">AND (H.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_REG))</if>
+		<if test="isTrRecord3 != null and isTrRecord3 != ''">AND (H.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_CON))</if>
+		<if test="isSclas != null and isSclas != ''"> AND (H.BPL_NO IN(
+			SELECT BPL_NO FROM HRD_BSK_CL_PASSIV_SCLAS
+			WHERE STATUS = 'Y' AND SCLAS_CD = #{isSclas}
+			UNION ALL
+			SELECT BPL_NO
+			FROM HRD_BSK_CL_ATMC_SCLAS WHERE STATUS = 'Y' AND
+			SCLAS_CD =
+			#{isSclas} AND BPL_NO NOT IN (SELECT BPL_NO FROM
+			HRD_BSK_CL_PASSIV_SCLAS
+			WHERE STATUS = 'Y' AND SCLAS_CD = #{isSclas})
+
+			))
+		</if>
+
+		<if test="isHashTag != null and isHashTag != ''"> AND (H.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_HASHTAG
+			WHERE
+			HASHTAG_CD = #{isHashTag}))
+		</if>
+
+		<if test="isCtprvn != null and isCtprvn != ''">
+			AND (H.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN
+			=
+			#{isCtprvn}))
+		</if>
+
+		<if test="isSigngu != null and isSigngu != ''">
+			AND (H.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN
+			=
+			#{isCtprvn} AND SIGNGU = #{isSigngu} ))
+		</if>
+
+		<if test="(isTotEmpCntMin != null and isTotEmpCntMin != '')">
+		<![CDATA[
+		AND (H.TOT_EMP_CNT >= #{isTotEmpCntMin}) ]]>
+		</if>
+		<if test="(isTotEmpCntMax != null and isTotEmpCntMax != '')">
+			<![CDATA[
+			AND (H.TOT_EMP_CNT <= #{isTotEmpCntMax})
+			]]>
+		</if>
+
+
+	</select>
+
+	<select id="bplNoSelectList" resultType="String"
+		fetchSize="2000">
+		SELECT A.BPL_NO
+		FROM HRD_BSK A
+		LEFT JOIN HRD_BSK_PSITN_INSTT Q ON A.BPL_NO = Q.BPL_NO AND Q.APPLY_YN = 'Y'
+		
+		WHERE A.BPL_STATUS_CD = '1'
+		
+		<if test="insttIdx != null and insttIdx != ''"> AND (Q.INSTT_IDX = #{insttIdx})
+		</if>
+		<if test="isInsttIdx != null and isInsttIdx != ''">AND (Q.INSTT_IDX =
+			#{isInsttIdx})
+		
+		
+		
+		<if test="isBplNo != null and isBplNo != ''">AND (A.BPL_NO Like '%' || #{isBplNo}
+			|| '%') </if>
+		<if test="isBplNm != null and isBplNm != ''">AND (A.BPL_NM Like '%' || #{isBplNm}
+			|| '%') </if>
+			
+		</if>
+		<if test="isIndustCd != null and isIndustCd != ''">AND (SUBSTR(A.INDUTY_CD, 1, 3) = #{isIndustCd})
+		</if>
+		<if test="isTrRecord1 != null and isTrRecord1 != ''">AND (A.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_BPR))</if>
+		<if test="isTrRecord2 != null and isTrRecord2 != ''">AND (A.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_REG))</if>
+		<if test="isTrRecord3 != null and isTrRecord3 != ''">AND (A.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_CON))</if>
+		<if test="isSclas != null and isSclas != ''">
+			AND (A.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_CL_ATMC_SCLAS
+			WHERE
+			SCLAS_CD =
+			#{isSclas}))
+		</if>
+
+		<if test="isLclas != null and isLclas != ''"> AND (A.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_CL_ATMC_LCLAS
+			WHERE LCLAS_CD = #{isLclas}))
+		</if>
+		<if test="isHashTag != null and isHashTag != ''"> AND (A.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_HASHTAG
+			WHERE
+			HASHTAG_CD = #{isHashTag}))
+		</if>
+
+		<if test="isCtprvn != null and isCtprvn != ''">
+			AND (A.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN
+			=
+			#{isCtprvn}))
+		</if>
+
+		<if test="isSigngu != null and isSigngu != ''">
+			AND (A.BPL_ZIP IN(SELECT ZIP FROM INF_ZIP_GROUP WHERE CTPRVN
+			=
+			#{isCtprvn} AND SIGNGU = #{isSigngu} ))
+		</if>
+
+		<if test="(isTotEmpCntMin != null and isTotEmpCntMin != '')">
+		<![CDATA[
+		AND (A.TOT_EMP_CNT >= #{isTotEmpCntMin}) ]]>
+		</if>
+		<if test="(isTotEmpCntMax != null and isTotEmpCntMax != '')">
+			<![CDATA[
+			AND (A.TOT_EMP_CNT <= #{isTotEmpCntMax})
+			]]>
+		</if>
+
+	</select>
+
+
+
+
+	<select id="selResList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.*
+		<if test="fnIdx == 4">
+			, (SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX =
+			A.INSTT_IDX) AS INSTT_NAME
+		</if>
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="BASKET_TABLE_NAME" />
+		A
+		<where>
+			<include refid="rbs.commonMapper.COM_ST_WHERE" />
+			<if test="TR_RECORD != null">
+				<foreach collection="TR_RECORD" item="item">
+					<if test="item == 01">AND A.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_BPR)</if>
+					<if test="item == 02">AND A.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_REG)</if>
+					<if test="item == 03">AND A.BPL_NO IN(SELECT BPL_NO FROM HRD_BSK_CON)</if>
+				</foreach>
+			</if>
+		</where>
+		<choose>
+			<when test="fnIdx == 2">
+				<bind name="defaultOrderStr" value="'A.SCLAS_CD DESC'" />
+			</when>
+			<when test="fnIdx == 3">
+				<bind name="defaultOrderStr" value="'A.RESVE_IDX DESC'" />
+			</when>
+			<when test="fnIdx == 4">
+				<bind name="defaultOrderStr" value="'A.HASHTAG_CD DESC'" />
+			</when>
+			<when test="dsetOrderField == null">
+				<bind name="defaultOrderStr" value="'A.BPL_NO'" />
+			</when>
+			<otherwise>
+				<bind name="defaultOrderStr"
+					value="_parameter.get('dsetOrderField')" />
+			</otherwise>
+		</choose>
+		<include refid="rbs.commonMapper.COM_ORDER" />
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+		AND ISDELETE = 0
+		<choose>
+			<when test="fnIdx == 2">
+				AND LCLAS_CD = #{lclasCd}
+			</when>
+			<when test="fnIdx == 4">
+				<if test="sbCd != 1000000001">
+					AND
+					INSTT_IDX = #{insttIdx}
+				</if>
+			</when>
+			<otherwise>
+
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="selResCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="BASKET_TABLE_NAME" />
+		A
+		WHERE
+		ISDELETE = 0
+	</select>
+
+	<select id="selectView" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.*
+		<include refid="editAuthListQuery" />
+		FROM
+		<include refid="BASKET_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</select>
+
+
+
+	<select id="authCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="BASKET_TABLE_NAME" />
+		A
+		<include refid="editAuthWhereQuery" />
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.*
+		FROM
+		<include refid="BASKET_TABLE_NAME" />
+		A
+		<include refid="editAuthWhereQuery" />
+	</select>
+
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO
+		<include refid="BASKET_TABLE_NAME" />
+		(
+		<include refid="rbs.commonMapper.INSERT_COLUMNS" />
+		, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+		<include refid="rbs.commonMapper.INSERT_VALUES" />
+		,
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		,
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		)
+	</insert>
+
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="BASKET_TABLE_NAME" />
+		SET LAST_MODI_DATE =
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</update>
+
+	<select id="deleteList" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+		SELECT
+		A.*
+		FROM
+		<include refid="BASKET_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE" />
+		ORDER BY A.BPL_NO
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<select id="deleteCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM
+		<include refid="BASKET_TABLE_NAME" />
+		A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE" />
+	</select>
+
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="BASKET_TABLE_NAME" />
+		SET ISDELETE = '1', LAST_MODI_DATE =
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</update>
+
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE
+		<include refid="BASKET_TABLE_NAME" />
+		SET ISDELETE = '0', LAST_MODI_DATE =
+		<include refid="rbs.commonDBMSMapper.currentDate" />
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</update>
+
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM
+		<include refid="BASKET_TABLE_NAME" />
+		<include refid="rbs.commonMapper.COM_SG_WHERE" />
+	</delete>
+
+	<select id="basketSelectOne" parameterType="java.lang.String"
+		resultType="rbs.modules.basket.dto.Basket">
+		SELECT A.* , B.NAME AS bplIndustNm
+		FROM
+		HRD_BSK A
+		LEFT JOIN TMP_INDUSTRY_LIMIT B ON A.INDUTY_CD = B.CODE
+		WHERE BPL_NO = #{bplNo}
+
+	</select>
+
+
+	<!-- 자동분류 정보 조회 -->
+	<resultMap id="bskClAtmsResultMap"
+		type="rbs.modules.basket.dto.BskClAtmcDto">
+		<id column="BPL_NO" property="bplNo" />
+		<id column="LCLAS_CD" property="lclasCd" />
+		<result column="START_DATE" property="startDate" />
+		<result column="END_DATE" property="endDate" />
+		<result column="STATUS" property="status" />
+		<result column="ISDELETE" property="isdelete" />
+		<result column="LCLAS_NM" property="lclasNm" />
+		<collection property="bskClAtmcSclases"
+			ofType="rbs.modules.basket.dto.BskClAtmcSclasDto">
+			<id column="BPL_NO" property="bplNo" />
+			<id column="SCLAS_CD" property="sclasCd" />
+			<result column="ISDELETE" property="isdelete" />
+			<result column="LCLAS_CD" property="lclasCd" />
+			<result column="SCLAS_NM" property="sclasNm" />
+		</collection>
+	</resultMap>
+	<select id="bskClAtmsSelect" parameterType="String"
+		resultMap="bskClAtmsResultMap">
+		SELECT A.*,
+		B.*, C.LCLAS_NM, D.SCLAS_NM
+		FROM
+		HRD_BSK_CL_ATMC_LCLAS A
+		LEFT JOIN HRD_BSK_CL_ATMC_SCLAS B ON A.BPL_NO =
+		B.BPL_NO
+		LEFT JOIN HRD_BSK_CL_LCLAS C ON A.LCLAS_CD = C.LCLAS_CD
+		LEFT
+		JOIN
+		HRD_BSK_CL_SCLAS D ON B.SCLAS_CD = D.SCLAS_CD
+		WHERE A.BPL_NO =
+		#{bplNo}
+		AND A.ISDELETE != '1'
+	</select>
+
+
+
+	<!-- 수동분류 정보 조회 -->
+	<select id="bskClPassivSelect" parameterType="String"
+		resultType="rbs.modules.basket.dto.BskClPassivDto">
+		SELECT A.*, B.*, C.LCLAS_NM, D.SCLAS_NM
+		FROM
+		HRD_BSK_CL_PASSIV_LCLAS A
+		LEFT JOIN HRD_BSK_CL_PASSIV_SCLAS B ON
+		A.LCLAS_IDX
+		= B.LCLAS_IDX
+		LEFT JOIN HRD_BSK_CL_LCLAS C ON A.LCLAS_CD =
+		C.LCLAS_CD
+		LEFT JOIN HRD_BSK_CL_SCLAS D ON B.SCLAS_CD = D.SCLAS_CD AND
+		B.LCLAS_CD = D.LCLAS_CD
+		WHERE A.BPL_NO = #{bplNo}
+		AND A.STATUS = 'Y'
+	</select>
+
+
+	<!-- 분류 이력 조회 -->
+	<select id="bskClLogSelect" parameterType="String"
+		resultType="rbs.modules.basket.dto.BskClLogDto">
+		SELECT
+		A.BPL_NO
+		,A.REGI_DATE
+		,'수동' AS sort
+		,C.LCLAS_NM
+		,A.REGI_NAME
+		,LISTAGG(D.SCLAS_NM, ',') WITHIN GROUP (ORDER BY
+		D.SCLAS_NM) SCLAS_NM
+		FROM HRD_BSK_CL_PASSIV_LCLAS A
+		LEFT JOIN
+		HRD_BSK_CL_PASSIV_SCLAS B ON
+		A.LCLAS_IDX = B.LCLAS_IDX
+		LEFT JOIN
+		HRD_BSK_CL_LCLAS C ON A.LCLAS_CD =
+		C.LCLAS_CD
+		LEFT JOIN
+		HRD_BSK_CL_SCLAS
+		D ON B.SCLAS_CD = D.SCLAS_CD AND
+		B.LCLAS_CD =
+		D.LCLAS_CD
+		WHERE A.BPL_NO =
+		#{bplNo}
+		GROUP BY
+		A.BPL_NO,A.REGI_DATE,C.LCLAS_NM,A.REGI_NAME
+		UNION ALL
+		SELECT
+		A.BPL_NO
+		,A.START_DATE AS REGI_DATE
+		,'자동' AS sort
+		,C.LCLAS_NM
+		,UNISTR('최고관리자') AS
+		REGI_NAME
+		,LISTAGG(D.SCLAS_NM, ',') WITHIN GROUP
+		(ORDER BY
+		D.SCLAS_NM)
+		SCLAS_NM
+		FROM HRD_BSK_CL_ATMC_LCLAS A
+
+		LEFT JOIN
+		HRD_BSK_CL_ATMC_SCLAS B ON A.BPL_NO = B.BPL_NO AND B.STATUS =
+		'Y'
+		LEFT
+		JOIN
+		HRD_BSK_CL_LCLAS C ON A.LCLAS_CD = C.LCLAS_CD
+		LEFT JOIN
+		HRD_BSK_CL_SCLAS D ON B.SCLAS_CD = D.SCLAS_CD AND B.LCLAS_CD =
+		D.LCLAS_CD
+		WHERE A.BPL_NO = #{bplNo}
+		GROUP BY
+		A.BPL_NO,A.START_DATE,C.LCLAS_NM
+		ORDER BY REGI_DATE DESC
+	</select>
+
+	<!-- 기업 훈련 조회 쿼리 -->
+	<select id="trSelectList"
+		resultType="rbs.modules.basket.dto.TrDataDto">
+		SELECT * FROM
+		(SELECT ROWNUM as RN, TR.* from
+		(SELECT
+		BPL_NO,
+		TP_NM,
+		TP_TME,
+		TR_MTH,TR_MBY,
+		TR_START_DATE,
+		TR_END_DATE,
+		TOT_TR_CT,
+		'지역산업맞춤훈련' AS
+		BIZR_NM
+		FROM
+		HRD_BSK_REG A
+		WHERE A.BPL_NO = #{bplNo}
+		GROUP BY BPL_NO,
+		TP_NM,
+		TP_TME,
+		TR_MTH,TR_MBY,
+		TR_START_DATE,
+		TR_END_DATE,
+		TOT_TR_CT
+		UNION
+		ALL
+		SELECT
+		BPL_NO,
+		TP_NM,
+		TP_TME,
+		TR_MTH,TR_MBY,
+		TR_START_DATE,
+		TR_END_DATE,
+		TOT_TR_CT,
+		'사업주훈련' AS BIZR_NM
+		FROM
+		HRD_BSK_BPR B
+		WHERE
+		B.BPL_NO =
+		#{bplNo}
+		GROUP BY
+		BPL_NO,
+		TP_NM,
+		TP_TME,
+		TR_MTH,TR_MBY,
+		TR_START_DATE,
+		TR_END_DATE,
+		TOT_TR_CT
+		UNION ALL
+		SELECT
+		BPL_NO,
+		TP_NM,
+		TP_TME,
+		TR_MTH,TR_MBY,
+		TR_START_DATE,
+		TR_END_DATE,
+		TOT_TR_CT,
+		'컨소시엄'
+		AS BIZR_NM
+		FROM
+		HRD_BSK_CON C
+		WHERE C.BPL_NO
+		=
+		#{bplNo}
+		GROUP BY BPL_NO,
+		TP_NM,
+		TP_TME,
+		TR_MTH,TR_MBY,
+		TR_START_DATE,
+		TR_END_DATE,
+		TOT_TR_CT
+		) TR
+		<![CDATA[
+        WHERE ROWNUM <= #{pageNum} * #{amount}) TR_A
+		WHERE TR_A.RN > (#{pageNum}-1) * #{amount} ]]>
+		ORDER BY TR_START_DATE DESC
+	</select>
+
+	<select id="selectTrCount" parameterType="String"
+		resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM (
+		SELECT BPL_NO, TP_NM, TR_MTH,
+		TR_START_DATE,
+		TR_END_DATE,
+		'사업주훈련' AS
+		BIZR_NM
+		FROM
+		HRD_BSK_REG A
+		WHERE
+		A.BPL_NO =
+		#{bplNo}
+		UNION ALL
+		SELECT BPL_NO,
+		TP_NM,
+		TR_MTH, TR_START_DATE,
+		TR_END_DATE, '지역산업맞춤' AS
+		BIZR_NM
+		FROM
+		HRD_BSK_BPR B
+		WHERE
+		B.BPL_NO =
+		#{bplNo}
+		UNION ALL
+		SELECT BPL_NO,
+		TP_NM, TR_MTH,
+		TR_START_DATE,
+		TR_END_DATE, '컨소시엄' AS BIZR_NM
+		FROM
+		HRD_BSK_CON C
+		WHERE
+		C.BPL_NO
+		= #{bplNo}
+		)
+	</select>
+
+
+
+
+	<!-- 기업 훈련 count 조회 쿼리 -->
+	<select id="trCountSelect" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT
+		(SELECT COUNT(*)
+		FROM
+		<include refid="TR1_TABLE_NAME" />
+		A
+		WHERE A.BPL_NO = #{bplNo}) +
+		(SELECT COUNT(*)
+		FROM
+		<include refid="TR2_TABLE_NAME" />
+		B
+		WHERE B.BPL_NO = #{bplNo}) +
+		(SELECT COUNT(*)
+		FROM
+		<include refid="TR3_TABLE_NAME" />
+		B
+		WHERE C.BPL_NO = #{bplNo})
+		FROM DUAL;
+	</select>
+
+
+
+
+	<!-- 분류 예외 이전 상태 비활성화 -->
+	<update id="updateClException" parameterType="java.util.HashMap">
+		<foreach collection="bplList" item="bplNo" separator=";"
+			open="DECLARE BEGIN" close=";End;">
+			update HRD_BSK_CL_EXCEPT
+			SET ISDELETE = '1'
+			WHERE BPL_NO = #{bplNo}
+		</foreach>
+
+	</update>
+
+	<!-- 분류 예외 이전 상태 비활성화 Dtos -->
+	<update id="updateClExceptionDtos">
+		<foreach collection="list" item="item" separator=";"
+			open="DECLARE BEGIN" close=";End;">
+			update HRD_BSK_CL_EXCEPT
+			SET ISDELETE = '1'
+			WHERE BPL_NO = #{item.bplNo}
+		</foreach>
+
+	</update>
+
+
+	<!-- 분류 예외 등록 -->
+	<insert id="clExceptionInsert" parameterType="java.util.HashMap">
+		INSERT INTO HRD_BSK_CL_EXCEPT (
+		EXCEPT_IDX,
+		BPL_NO,
+		EXCEPT_START_DATE,
+		EXCEPT_END_DATE,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)
+		SELECT
+		SEQ_CL_EXCEPT.NEXTVAL AS exceptIdx, T.*
+		FROM (
+		<foreach collection="bplList" item="bplNo"
+			separator="union all">
+			SELECT
+			#{bplNo} as bplNo
+			,TO_DATE(#{startDate}, 'YY/MM/DD')
+			as exceptStartDate
+			,TO_DATE(#{endDate}, 'YY/MM/DD') as excepEndDate
+			,#{REGI_IDX} as regiIdx
+			,#{REGI_ID} as regiId
+			,#{REGI_NAME} as regiName
+			,SYSDATE as regiDate
+			,#{REGI_IP} as regiIp
+			FROM SYS.DUAL
+		</foreach>
+		) T
+	</insert>
+
+
+	<!-- 분류 예외 등록 dtos -->
+	<insert id="clExceptionInsertDtos">
+		INSERT INTO HRD_BSK_CL_EXCEPT (
+		EXCEPT_IDX,
+		BPL_NO,
+		EXCEPT_START_DATE,
+		EXCEPT_END_DATE,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)
+		SELECT
+		SEQ_CL_EXCEPT.NEXTVAL AS exceptIdx, T.*
+		FROM (
+		<foreach collection="list" item="item" separator="union all">
+			SELECT
+			#{item.bplNo} as bplNo
+			,TO_DATE(#{item.startDate}, 'YY/MM/DD')
+			as
+			exceptStartDate
+			,TO_DATE(#{item.endDate}, 'YY/MM/DD') as excepEndDate
+			,#{item.regiIdx} as regiIdx
+			,#{item.regiId} as regiId
+			,#{item.regiName} as regiName
+			,SYSDATE as regiDate
+			,#{item.regiIp} as
+			regiIp
+			FROM SYS.DUAL
+		</foreach>
+		) T
+	</insert>
+
+	<!-- 대분류 전체 조회 -->
+	<select id="clLclasSelectlist"
+		resultType="rbs.modules.basket.dto.ClLclasDto">
+		SELECT *
+		FROM
+		HRD_BSK_CL_LCLAS
+	</select>
+
+	<!-- 소분류 조회 -->
+	<select id="clSclasSelectlist" parameterType="Integer"
+		resultType="rbs.modules.basket.dto.ClSclasDto">
+		SELECT *
+		FROM
+		HRD_BSK_CL_SCLAS
+		WHERE LCLAS_CD = #{lclasCd}
+	</select>
+
+	<!-- 수동분류 대분류 이전데이터 비활성화 -->
+	<update id="clPassivLclasUpdate" parameterType="java.util.List">
+		<foreach collection="list" item="item" open="DECLARE BEGIN"
+			separator=";" close="; END;">
+			UPDATE HRD_BSK_CL_PASSIV_LCLAS
+			SET STATUS = 'N'
+			WHERE BPL_NO = #{item.bplNo}
+		</foreach>
+	</update>
+
+	<!-- 수동분류 소분류 이전데이터 비활성화 -->
+	<update id="clPassivSclasUpdate" parameterType="java.util.List">
+		<foreach collection="list" item="item" open="DECLARE BEGIN"
+			separator=";" close="; END;">
+			UPDATE HRD_BSK_CL_PASSIV_SCLAS
+			SET STATUS = 'N'
+			WHERE BPL_NO = #{item.bplNo}
+		</foreach>
+	</update>
+
+	<!-- 분류변경(수동분류) 대분류 -->
+	<insert id="clPassivLclasInsert2"
+		parameterType="rbs.modules.basket.dto.BskClPassivDto">
+		INSERT INTO HRD_BSK_CL_PASSIV_LCLAS (
+		LCLAS_IDX
+		,BPL_NO
+		,LCLAS_CD
+		,STATUS
+		,REGI_IDX
+		,REGI_ID
+		,REGI_NAME
+		,REGI_DATE
+		,REGI_IP
+		) VALUES
+		(
+		SEQ_CL_PASSIV_LCLAS.NEXTVAL,
+		#{bplNo},
+		#{lclasCd},
+		'Y',
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		)
+
+	</insert>
+
+
+
+	<!-- 분류변경(수동분류) 소분류 -->
+	<insert id="clPassivSclasInsert2"
+		parameterType="rbs.modules.basket.dto.BskClPassivDto">
+		INSERT /*+ append */ INTO HRD_BSK_CL_PASSIV_SCLAS (
+		SCLAS_IDX
+		,BPL_NO
+		,STATUS
+		,LCLAS_IDX
+		,LCLAS_CD
+		,SCLAS_CD
+		)
+		SELECT
+		SEQ_CL_PASSIV_SCLAS.NEXTVAL
+		AS
+		sclasIdx, T.*
+		FROM (
+		<foreach collection="sclasCd" item="it" separator="union all">
+			SELECT
+			#{bplNo} as bplNo
+			,'Y'
+			,B.LCLAS_IDX as lclasIdx
+			,#{lclasCd} as lclasCd
+			,#{it} as sclasCd
+			FROM SYS.DUAL A
+			JOIN
+			HRD_BSK_CL_PASSIV_LCLAS B ON
+			B.STATUS ='Y' AND #{bplNo} =
+			B.BPL_NO
+		</foreach>
+		) T
+	</insert>
+
+
+
+
+	<!-- 전체 해시태그 조회 쿼리 -->
+	<resultMap id="hashTagResultMap"
+		type="rbs.modules.basket.dto.HashTagDto">
+		<id property="insttIdx" column="INSTT_IDX" />
+		<id property="hashtagCd" column="HASHTAG_CD" />
+		<result property="hashtagNm" column="HASHTAG_NM" />
+		<result property="isDelete" column="ISDELETE" />
+		<result property="regiIdx" column="REGI_IDX" />
+		<result property="regiId" column="REGI_ID" />
+		<result property="regiName" column="REGI_NAME" />
+		<result property="regiDate" column="REGI_DATE" />
+		<result property="regiIp" column="REGI_IP" />
+		<result property="lastModiIdx" column="LAST_MODI_IDX" />
+		<result property="lastModiId" column="LAST_MODI_ID" />
+		<result property="lastModiName" column="LAST_MODI_NAME" />
+		<result property="lastModiDate" column="LAST_MODI_DATE" />
+		<result property="lastModiIp" column="LAST_MODI_IP" />
+	</resultMap>
+	<select id="hashTagSelectList" parameterType="java.util.HashMap"
+		resultMap="hashTagResultMap">
+		SELECT *
+		FROM HRD_BSK_HASHTAG_CODE
+		WHERE INSTT_IDX =
+		#{insttIdx} AND ISDELETE = 0
+	</select>
+
+
+	<!-- 해시태그 할당 -->
+	<insert id="hashTagToCorpInsert"
+		parameterType="rbs.modules.basket.dto.BskHashTagDto">
+		INSERT INTO HRD_BSK_HASHTAG (
+		HASHTAG_IDX
+		,BPL_NO
+		,INSTT_IDX
+		,HASHTAG_CD
+		,REGI_IDX
+		,REGI_ID
+		,REGI_NAME
+		,REGI_DATE
+		,REGI_IP
+		)
+		SELECT
+		SEQ_BSK_HASHTAG.NEXTVAL AS hashtagIdx, T.*
+		FROM (
+		<foreach collection="list" item="item" separator="union all">
+			SELECT
+			#{item.bplNo} as bplNo
+			,#{item.insttIdx} as insttIdx
+			,#{item.hashtagCd} as hashtagCd
+			,#{item.regiIdx} as regiIdx
+			,#{item.regiId} as regiId
+			,#{item.regiName} as regiName
+			,SYSDATE as
+			regiDate
+			,#{item.regiIp} as regiIp
+			FROM SYS.DUAL
+		</foreach>
+		) T
+	</insert>
+
+	<insert id="hashTagToCorpInsert2"
+		parameterType="rbs.modules.basket.dto.BskHashTagDto">
+		INSERT INTO HRD_BSK_HASHTAG (
+		HASHTAG_IDX
+		,BPL_NO
+		,INSTT_IDX
+		,HASHTAG_CD
+		,REGI_IDX
+		,REGI_ID
+		,REGI_NAME
+		,REGI_DATE
+		,REGI_IP
+		)
+		VALUES
+		(SEQ_BSK_HASHTAG.NEXTVAL,
+		#{bplNo},
+		#{insttIdx},
+		#{hashtagCd},
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		)
+	</insert>
+
+	<!-- bplNo로 기업 해시태그 조회 -->
+	<select id="bskHashtagSelectList" parameterType="String"
+		resultType="rbs.modules.basket.dto.BskHashTagDto">
+		SELECT A.*, B.HASHTAG_NM AS hashtagNm
+		FROM HRD_BSK_HASHTAG A
+		JOIN HRD_BSK_HASHTAG_CODE B ON A.HASHTAG_CD = B.HASHTAG_CD
+		WHERE
+		A.BPL_NO =
+		#{bplNo} AND A.ISDELETE = 0 AND A.USE_YN = 'Y'
+	</select>
+
+
+	<!-- 해시태그 삭제 -->
+	<update id="bskHashtagDelete"
+		parameterType="rbs.modules.basket.dto.BskHashTagDto">
+		UPDATE HRD_BSK_HASHTAG
+		SET ISDELETE = 1
+		WHERE HASHTAG_IDX
+		= #{hashtagIdx}
+	</update>
+
+
+	<!-- 해시태그 이전 데이터 비활성화 -->
+	<update id="hashTagUpdate" parameterType="java.util.List">
+		<foreach collection="list" item="item" open="DECLARE BEGIN"
+			separator=";" close="; END;">
+			UPDATE HRD_BSK_HASHTAG
+			SET USE_YN = 'N'
+			WHERE
+			BPL_NO
+			= #{item.bplNo}
+		</foreach>
+	</update>
+
+
+	<select id="getResevCl" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		RESVE_IDX,
+		RESVE_DATE,
+		RESVE_HOUR,
+		RESVE_MINUTE,
+		STATUS,
+		REGI_NAME
+		FROM HRD_BSK_CL_RESVE
+		WHERE
+		RESVE_IDX = #{resveIdx}
+	</select>
+
+	<!-- 분류예약등록 -->
+	<insert id="addResve"
+		parameterType="rbs.modules.basket.dto.ClResveDto">
+		INSERT INTO HRD_BSK_CL_RESVE (
+		RESVE_IDX
+		,RESVE_DATE
+		,RESVE_HOUR
+		,RESVE_MINUTE
+		,START_DATE
+		,END_DATE
+		,STATUS
+		,RESULT
+		,ISDELETE
+		,REGI_IDX
+		,REGI_ID
+		,REGI_NAME
+		,REGI_DATE
+		,REGI_IP
+		) VALUES (
+		<![CDATA[
+			(SELECT NVL(MAX(RESVE_IDX),0)+1 FROM HRD_BSK_CL_RESVE),
+		]]>
+		#{resveDate}
+		,#{resveHour}
+		,#{resveMinute}
+		,#{startDate}
+		,#{endDate}
+		,#{status}
+		,#{result}
+		,'0'
+		,#{regiIdx}
+		,#{regiId}
+		,#{regiName}
+		,SYSDATE
+		,#{regiIp}
+		)
+	</insert>
+
+	<!-- 분류예약수정 -->
+	<update id="editResve"
+		parameterType="rbs.modules.basket.dto.ClResveDto">
+		UPDATE
+		HRD_BSK_CL_RESVE
+		SET
+		RESVE_DATE = #{resveDate},
+		RESVE_HOUR = #{resveHour},
+		RESVE_MINUTE = #{resveMinute},
+		LAST_MODI_IDX
+		= #{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME =
+		#{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE
+		RESVE_IDX = #{resveIdx}
+	</update>
+
+	<!-- 소분류 수정 -->
+	<update id="editClass"
+		parameterType="rbs.modules.basket.dto.ClSclasDto">
+		UPDATE
+		HRD_BSK_CL_SCLAS
+		SET
+		SCLAS_VAL = #{sclasVal},
+		SCLAS_CND = #{sclasCnd},
+		LAST_MODI_IDX =
+		#{lastModiIdx},
+		LAST_MODI_ID =
+		#{lastModiId},
+		LAST_MODI_NAME =
+		#{lastModiName},
+		LAST_MODI_DATE =
+		SYSDATE,
+		LAST_MODI_IP =
+		#{lastModiIp}
+		WHERE
+		LCLAS_CD = #{lclasCd}
+		AND
+		SCLAS_CD = #{sclasCd}
+	</update>
+
+	<!-- 소분류 삭제 -->
+	<update id="delClass"
+		parameterType="rbs.modules.basket.dto.ClSclasDto">
+		UPDATE
+		HRD_BSK_CL_SCLAS
+		SET
+		ISDELETE = '1',
+		LAST_MODI_IDX =
+		#{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME =
+		#{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE
+		LCLAS_CD = #{lclasCd}
+		AND
+		SCLAS_CD = #{sclasCd}
+	</update>
+
+	<!-- 분류예약삭제 -->
+	<update id="delResve"
+		parameterType="rbs.modules.basket.dto.ClResveDto">
+		UPDATE
+		HRD_BSK_CL_RESVE
+		SET
+		ISDELETE = '1',
+		LAST_MODI_IDX =
+		#{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME =
+		#{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE
+		RESVE_IDX = #{resveIdx}
+	</update>
+
+	<select id="getClassify" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		A.LCLAS_CD,
+		A.SCLAS_CD,
+		A.SCLAS_NM,
+		A.SCLAS_CND,
+		A.SCLAS_VAL,
+		A.REGI_NAME,
+		A.REGI_DATE,
+		(SELECT LCLAS_NM FROM
+		HRD_BSK_CL_LCLAS WHERE LCLAS_CD = A.LCLAS_CD) as
+		LCLAS_NM
+		FROM
+		HRD_BSK_CL_SCLAS A
+		WHERE
+		LCLAS_CD = #{lclasCd}
+		AND
+		SCLAS_CD = #{sclasCd}
+	</select>
+
+	<!-- 우편번호 검색 -->
+	<select id="zipSelectList"
+		resultType="rbs.modules.basket.dto.ZipCodeDto">
+		SELECT DISTINCT(CTPRVN)
+		FROM INF_ZIP_GROUP
+	</select>
+
+	<select id="signguSelect"
+		resultType="rbs.modules.basket.dto.ZipCodeDto" parameterType="String">
+		SELECT
+		DISTINCT(SIGNGU)
+		FROM INF_ZIP_GROUP
+		WHERE CTPRVN = #{selectedCtprvn}
+	</select>
+
+	<select id="industCdSelectList" resultType="java.util.HashMap">
+		SELECT *
+		FROM
+		TMP_INDUSTRY_LIMIT
+		WHERE LENGTH(CODE) = 3
+	</select>
+
+
+	<insert id="bskDataInsert" parameterType="java.util.HashMap">
+		INSERT INTO
+		HRD_BSK_UPLOAD(
+		BPL_NO,
+		FLE_IDX,
+		BPL_NM,
+		EXCENT_YN,
+		BESTHRD_YN,
+		WRDCLS_YN,
+		IDSCPX_YN,
+		INDACMT_YN,
+		WGDLY_YN,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)
+		VALUES
+		(#{bplNo},
+		#{fleIdx},
+		#{bplNm},
+		#{excentYn},
+		#{besthrdYn},
+		#{wrdclsYn},
+		#{idscpxYn},
+		#{indacmtYn},
+		#{wgdlyYn},
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		)
+
+	</insert>
+
+	<update id="bskDataMerge" parameterType="java.util.HashMap">
+		BEGIN
+		MERGE INTO
+		HRD_BSK_UPLOAD USING DUAL ON
+		(BPL_NO = #{bplNo}
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+		EXCENT_YN = #{excentYn},
+		BESTHRD_YN = #{besthrdYn},
+		WRDCLS_YN
+		= #{wrdclsYn},
+		IDSCPX_YN = #{idscpxYn},
+		INDACMT_YN = #{indacmtYn},
+		WGDLY_YN = #{wgdlyYn},
+		LAST_MODI_IDX = #{regiIdx},
+		LAST_MODI_ID =
+		#{regiId},
+		LAST_MODI_NAME = #{regiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{regiIp}
+		WHEN NOT MATCHED THEN
+		INSERT
+		(BPL_NO,
+		FLE_IDX,
+		BPL_NM,
+		EXCENT_YN,
+		BESTHRD_YN,
+		WRDCLS_YN,
+		IDSCPX_YN,
+		INDACMT_YN,
+		WGDLY_YN,
+		REGI_IDX,
+		REGI_ID,
+		REGI_NAME,
+		REGI_DATE,
+		REGI_IP
+		)
+		VALUES
+		(#{bplNo},
+		#{fleIdx},
+		#{bplNm},
+		#{excentYn},
+		#{besthrdYn},
+		#{wrdclsYn},
+		#{idscpxYn},
+		#{indacmtYn},
+		#{wgdlyYn},
+		#{regiIdx},
+		#{regiId},
+		#{regiName},
+		SYSDATE,
+		#{regiIp}
+		);
+		END;
+	</update>
+
+
+	<insert id="bskDataFileInsert"
+		parameterType="rbs.modules.basket.dto.ExcelUploadDto">
+		<selectKey keyProperty="fleIdx" resultType="Integer"
+			order="BEFORE">
+			SELECT SEQ_UPLOAD_FILE.NEXTVAL FROM
+			DUAL
+		</selectKey>
+		INSERT INTO
+		HRD_BSK_UPLOAD_FILE(FLE_IDX, UPLOAD_FILE_NAME,
+		UPLOAD_FILE_PATH, REGI_IDX, REGI_ID, REGI_NAME,
+		REGI_DATE, REGI_IP)
+		VALUES (#{fleIdx}, #{uploadFileName},
+		#{uploadFilePath}, #{regiIdx},
+		#{regiId}, #{regiName}, SYSDATE,
+		#{regiIp})
+
+	</insert>
+
+	<update id="bskDataFileUpdate"
+		parameterType="rbs.modules.basket.dto.ExcelUploadDto">
+		UPDATE HRD_BSK_UPLOAD_FILE
+		SET RESULT_FILE_NAME =
+		#{resultFileName},
+		RESULT_FILE_PATH = #{resultFilePath}
+		WHERE FLE_IDX =
+		#{fleIdx}
+	</update>
+
+	<select id="bskExcelUploadSelectList"
+		resultType="rbs.modules.basket.dto.ExcelUploadDto">
+		SELECT *
+		FROM
+		(SELECT ROWNUM as RN, A.*
+		FROM (
+		<![CDATA[
+		SELECT * FROM
+		HRD_BSK_UPLOAD_FILE ORDER BY REGI_DATE DESC) A WHERE ROWNUM <=#{pageNum} * #{amount} )
+		WHERE RN
+		> (#{pageNum}-1) * #{amount} ]]>
+	</select>
+
+	<select id="bskExcelSelectCount" resultType="Integer">
+		SELECT
+		COUNT(FLE_IDX) as total from HRD_BSK_UPLOAD_FILE
+	</select>
+
+
+	<select id="bskRecSelectList"
+		resultType="rbs.modules.basket.dto.BskRecDto">
+		SELECT * FROM
+		HRD_BSK_BIZR_REC
+		WHERE BIZR_NO = (SELECT
+		BIZR_NO FROM HRD_BSK WHERE BPL_NO = #{bplNo})
+	</select>
+
+	<!-- 해시태그 등록 -->
+	<insert id="addHash"
+		parameterType="rbs.modules.basket.dto.HashTagDto">
+		INSERT
+		INTO HRD_BSK_HASHTAG_CODE
+		(
+		INSTT_IDX
+		,HASHTAG_CD
+		,HASHTAG_NM
+		,HASHTAG_REMARKS
+		,ISDELETE
+		,REGI_IDX
+		,REGI_ID
+		,REGI_NAME
+		,REGI_DATE
+		,REGI_IP
+		) VALUES (
+		#{insttIdx}
+		,(SELECT
+		NVL(MAX(HASHTAG_CD),0)+1 FROM HRD_BSK_HASHTAG_CODE)
+		,#{hashtagNm}
+		,#{hashtagRemarks}
+		,'0'
+		,#{regiIdx}
+		,#{regiId}
+		,#{regiName}
+		,SYSDATE
+		,#{regiIp}
+		)
+	</insert>
+
+	<select id="getInsttIdx" parameterType="String" resultType="int">
+		SELECT
+		INSTT_IDX
+		FROM
+		HRD_COM_INSTT
+		WHERE
+		BRFFC_CD = #{insttIdx}
+	</select>
+
+	<!-- 해시태그삭제 -->
+	<update id="delHash"
+		parameterType="rbs.modules.basket.dto.HashTagDto">
+		UPDATE HRD_BSK_HASHTAG_CODE
+		SET
+		ISDELETE = '1',
+		LAST_MODI_IDX = #{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME = #{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE
+		HASHTAG_CD = #{hashtagCd}
+	</update>
+
+	<!-- 해시태그수정 -->
+	<update id="editHash"
+		parameterType="rbs.modules.basket.dto.HashTagDto">
+		UPDATE HRD_BSK_HASHTAG_CODE
+		SET
+		HASHTAG_NM = #{hashtagNm},
+		HASHTAG_REMARKS = #{hashtagRemarks},
+		LAST_MODI_IDX = #{lastModiIdx},
+		LAST_MODI_ID = #{lastModiId},
+		LAST_MODI_NAME = #{lastModiName},
+		LAST_MODI_DATE = SYSDATE,
+		LAST_MODI_IP = #{lastModiIp}
+		WHERE
+		HASHTAG_CD =
+		#{hashtagCd}
+	</update>
+
+	<select id="getHashTag" parameterType="java.util.HashMap"
+		resultType="dataMap">
+		SELECT
+		HASHTAG_NM,
+		REGI_NAME,
+		REGI_DATE,
+		HASHTAG_REMARKS
+		FROM
+		HRD_BSK_HASHTAG_CODE
+		WHERE
+		HASHTAG_CD = #{hashtagCd}
+	</select>
+	
+	<select id="selectBskFncInfo" resultType="java.util.HashMap">
+		SELECT *
+		FROM HRD_BSK_KED_FNC
+		WHERE BIZR_NO = #{bizrNo}
+	</select>
+
+</mapper>            

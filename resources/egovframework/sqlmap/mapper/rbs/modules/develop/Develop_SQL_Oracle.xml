@@ -1,0 +1,1149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. [KEY_IDX_COLUMN], ${targetTable}, [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.develop.developMapper">
+	<!-- 테이블명 -->
+	<sql id="DEVELOP_TABLE_NAME">HRD_DEVELOP</sql>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(${targetTableIdx}), 0)</trim> + 1 MAXID
+		FROM 
+		${targetTable} A
+	</select>
+	
+	<!-- 시군구 코드로 지부지사 코드 가져오기 -->
+	<select id="getInsttIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT 
+			INSTT_IDX 
+		FROM 
+			HRD_COM_INSTT_BLOCK
+		WHERE 
+			BLOCK_CD = #{BLOCK_CD}
+			AND ISDELETE = '0'
+	</select>
+	
+	<!-- 기업의 가장 최근 기초진단시 식별번호를 가져온다 -->
+	<select id="getMaxBsisCnsl" parameterType="java.util.HashMap" resultType="java.lang.Long">
+        WITH TEMP AS (
+            SELECT B.RSLT_IDX AS RSLT_IDX FROM HRD_DGNS_BSC A, HRD_DGNS_QUSTNR_RSLT B
+            WHERE A.BPL_NO = #{BPL_NO}
+            AND  A.BSC_IDX = B.BSC_IDX
+            AND  ROWNUM = 1
+            ORDER BY A.BSC_IDX DESC
+            )
+        SELECT 
+            NVL(MAX(BSISCNSL_IDX),0) AS BSISCNSL_IDX
+        FROM TEMP A, HRD_DGNS_BSISCNSL B
+        WHERE A.RSLT_IDX = B.RSLT_IDX
+	</select>
+	
+	<select id="getRecommend" parameterType="long" resultType="dataMap">
+		SELECT 
+			B.*,
+			A.BIZ_IDX, 
+			A.RANK, 
+			A.RCTR_NAME, 
+			A.INTRO, 
+			A.HRD_SGST, 
+			A.FUTR_SPRT_PROC, 
+			A.CONSIDER, 
+			A.PRTBIZ_IDX 
+		FROM HRD_DGNS_BSISCNSL_RCTR_BIZ A 
+			LEFT OUTER JOIN HRD_DGNS_BSISCNSL_RCTR_COURSE B ON 
+			A.BSISCNSL_IDX = B.BSISCNSL_IDX 
+		AND A.BIZ_IDX = B.BIZ_IDX		
+		WHERE
+			A.BSISCNSL_IDX = #{bsiscnsl_idx}
+			AND RANK &lt; 4
+		ORDER BY RANK
+	</select>	
+	
+	<select id="getTpInfo" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		A.PRTBIZ_IDX,
+		A.TP_IDX,
+		(SELECT PRTBIZ_NAME FROM HRD_DGNS_PRTBIZ WHERE PRTBIZ_IDX = A.PRTBIZ_IDX) AS BIZ_TYPE,
+		CASE PRTBIZ_IDX
+		     WHEN 1 THEN 'S-OJT' 
+		     ELSE '사업주자체훈련' 
+		    END 
+		AS BIZ_TYPE2,
+	    CASE PRTBIZ_IDX
+	            WHEN 1   THEN '일반훈련'
+	            ELSE '사업주훈련' 
+	        END 
+	    AS TRAINING_TYPE,
+	    CASE PRTBIZ_IDX
+	            WHEN 1   THEN 'S-OJT 훈련'
+	            ELSE '집체훈련'
+	        END
+	    AS TRAINING_METHOD,
+		(SELECT PRTBIZ_NAME FROM HRD_DGNS_PRTBIZ WHERE PRTBIZ_IDX = A.PRTBIZ_IDX) AS BIZ_TYPE,
+		(SELECT CLASS_NAME FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = A.NCS_LCLAS_CD) AS L_NCS_NM,     
+		(SELECT CLASS_NAME FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = A.NCS_SCLAS_CD) AS S_NCS_NM,  
+		A.*     
+		FROM (SELECT * FROM (
+                   SELECT
+                        PRTBIZ_IDX,
+                        TP_IDX AS TP_IDX,
+                        TP_NAME AS TP_NAME,
+                        TP_OPRINST AS TP_OPRINST,
+                        NCS_LCLAS_CD AS NCS_LCLAS_CD,
+                        NCS_MCLAS_CD AS NCS_MCLAS_CD,
+                        NCS_SCLAS_CD AS NCS_SCLAS_CD,
+                        TR_DAYCNT,
+                        FTHTEC_CATE AS FTHTEC_CATE,
+                        APPLY_INDUTY AS APPLY_INDUTY,
+                        TR_SFE AS TR_SFE,
+                        TR_GOAL AS TR_GOAL,
+                        TRNREQM AS TRNREQM,
+                        ISDELETE,
+                        TO_CHAR(REGI_IDX) AS REGI_IDX,
+                        TO_CHAR(REGI_ID) AS REGI_ID,
+                        TO_CHAR(REGI_NAME) AS REGI_NAME,
+                        REGI_DATE,
+                        TO_CHAR(REGI_IP) AS REGI_IP,
+                        TO_CHAR(LAST_MODI_IDX) AS LAST_MODI_IDX,
+                        TO_CHAR(LAST_MODI_ID) AS LAST_MODI_ID,
+                        TO_CHAR(LAST_MODI_NAME) AS LAST_MODI_NAME,
+                        LAST_MODI_DATE,
+                        TO_CHAR(LAST_MODI_IP) AS LAST_MODI_IP,
+                        TRTM,
+                        'HRDDOCTOR' AS SOURCE
+                    FROM
+                        HRD_DGNS_PRTBIZ_TP
+                    WHERE
+                        PRTBIZ_IDX IN (
+                            1,
+                            4
+                        )
+                    UNION ALL
+                    SELECT
+                        PRTBIZ_IDX,
+                        TP_IDX AS TP_IDX,
+                        TP_NAME,
+                        TP_OPRINST,
+                        NCS_LCLAS_CD,
+                        NCS_MCLAS_CD,
+                        NCS_SCLAS_CD,
+                        TR_DAYCNT,
+                        FTHTEC_CATE,
+                        APPLY_INDUTY,
+                        TR_SFE,
+                        TR_GOAL,
+                        TRNREQM,
+                        '0' AS ISDELETE,
+                        NULL AS REGI_IDX,
+                        NULL AS REGI_ID,
+                        NULL AS REGI_NAME,
+                        NULL AS REGI_DATE,
+                        NULL AS REGI_IP,
+                        NULL AS LAST_MODI_IDX,
+                        NULL AS LAST_MODI_ID,
+                        NULL AS LAST_MODI_NAME,
+                        NULL AS LAST_MODI_DATE,
+                        NULL AS LAST_MODI_IP,
+                        TRTM,
+                        'HRDNET' AS SOURCE
+                    FROM
+                        IFS_HRDNET_TR_TP
+			    ) A
+			 /*HRD-NET데이터가 정상적이게 될 시 잊지말고 밑의 조건 제거*/
+			 /*AND A.SOURCE = 'HRDNET'*/
+			 )A
+<!-- 		WHERE PRTBIZ_IDX = #{PRTBIZ_IDX} -->
+<!-- 		AND TP_IDX = #{TP_IDX} -->
+		WHERE TP_IDX = #{TP_IDX}
+	</select>
+	
+	<select id="getTpSubInfo" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT A.* FROM
+		    (
+		    SELECT 
+		        PRTBIZ_IDX AS PRTBIZ_IDX,
+		        TP_IDX AS TP_IDX,
+		        TP_COURSE_IDX AS TP_COURSE_IDX,
+		        COURSE_NO AS COURSE_NO,
+		        TO_CHAR(COURSE_NAME) AS COURSE_NAME,
+		        TO_CHAR(TIME) AS TIME,
+		        TO_CLOB(CN) AS CN,
+		        TO_CHAR(TCHMETHOD) AS TCHMETHOD,
+		        TO_CHAR(REMARKS) AS REMARKS,
+		        ISDELETE AS ISDELETE,
+		        TO_CHAR(REGI_IDX) AS REGI_IDX,
+		        TO_CHAR(REGI_ID) AS REGI_ID,
+		        TO_CHAR(REGI_NAME) AS REGI_NAME,
+		        REGI_DATE AS REGI_DATE,
+		        TO_CHAR(REGI_IP) AS REGI_IP,
+		        TO_CHAR(LAST_MODI_IDX) AS LAST_MODI_IDX,
+		        TO_CHAR(LAST_MODI_ID) AS LAST_MODI_ID,
+		        TO_CHAR(LAST_MODI_NAME) AS LAST_MODI_NAME,
+		        LAST_MODI_DATE AS LAST_MODI_DATE,
+		        TO_CHAR(LAST_MODI_IP) AS LAST_MODI_IP
+		    FROM 
+		        HRD_DGNS_PRTBIZ_TP_SUB
+		    UNION ALL
+		    SELECT 
+		        PRTBIZ_IDX AS PRTBIZ_IDX,
+		        TP_IDX AS TP_IDX,
+		        TP_COURSE_IDX AS TP_COURSE_IDX,
+		        TO_CHAR(COURSE_NO) AS COURSE_NO,
+		        COURSE_NAME AS COURSE_NAME,
+		        TIME AS TIME,
+		        CN AS CS,
+		        TCHMETHOD AS TCHMETHOD,
+		        REMARKS AS REMARKS,
+		        TO_CHAR(ISDELETE) AS ISDELETE,
+		        REGI_IDX AS REGI_IDX,
+		        REGI_ID AS REGI_ID,
+		        REGI_NAME AS REGI_NAME,
+		        REGI_DATE AS REGI_DATE,
+		        REGI_IP AS REGI_IP,
+		        LAST_MODI_IDX AS LAST_MODI_IDX,
+		        LAST_MODI_ID AS LAST_MODI_ID,
+		        LAST_MODI_NAME AS LAST_MODI_NAME,
+		        LAST_MODI_DATE AS LAST_MODI_DATE,
+		        LAST_MODI_IP AS LAST_MODI_IP
+		    FROM 
+		        IFS_HRDNET_TR_TP_SUB
+		) A
+<!-- 		WHERE PRTBIZ_IDX = #{PRTBIZ_IDX} -->
+<!-- 		AND TP_IDX = #{TP_IDX} -->
+		WHERE TP_IDX = #{TP_IDX}
+		AND A.COURSE_NAME IS NOT NULL
+		ORDER BY COURSE_NO
+	</select>
+	
+	<select id="selectDevList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*, B.TP_NM, SUBSTR(B.NCS_SCLAS_CD, 0, 2) AS NCS_LCLAS_CD, B.PRTBIZ_IDX,
+			(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = A.TR_OPRTN_BRFFC_CD) AS INSTT_NAME,
+			(SELECT CLASS_NAME FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = SUBSTR(B.NCS_SCLAS_CD, 0, 2)) AS NCS_LCLAS_NM,
+			(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = A.BPL_NO) AS BPL_NM
+			FROM 
+				HRD_DEVLOP A, HRD_DEVLOP_TP B
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+				AND A.DEVLOP_IDX = B.DEVLOP_IDX(+)
+				ORDER BY A.LAST_MODI_DATE DESC, A.CONFM_STATUS ASC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectDevCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			HRD_DEVLOP A, HRD_DEVLOP_TP B
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND A.DEVLOP_IDX = B.DEVLOP_IDX(+)
+	</select>
+	<!-- KEY가 STRING인 경우 - KEY형식에 맞게 변경하여 사용 
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.String">
+		SELECT <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || LPAD(TO_NUMBER(SUBSTR(NVL(MAX(A.[KEY_IDX_COLUMN]), <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '0'), 7)) + 1, 4, '0') MAXID
+		FROM 
+		${targetTable} A 
+		WHERE A.[KEY_IDX_COLUMN] LIKE <include refid="rbs.commonDBMSMapper.currentDateYYYYMM"/> || '%'
+	</select>
+	-->
+	<!-- 수정/삭제 권한 : 등록자 -->
+    <!-- 목록 수정/삭제 권한 조건 쿼리 -->
+	<sql id="editAuthListQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		, CASE WHEN A.REGI_IDX = #{AUTH_MEMBER_IDX} THEN '1' ELSE '0' END AS AUTH_MNG
+		</if>
+	</sql>
+	
+    <!-- 수정/삭제 권한 조건 쿼리 -->	
+	<sql id="editAuthWhereQuery">
+		<if test="AUTH_MEMBER_IDX != null">
+		AND A.REGI_IDX = #{AUTH_MEMBER_IDX} 
+		</if>
+	</sql>
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 			
+			A.*
+			<include refid="editAuthListQuery"/>
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			ORDER BY ${orderColumn}
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="selectCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+			${targetTable} A
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<select id="selectView" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 		
+			<if test='targetTable == "HRD_DEVLOP_TP"'>
+			PKG_DGUARD.FN_DEC_TELNO(A.TP_PIC_TELNO) AS TP_PIC_TELNO,
+			</if>
+			<if test='targetTable == "HRD_CNSL_COST"'>
+			TO_CHAR(TR_OPRTN_DE, 'YYYY-MM-DD') AS TR_OPRTN_DE,
+			PKG_DGUARD.FN_DEC_ACNUTNO(A.ACNUTNO)  AS ACNUTNO,
+			</if>
+			A.*
+			<if test='targetTable == "HRD_DEVLOP"'>
+			,(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = A.TR_OPRTN_BRFFC_CD) AS INSTT_NAME
+			</if>
+		FROM 
+		${targetTable} A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			<foreach collection="columnList" item="columnItem" index="i" separator=",">
+				${columnItem}
+			</foreach>
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	<select id="selectFileView" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+			A.*
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+	</select>
+	
+	<update id="updateFileDown" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET ${FILE_COLUMN}_DCNT = ${FILE_COLUMN}_DCNT + 1 
+		WHERE ${targetTableIdx} = #{KEY_IDX}
+	</update>
+	
+	<select id="authCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		${targetTable} A
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	<select id="selectModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+		A.* 
+		FROM 
+		${targetTable} A 
+		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO ${targetTable} (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>
+	
+	<update id="update" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<select id="deleteList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+			SELECT 
+			A.*
+			FROM 
+			${targetTable} A 
+			<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+			ORDER BY ${orderColumn}
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
+	</select>
+	
+	<select id="deleteCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM 
+		${targetTable} A
+		<include refid="rbs.commonMapper.SELECT_DT_WHERE"/>
+	</select>
+	
+	<update id="delete" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET ISDELETE = '1', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="restore" parameterType="java.util.HashMap">
+		UPDATE ${targetTable} SET ISDELETE = '0', LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>  
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<delete id="cdelete" parameterType="java.util.HashMap">
+		DELETE FROM ${targetTable}  
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</delete>
+	
+	<!-- 가장 마지막 IDX의 다음값을 가져온다. -->
+	<select id="getNextIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(${targetTableIdx}), 0)</trim> + 1 MAXID
+		FROM 
+		${targetTable} A
+		WHERE ISDELETE = 0
+		<if test='DEVLOP_IDX != null'>
+			AND DEVLOP_IDX = #{DEVLOP_IDX}
+		</if>
+		<if test='CNSL_IDX != null'>
+			AND CNSL_IDX = #{CNSL_IDX}
+		</if>
+	</select>
+	
+	<!-- 해당 기업의 가장 최근  IDX값을 가져온다. -->
+	<select id="getMaxDevlopIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(DEVLOP_IDX), 0)</trim> MAXID
+		FROM 
+		HRD_DEVLOP A
+		WHERE ISDELETE = 0
+		AND CONFM_STATUS != '80'
+		AND BPL_NO = #{BPL_NO}
+	</select>
+	
+	<!-- [S-OJT 일반] 3회 한도 체크 -->
+	<select id="getSojtAvailableFlag" parameterType="String" resultType="String">
+		SELECT CASE WHEN SUM(CNT) > 3 THEN 'N'
+		                              ELSE 'Y' END AS SOJTREQYN FROM(
+		        /*맞춤개발의 일반 S-OJT 횟수*/
+		        SELECT COUNT(*) AS CNT FROM HRD_CNSL
+		        WHERE 1=1 
+		        AND BPL_NO = #{BPL_NO}
+		        /*AND CONFM_STATUS IN (10, 30, 33, 35, 50, 53, 55, 70, 72, 73, 75)*/
+		        AND CONFM_STATUS = '55'
+		        AND ISDELETE = 0
+		        AND TO_CHAR(LAST_MODI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+		        AND CNSL_TYPE = '2'
+		        UNION ALL
+		        /*표준개발의 일반 S-OJT 횟수*/
+		        SELECT COUNT(*) AS CNT FROM HRD_DEVLOP_TP
+		        WHERE TP_IDX IN (SELECT DEVLOP_IDX 
+				                 FROM HRD_DEVLOP 
+				                 WHERE BPL_NO = #{BPL_NO} 
+				                  /*AND CONFM_STATUS IN (10, 30, 33, 35, 50, 53, 55, 70, 72, 73, 75)*/
+				                  AND CONFM_STATUS = '55'
+				                  AND ISDELETE = 0
+				                  AND TO_CHAR(LAST_MODI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+				                  )
+		        AND PRTBIZ_IDX = '1')
+	</select>
+
+	<!-- 종합이력 목록 -->	
+	<select id="getTotalList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+		 SELECT * FROM(
+		    SELECT
+		    B.PRTBIZ_IDX,
+		    TO_CHAR(A.TR_OPRTN_BRFFC_CD) AS INSTT_IDX,
+		    TO_CHAR(A.DOCTOR_IDX) AS DOCTOR_IDX,
+		    (SELECT CLASS_NAME FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = (SELECT GROUP_CLASS_IDX FROM RBS_ICLASS_INFO
+							        WHERE MASTER_CODE = 'NCS_CODE'
+							        AND CLASS_IDX = B.NCS_SCLAS_CD)) AS NCS_LCLAS_NM,    
+		    (SELECT CLASS_IDX FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = (SELECT GROUP_CLASS_IDX FROM RBS_ICLASS_INFO
+							        WHERE MASTER_CODE = 'NCS_CODE'
+							        AND CLASS_IDX = B.NCS_SCLAS_CD)) AS NCS_LCLAS_CD,
+		    B.NCS_SCLAS_CD AS NCS_SCLAS_CD,
+		    A.BPL_NO AS BPL_NO,
+		    B.DEVLOP_IDX AS IDX,
+		    (SELECT OPTION_CODE FROM RBS_OPTION_INFO
+		    WHERE MASTER_CODE = 'INDUST_CD'
+		    AND OPTION_CODE = (
+		            SELECT LCLAS FROM IFS_INDUSTRY_CODE 
+		            WHERE CODE = (SELECT INDUTY_CD FROM HRD_BSK
+		                            WHERE BPL_NO = A.BPL_NO))) AS INDUSTRY_CD,
+		    (SELECT OPTION_NAME FROM RBS_OPTION_INFO
+		    WHERE MASTER_CODE = 'INDUST_CD'
+		    AND OPTION_CODE = (
+		            SELECT LCLAS FROM IFS_INDUSTRY_CODE 
+		            WHERE CODE = (SELECT INDUTY_CD FROM HRD_BSK
+		                            WHERE BPL_NO = A.BPL_NO))) AS INDUSTRY_NM,                                
+		    CASE B.PRTBIZ_IDX
+		         WHEN 1 THEN 'S-OJT' 
+		         WHEN 2 THEN '일학습병행'
+		         WHEN 3 THEN '외부훈련'
+		         WHEN 4 THEN '사업주자체훈련'
+		         WHEN 5 THEN '능력개발클리닉'
+		         WHEN 6 THEN '컨소시엄'
+		         WHEN 7 THEN '대부사업'
+		         WHEN 8 THEN '공통'
+		         WHEN 10 THEN '참여가능사업'
+		         ELSE '-' END AS BIZ_TYPE,    
+		    TO_CHAR(B.TP_NM) AS TP_NM,
+		    B.TR_MTH AS TR_MTH,
+		    (SELECT CLASS_NAME FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = B.NCS_SCLAS_CD) AS NCS_NM,
+		    (SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = A.BPL_NO) AS BPL_NM,
+		    B.REGI_NAME AS REGI_NAME,
+		    '표준' AS TYPE,
+		    TO_CHAR(B.REGI_DATE,'YYYY-MM-DD') AS REGI_DATE,
+		    A.CONFM_STATUS AS CONFM_STATUS,
+		    A.ISDELETE AS ISDELETE
+		    FROM HRD_DEVLOP A,
+		         HRD_DEVLOP_TP B
+		    WHERE B.DEVLOP_IDX = A.DEVLOP_IDX
+		     UNION ALL
+		    SELECT 
+		    CASE
+		    	WHEN CNSL_TYPE = '1' THEN 4
+		    	WHEN CNSL_TYPE IN ('2', '3') THEN 1
+		    	ELSE 0
+		    END AS PRTBIZ_IDX,
+		    TO_CHAR(A.CMPTNC_BRFFC_IDX) AS INSTT_IDX,
+    		TO_CHAR(A.CMPTNC_BRFFC_PIC_IDX) AS DOCTOR_IDX,
+		    (SELECT CLASS_NAME FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = (SELECT GROUP_CLASS_IDX FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = A.DTY_CL)) AS NCS_LCLAS_NM,    
+		    (SELECT CLASS_IDX FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = (SELECT GROUP_CLASS_IDX FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = A.DTY_CL)) AS NCS_LCLAS_CD,
+		    A.DTY_CL AS NCS_SCLAS_CD,
+		    A.BPL_NO AS BPL_NO,
+		    A.CNSL_IDX AS IDX,
+		    (SELECT OPTION_CODE FROM RBS_OPTION_INFO
+		    WHERE MASTER_CODE = 'INDUST_CD'
+		    AND OPTION_CODE = (
+		            SELECT LCLAS FROM IFS_INDUSTRY_CODE 
+		            WHERE CODE = (SELECT INDUTY_CD FROM HRD_BSK
+		                            WHERE BPL_NO = A.BPL_NO))) AS INDUSTRY_CD,
+		    (SELECT OPTION_NAME FROM RBS_OPTION_INFO
+		    WHERE MASTER_CODE = 'INDUST_CD'
+		    AND OPTION_CODE = (
+		            SELECT LCLAS FROM IFS_INDUSTRY_CODE 
+		            WHERE CODE = (SELECT INDUTY_CD FROM HRD_BSK
+		                            WHERE BPL_NO = A.BPL_NO))) AS INDUSTRY_NM,                             
+		    CASE TO_CHAR(A.CNSL_TYPE)
+		         WHEN '1' THEN '사업주자체훈련' 
+		         WHEN '2' THEN 'S-OJT(일반)'
+		         WHEN '3' THEN 'S-OJT(특화)'
+		         ELSE '-'
+		         END AS BIZ_TYPE,
+		    TO_CHAR(A.LAST_MODI_DATE,'YYYY') || '_맞춤개발_' || A.CNSL_TME || '회차' AS TP_NM,
+		    NULL AS TR_MTH,
+		    NULL AS NCS_NM,
+		    (SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = A.BPL_NO) AS BPL_NM,
+		    A.REGI_NAME AS REGI_NAME,
+		    '맞춤' AS TYPE,
+		    TO_CHAR(A.REGI_DATE,'YYYY-MM-DD') AS REGI_DATE,
+		    A.CONFM_STATUS AS CONFM_STATUS,
+		    A.ISDELETE AS ISDELETE
+		    FROM HRD_CNSL A
+		    WHERE CNSL_TYPE IN (1,2,3)
+		 ) A
+		 <include refid="rbs.commonMapper.SELECT_DF_WHERE"/>		 
+		 ORDER BY REGI_DATE DESC
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>			
+	</select>
+	
+	<select id="getTotalListCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		 SELECT COUNT(*) FROM(
+		    SELECT
+		    B.PRTBIZ_IDX,
+		    TO_CHAR(A.TR_OPRTN_BRFFC_CD) AS INSTT_IDX,
+		    TO_CHAR(A.DOCTOR_IDX) AS DOCTOR_IDX,
+		    (SELECT CLASS_NAME FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = (SELECT GROUP_CLASS_IDX FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = B.NCS_SCLAS_CD)) AS NCS_LCLAS_NM,    
+		    (SELECT CLASS_IDX FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = (SELECT GROUP_CLASS_IDX FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = B.NCS_SCLAS_CD)) AS NCS_LCLAS_CD,
+		    B.NCS_SCLAS_CD AS NCS_SCLAS_CD,
+		    A.BPL_NO AS BPL_NO,
+		    B.DEVLOP_IDX AS IDX,
+		    (SELECT OPTION_CODE FROM RBS_OPTION_INFO
+		    WHERE MASTER_CODE = 'INDUST_CD'
+		    AND OPTION_CODE = (
+		            SELECT LCLAS FROM IFS_INDUSTRY_CODE 
+		            WHERE CODE = (SELECT INDUTY_CD FROM HRD_BSK
+		                            WHERE BPL_NO = A.BPL_NO))) AS INDUSTRY_CD,
+		    (SELECT OPTION_NAME FROM RBS_OPTION_INFO
+		    WHERE MASTER_CODE = 'INDUST_CD'
+		    AND OPTION_CODE = (
+		            SELECT LCLAS FROM IFS_INDUSTRY_CODE 
+		            WHERE CODE = (SELECT INDUTY_CD FROM HRD_BSK
+		                            WHERE BPL_NO = A.BPL_NO))) AS INDUSTRY_NM,                                
+		    CASE B.PRTBIZ_IDX
+		         WHEN 1 THEN 'S-OJT' 
+		         WHEN 2 THEN '일학습병행'
+		         WHEN 3 THEN '외부훈련'
+		         WHEN 4 THEN '사업주자체훈련'
+		         WHEN 5 THEN '능력개발클리닉'
+		         WHEN 6 THEN '컨소시엄'
+		         WHEN 7 THEN '대부사업'
+		         WHEN 8 THEN '공통'
+		         WHEN 10 THEN '참여가능사업'
+		         ELSE '-' END AS BIZ_TYPE,    
+		    TO_CHAR(B.TP_NM) AS TP_NM,
+		    B.TR_MTH AS TR_MTH,
+		    (SELECT CLASS_NAME FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = B.NCS_SCLAS_CD) AS NCS_NM,
+		    (SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = A.BPL_NO) AS BPL_NM,
+		    B.REGI_NAME AS REGI_NAME,
+		    '표준' AS TYPE,
+		    TO_CHAR(B.REGI_DATE,'YYYY-MM-DD') AS REGI_DATE,
+		    A.CONFM_STATUS AS CONFM_STATUS,
+		    A.ISDELETE AS ISDELETE
+		    FROM HRD_DEVLOP A,
+		         HRD_DEVLOP_TP B
+		    WHERE B.DEVLOP_IDX = A.DEVLOP_IDX
+		     UNION ALL
+		    SELECT 
+		    CASE
+		    	WHEN CNSL_TYPE = '1' THEN 4
+		    	WHEN CNSL_TYPE IN ('2', '3') THEN 1
+		    	ELSE 0
+		    END AS PRTBIZ_IDX,
+		    TO_CHAR(A.CMPTNC_BRFFC_IDX) AS INSTT_IDX,
+    		TO_CHAR(A.CMPTNC_BRFFC_PIC_IDX) AS DOCTOR_IDX,
+		    (SELECT CLASS_NAME FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = (SELECT GROUP_CLASS_IDX FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = A.DTY_CL)) AS NCS_LCLAS_NM,    
+		    (SELECT CLASS_IDX FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = (SELECT GROUP_CLASS_IDX FROM RBS_ICLASS_INFO
+		        WHERE MASTER_CODE = 'NCS_CODE'
+		        AND CLASS_IDX = A.DTY_CL)) AS NCS_LCLAS_CD,
+		    A.DTY_CL AS NCS_SCLAS_CD,
+		    A.BPL_NO AS BPL_NO,
+		    A.CNSL_IDX AS IDX,
+		    (SELECT OPTION_CODE FROM RBS_OPTION_INFO
+		    WHERE MASTER_CODE = 'INDUST_CD'
+		    AND OPTION_CODE = (
+		            SELECT LCLAS FROM IFS_INDUSTRY_CODE 
+		            WHERE CODE = (SELECT INDUTY_CD FROM HRD_BSK
+		                            WHERE BPL_NO = A.BPL_NO))) AS INDUSTRY_CD,
+		    (SELECT OPTION_NAME FROM RBS_OPTION_INFO
+		    WHERE MASTER_CODE = 'INDUST_CD'
+		    AND OPTION_CODE = (
+		            SELECT LCLAS FROM IFS_INDUSTRY_CODE 
+		            WHERE CODE = (SELECT INDUTY_CD FROM HRD_BSK
+		                            WHERE BPL_NO = A.BPL_NO))) AS INDUSTRY_NM,                             
+		    CASE TO_CHAR(A.CNSL_TYPE)
+		         WHEN '1' THEN '사업주자체훈련' 
+		         WHEN '2' THEN 'S-OJT(일반)'
+		         WHEN '3' THEN 'S-OJT(특화)'
+		         ELSE '-'
+		         END AS BIZ_TYPE,
+		    TO_CHAR(A.LAST_MODI_DATE,'YYYY') || '_맞춤개발_' || A.CNSL_TME || '회차' AS TP_NM,
+		    NULL AS TR_MTH,
+		    NULL AS NCS_NM,
+		    (SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = A.BPL_NO) AS BPL_NM,
+		    A.REGI_NAME AS REGI_NAME,
+		    '맞춤' AS TYPE,
+		    TO_CHAR(A.REGI_DATE,'YYYY-MM-DD') AS REGI_DATE,
+		    A.CONFM_STATUS AS CONFM_STATUS,
+		    A.ISDELETE AS ISDELETE
+		    FROM HRD_CNSL A
+		    WHERE CNSL_TYPE IN (1,2,3)
+		 ) A		 
+		 <include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+		 
+	</select>
+	
+	
+	<select id="getDoctorIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		/*주치의가 NULL로 들어왔을 시 입력된 지부지사의 주치의들 중 가장 기업과 매칭이 적은 주치의를 뽑아온다.
+		  그래도 없을 시(해당 지부지사에 주치의가 한명도 없음) 0으로 뽑는다*/
+		SELECT NVL(DOCTOR_IDX, (SELECT NVL(MAX(DOCTOR_IDX),0)
+		                        FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY NVL(B.CNT,0) ) AS RN
+		                                     , A.DOCTOR_IDX
+		                                     , NVL(B.CNT,0) CNT
+		                                FROM HRD_COM_DOCTOR A
+		                                LEFT JOIN (SELECT DOCTOR_IDX, COUNT(*) AS CNT
+		                                            FROM HRD_DEVLOP
+		                                            WHERE ISDELETE = '0'
+		                                            GROUP BY DOCTOR_IDX ) B ON A.DOCTOR_IDX = B.DOCTOR_IDX
+		                                WHERE INSTT_IDX = #{INSTT_IDX}
+		                                AND STATUS = '1'  
+		                                AND APPLY_YN = 'Y'
+		                                AND ISDELETE = '0' )
+		                        WHERE RN = 1)) AS DOCTOR_IDX 
+		FROM(
+		        /*입력된 INSTT_IDX(지부지사 코드)와 BPL_NO로 DOCTOR_IDX(주치의 식별색인)을 찾는다.
+		          - BPL_NO에 해당하는 주치의의 지부지사와 입력된 지부지사가 동일할 경우 DOCTOR_IDX.
+		          - BPL_NO에 해당하는 주치의의 지부지사와 입력된 지부지사가 불일치한 경우 NULL*/
+		        SELECT MAX(B.DOCTOR_IDX) AS DOCTOR_IDX
+		        FROM HRD_COM_DOCTOR_CORP A, 
+		             HRD_COM_DOCTOR B
+		        WHERE A.BPL_NO = #{BPL_NO}
+		         AND B.INSTT_IDX = #{INSTT_IDX}
+		         AND A.DOCTOR_IDX = B.DOCTOR_IDX
+		         AND B.STATUS = '1'
+		         AND B.APPLY_YN = 'Y'
+		         AND B.ISDELETE = '0')		
+	</select>
+	
+	<select id="getTrainingListCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM(
+		 SELECT 
+			(SELECT PRTBIZ_NAME FROM HRD_DGNS_PRTBIZ WHERE PRTBIZ_IDX = A.PRTBIZ_IDX) AS BIZ_TYPE,
+			CASE PRTBIZ_IDX
+			     WHEN 1 THEN 'S-OJT' 
+			     WHEN 2 THEN '일학습병행'
+			     WHEN 3 THEN '외부훈련'
+			     WHEN 4 THEN '사업주자체훈련'
+			     WHEN 5 THEN '능력개발클리닉'
+			     WHEN 6 THEN '컨소시엄'
+			     WHEN 7 THEN '대부사업'
+			     WHEN 8 THEN '공통'
+			     WHEN 10 THEN '참여가능사업'
+			     ELSE '-' END AS BIZ_TYPE2,
+			CASE PRTBIZ_IDX
+			     WHEN 1 THEN 'S-OJT 훈련' 
+			     WHEN 4 THEN '집체훈련'
+			     ELSE '-' END AS TRAINING_TYPE, 
+			(SELECT CLASS_NAME FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = A.NCS_SCLAS_CD) AS NCS_NM,     
+			A.* 
+			FROM (SELECT * FROM (
+				<if test='isFromDevelop == "Y"'>
+<!--                     SELECT -->
+<!--                         PRTBIZ_IDX, -->
+<!--                         TP_IDX AS TP_IDX, -->
+<!--                         TP_NAME, -->
+<!--                         TP_OPRINST, -->
+<!--                         NCS_LCLAS_CD, -->
+<!--                         NCS_MCLAS_CD, -->
+<!--                         NCS_SCLAS_CD, -->
+<!--                         TR_DAYCNT, -->
+<!--                         FTHTEC_CATE, -->
+<!--                         APPLY_INDUTY, -->
+<!--                         TR_SFE, -->
+<!--                         TR_GOAL, -->
+<!--                         TRNREQM, -->
+<!--                         '0' AS ISDELETE, -->
+<!--                         NULL AS REGI_IDX, -->
+<!--                         NULL AS REGI_ID, -->
+<!--                         NULL AS REGI_NAME, -->
+<!--                         NULL AS REGI_DATE, -->
+<!--                         NULL AS REGI_IP, -->
+<!--                         NULL AS LAST_MODI_IDX, -->
+<!--                         NULL AS LAST_MODI_ID, -->
+<!--                         NULL AS LAST_MODI_NAME, -->
+<!--                         NULL AS LAST_MODI_DATE, -->
+<!--                         NULL AS LAST_MODI_IP, -->
+<!--                         TRTM, -->
+<!--                         'HRDNET' AS SOURCE -->
+<!--                     FROM -->
+<!--                         IFS_HRDNET_TR_TP -->
+<!--                     WHERE -->
+<!--                         TP_IDX IN (${tpList})               -->
+<!--                     UNION ALL	 -->
+                    </if>		
+                    SELECT
+                        PRTBIZ_IDX,
+                        TP_IDX AS TP_IDX,
+                        TP_NAME AS TP_NAME,
+                        TP_OPRINST AS TP_OPRINST,
+                        NCS_LCLAS_CD AS NCS_LCLAS_CD,
+                        NCS_MCLAS_CD AS NCS_MCLAS_CD,
+                        NCS_SCLAS_CD AS NCS_SCLAS_CD,
+                        TR_DAYCNT,
+                        FTHTEC_CATE AS FTHTEC_CATE,
+                        APPLY_INDUTY AS APPLY_INDUTY,
+                        TR_SFE AS TR_SFE,
+                        TR_GOAL AS TR_GOAL,
+                        TRNREQM AS TRNREQM,
+                        ISDELETE,
+                        TO_CHAR(REGI_IDX) AS REGI_IDX,
+                        TO_CHAR(REGI_ID) AS REGI_ID,
+                        TO_CHAR(REGI_NAME) AS REGI_NAME,
+                        REGI_DATE,
+                        TO_CHAR(REGI_IP) AS REGI_IP,
+                        TO_CHAR(LAST_MODI_IDX) AS LAST_MODI_IDX,
+                        TO_CHAR(LAST_MODI_ID) AS LAST_MODI_ID,
+                        TO_CHAR(LAST_MODI_NAME) AS LAST_MODI_NAME,
+                        LAST_MODI_DATE,
+                        TO_CHAR(LAST_MODI_IP) AS LAST_MODI_IP,
+                        TRTM,
+                        'HRDDOCTOR' AS SOURCE
+                    FROM
+                        HRD_DGNS_PRTBIZ_TP
+                    WHERE
+                        PRTBIZ_IDX IN (
+                            1,
+                            4
+                        )
+                    UNION ALL
+                    SELECT
+                        PRTBIZ_IDX,
+                        TP_IDX AS TP_IDX,
+                        TP_NAME,
+                        TP_OPRINST,
+                        NCS_LCLAS_CD,
+                        NCS_MCLAS_CD,
+                        NCS_SCLAS_CD,
+                        TR_DAYCNT,
+                        FTHTEC_CATE,
+                        APPLY_INDUTY,
+                        TR_SFE,
+                        TR_GOAL,
+                        TRNREQM,
+                        '0' AS ISDELETE,
+                        NULL AS REGI_IDX,
+                        NULL AS REGI_ID,
+                        NULL AS REGI_NAME,
+                        NULL AS REGI_DATE,
+                        NULL AS REGI_IP,
+                        NULL AS LAST_MODI_IDX,
+                        NULL AS LAST_MODI_ID,
+                        NULL AS LAST_MODI_NAME,
+                        NULL AS LAST_MODI_DATE,
+                        NULL AS LAST_MODI_IP,
+                        TRTM,
+                        'HRDNET' AS SOURCE
+                    FROM
+                        IFS_HRDNET_TR_TP
+			    )) A
+			 /*HRD-NET데이터가 정상적이게 될 시 잊지말고 밑의 조건 제거*/
+			 /*AND A.SOURCE = 'HRDNET'*/
+			 )A
+		 <include refid="rbs.commonMapper.SELECT_DF_WHERE"/>		 
+	</select>
+	
+		<!-- 종합이력 목록 -->	
+	<select id="getTrainingList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
+		 SELECT * FROM(
+		 SELECT 
+			(SELECT PRTBIZ_NAME FROM HRD_DGNS_PRTBIZ WHERE PRTBIZ_IDX = A.PRTBIZ_IDX) AS BIZ_TYPE,
+			CASE PRTBIZ_IDX
+			     WHEN 1 THEN 'S-OJT' 
+			     WHEN 2 THEN '일학습병행'
+			     WHEN 3 THEN '외부훈련'
+			     WHEN 4 THEN '사업주자체훈련'
+			     WHEN 5 THEN '능력개발클리닉'
+			     WHEN 6 THEN '컨소시엄'
+			     WHEN 7 THEN '대부사업'
+			     WHEN 8 THEN '공통'
+			     WHEN 10 THEN '참여가능사업'
+			     ELSE '-' END AS BIZ_TYPE2,
+			CASE PRTBIZ_IDX
+			     WHEN 1 THEN 'S-OJT 훈련' 
+			     WHEN 4 THEN '집체훈련'
+			     ELSE '-' END AS TRAINING_TYPE, 
+			(SELECT CLASS_NAME FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = A.NCS_SCLAS_CD) AS NCS_NM,
+			(SELECT CLASS_NAME FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = A.NCS_LCLAS_CD) AS L_NCS_NM,    
+			A.* 
+			FROM (SELECT * FROM (
+					<if test='isFromDevelop == "Y"'>
+<!-- 					공단요청으로 주석처리 -->
+<!--                     SELECT -->
+<!--                         PRTBIZ_IDX, -->
+<!--                         TP_IDX AS TP_IDX, -->
+<!--                         TP_NAME, -->
+<!--                         TP_OPRINST, -->
+<!--                         NCS_LCLAS_CD, -->
+<!--                         NCS_MCLAS_CD, -->
+<!--                         NCS_SCLAS_CD, -->
+<!--                         TR_DAYCNT, -->
+<!--                         FTHTEC_CATE, -->
+<!--                         APPLY_INDUTY, -->
+<!--                         TR_SFE, -->
+<!--                         TR_GOAL, -->
+<!--                         TRNREQM, -->
+<!--                         '0' AS ISDELETE, -->
+<!--                         NULL AS REGI_IDX, -->
+<!--                         NULL AS REGI_ID, -->
+<!--                         NULL AS REGI_NAME, -->
+<!--                         NULL AS REGI_DATE, -->
+<!--                         NULL AS REGI_IP, -->
+<!--                         NULL AS LAST_MODI_IDX, -->
+<!--                         NULL AS LAST_MODI_ID, -->
+<!--                         NULL AS LAST_MODI_NAME, -->
+<!--                         NULL AS LAST_MODI_DATE, -->
+<!--                         NULL AS LAST_MODI_IP, -->
+<!--                         TRTM, -->
+<!--                         'HRDNET' AS SOURCE -->
+<!--                     FROM -->
+<!--                         IFS_HRDNET_TR_TP -->
+<!--                     WHERE -->
+<!--                         TP_IDX IN (${tpList})                      -->
+<!--                     UNION ALL	 -->
+                    </if>			
+                    SELECT
+                        PRTBIZ_IDX,
+                        TP_IDX AS TP_IDX,
+                        TP_NAME AS TP_NAME,
+                        TP_OPRINST AS TP_OPRINST,
+                        NCS_LCLAS_CD AS NCS_LCLAS_CD,
+                        NCS_MCLAS_CD AS NCS_MCLAS_CD,
+                        NCS_SCLAS_CD AS NCS_SCLAS_CD,
+                        TR_DAYCNT,
+                        FTHTEC_CATE AS FTHTEC_CATE,
+                        APPLY_INDUTY AS APPLY_INDUTY,
+                        TR_SFE AS TR_SFE,
+                        TR_GOAL AS TR_GOAL,
+                        TRNREQM AS TRNREQM,
+                        ISDELETE,
+                        TO_CHAR(REGI_IDX) AS REGI_IDX,
+                        TO_CHAR(REGI_ID) AS REGI_ID,
+                        TO_CHAR(REGI_NAME) AS REGI_NAME,
+                        REGI_DATE,
+                        TO_CHAR(REGI_IP) AS REGI_IP,
+                        TO_CHAR(LAST_MODI_IDX) AS LAST_MODI_IDX,
+                        TO_CHAR(LAST_MODI_ID) AS LAST_MODI_ID,
+                        TO_CHAR(LAST_MODI_NAME) AS LAST_MODI_NAME,
+                        LAST_MODI_DATE,
+                        TO_CHAR(LAST_MODI_IP) AS LAST_MODI_IP,
+                        TRTM,
+                        'HRDDOCTOR' AS SOURCE
+                    FROM
+                        HRD_DGNS_PRTBIZ_TP
+                    WHERE
+                        PRTBIZ_IDX IN (
+                            1,
+                            4
+                        )
+                    UNION ALL
+                    SELECT
+                        PRTBIZ_IDX,
+                        TP_IDX AS TP_IDX,
+                        TP_NAME,
+                        TP_OPRINST,
+                        NCS_LCLAS_CD,
+                        NCS_MCLAS_CD,
+                        NCS_SCLAS_CD,
+                        TR_DAYCNT,
+                        FTHTEC_CATE,
+                        APPLY_INDUTY,
+                        TR_SFE,
+                        TR_GOAL,
+                        TRNREQM,
+                        '0' AS ISDELETE,
+                        NULL AS REGI_IDX,
+                        NULL AS REGI_ID,
+                        NULL AS REGI_NAME,
+                        NULL AS REGI_DATE,
+                        NULL AS REGI_IP,
+                        NULL AS LAST_MODI_IDX,
+                        NULL AS LAST_MODI_ID,
+                        NULL AS LAST_MODI_NAME,
+                        NULL AS LAST_MODI_DATE,
+                        NULL AS LAST_MODI_IP,
+                        TRTM,
+                        'HRDNET' AS SOURCE
+                    FROM
+                        IFS_HRDNET_TR_TP
+			    )) A
+			 /*HRD-NET데이터가 정상적이게 될 시 잊지말고 밑의 조건 제거*/
+			 /*AND A.SOURCE = 'HRDNET'*/
+			 )A
+		 <include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+<!-- 		 <if test='isFromDevelop != "Y"'> -->
+		 	ORDER BY PRTBIZ_IDX, NCS_LCLAS_CD, TRTM
+<!-- 		 </if>		  -->
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>			
+	</select>
+	
+	<select id="getSupportListCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+			SELECT 
+				COUNT(*)
+			FROM HRD_CNSL_REPORT B, HRD_CNSL A, HRD_CNSL_COST C
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			AND B.ISDELETE = '0'
+			AND A.BPL_NO = #{BPL_NO}
+			AND A.CNSL_TYPE IN ('1', '2', '3')
+			AND A.CNSL_IDX = B.CNSL_IDX
+			AND B.CNSL_IDX = C.CNSL_IDX(+)
+			AND B.CONFM_STATUS = '55'
+			<if test="YEAR != null">
+				AND TO_CHAR(A.REGI_DATE,'YYYY') = #{YEAR}
+			</if>
+		 		 
+	</select>
+	
+	<select id="getSupportList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 
+				A.CNSL_IDX,
+				B.REPRT_IDX,
+				C.CT_IDX,
+				TO_CHAR(A.REGI_DATE,'YYYY') AS START_YEAR,
+				CASE TO_CHAR(A.CNSL_TYPE)
+						         WHEN '1' THEN '사업주자체훈련' 
+						         WHEN '2' THEN 'S-OJT(일반)'
+						         ELSE 'S-OJT(특화)'
+						         END AS BIZ_TYPE,
+				A.CNSL_TYPE,
+				A.CNSL_TME,
+				NVL(C.CONFM_STATUS, '0') AS CONFM_STATUS,
+				C.REGI_DATE,
+				C.SPLPC_AMT,
+				(
+			        SELECT
+			            INSTT_NAME
+			        FROM
+			            HRD_COM_INSTT
+			        WHERE
+			            INSTT_IDX = A.CMPTNC_BRFFC_IDX
+			    ) AS INSTT_NAME,
+				CASE 
+					WHEN C.CONFM_STATUS > 10 THEN C.LAST_MODI_DATE
+				    ELSE NULL 
+				    END AS LAST_MODI_DATE
+			FROM 
+				HRD_CNSL A, HRD_CNSL_REPORT B, HRD_CNSL_COST C
+			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+				AND B.ISDELETE = '0'
+				AND A.BPL_NO = #{BPL_NO}
+				AND A.CNSL_TYPE IN ('1', '2', '3')
+				AND A.CNSL_IDX = B.CNSL_IDX
+				AND B.CNSL_IDX = C.CNSL_IDX(+)
+				AND B.CONFM_STATUS = '55'
+			<if test="YEAR != null">
+				AND TO_CHAR(A.REGI_DATE,'YYYY') = #{YEAR}
+			</if>
+			ORDER BY 
+				CONFM_STATUS ASC
+	</select>
+	
+	<select id="getCnslReportInfo" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			TO_CHAR(A.REGI_DATE,'YYYY') || A.CNSL_TME || '회차' || '_맞춤개발_'  AS TP_NM,
+			A.CNSL_TYPE AS CNSL_TYPE,
+			(SELECT OPTION_NAME FROM RBS_OPTION_INFO WHERE MASTER_CODE = 'CNSL_TYPE' AND OPTION_CODE = A.CNSL_TYPE) AS CNSL_TYPE_NM,
+			CASE WHEN CNSL_TYPE = 3 THEN '특화'
+			    ELSE '일반' END AS CNSL_TP_REQ_TYPE,
+			'' AS CNSL_REQ_TYPE,
+			A.*
+		FROM 
+			HRD_CNSL A, 
+			HRD_CNSL_REPORT B
+		WHERE A.CNSL_IDX = #{CNSL_IDX}
+		  AND B.CNSL_IDX = A.CNSL_IDX
+	</select>
+	
+	<select id="getCnslTeamInfo" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			(SELECT OPTION_NAME FROM RBS_OPTION_INFO WHERE MASTER_CODE = 'TEAM_IDX' AND OPTION_CODE = A.TEAM_IDX) AS TEAM_NM,
+			CASE TEAM_IDX
+			     WHEN 1 THEN 100000 
+			     WHEN 2 THEN 200000
+			     WHEN 3 THEN 300000 END AS SPT_PAY,
+			CASE TEAM_IDX
+			     WHEN 1 THEN 'PM산출내역'
+			     WHEN 2 THEN '외부내용전문가 산출내역'
+			     WHEN 3 THEN '기업내부전문가 산출내역' END AS COMPUT_DTLS, 
+			A.MBER_NAME AS TEAM_MBER_NAME,
+			PKG_DGUARD.FN_DEC_TELNO(A.MBER_TELNO) AS MBER_TELNO,
+			A.*
+		FROM HRD_CNSL_TEAM A
+		WHERE A.CNSL_IDX = #{CNSL_IDX}	
+		ORDER BY A.TEAM_IDX ASC	 		 
+	</select>
+	
+	<select id="getCorpTpList" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT    
+		ROWNUM ,
+		A.*
+		FROM(
+		    SELECT DISTINCT 
+		    TP_CD, 
+		    TP_TME, 
+		    TP_NM, 
+		    TO_CHAR(TR_START_DATE, 'YYYY-MM-DD') AS TR_START_DATE
+		    FROM HRD_BSK_BPR
+		    WHERE BPL_NO = #{BPL_NO}
+		      AND TP_CD NOT IN (SELECT TP_CD 
+		                        FROM HRD_CNSL_COST 
+		                        WHERE CONFM_STATUS = '55'
+		                        AND   TO_CHAR(LAST_MODI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+		                        AND   CNSL_IDX IN (SELECT CNSL_IDX 
+		                                            FROM HRD_CNSL
+		                                            WHERE CONFM_STATUS = '55'
+		                                            AND BPL_NO = #{BPL_NO})
+		                        )
+		    /*AND TR_END_DATE > SYSDATE*/
+		    ORDER BY TR_START_DATE DESC
+		    ) A 		 
+	</select>	
+	
+	<resultMap id="aiResultMap" type="dataMap"></resultMap>	
+	<select id="getAiRcommendRankList" parameterType="java.util.HashMap" statementType="CALLABLE" >
+
+		{ 
+			call PROC_AI( #{RESPONSE} , 
+						  #{apiName} ,
+						  #{cursor, mode=OUT, jdbcType=CURSOR, javaType=java.sql.ResultSet, resultMap=aiResultMap}  
+			   		     )
+        }
+	</select>
+		
+	<select id="getBsisWithAiRecommendList" parameterType="java.util.HashMap" statementType="CALLABLE" >
+
+		{ 
+			call PROC_BSIS_WITH_AI( #{bsiscnslIdx} ,
+						  #{trainingRecommend} ,
+						  #{cursor, mode=OUT, jdbcType=CURSOR, javaType=java.sql.ResultSet, resultMap=aiResultMap}  
+			   		     )
+        }
+	</select>	
+	
+	
+	<select id="getCompareRequestAndVoByBplNo" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+			SELECT COUNT(*) FROM HRD_DEVLOP
+			WHERE CONFM_STATUS != '80'
+			AND DEVLOP_IDX = #{devlopIdx}
+			AND BPL_NO = #{BPL_NO}		 		 
+	</select>
+	
+	<select id="getIsSojt" parameterType="String" resultType="java.lang.Integer">
+			SELECT COUNT(*) FROM HRD_DGNS_SOJT_REQ
+			WHERE BPL_NO = #{BPL_NO}
+			AND CONFM_STATUS = '55'
+			AND TO_CHAR(LAST_MODI_DATE,'YYYY') = TO_CHAR(SYSDATE,'YYYY')	 		 
+	</select>
+	
+	<select id="getIsBsc" parameterType="String" resultType="java.lang.Integer">
+			SELECT COUNT(*) FROM HRD_DGNS_BSISCNSL
+			WHERE BPL_NO = #{BPL_NO}		 
+	</select>
+	
+	<select id="getRsltIdxByBsiscnslIdx" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+			 SELECT NVL(MAX(RSLT_IDX),0) AS RSLT_IDX FROM HRD_DGNS_BSISCNSL
+			 WHERE BSISCNSL_IDX = #{bsiscnslIdx}
+	</select>
+	
+	<update id="upsertEduRecoSystemValue" parameterType="java.util.HashMap">
+			{ 
+			call PROC_MERGE_BSIS_AI_RECOM(   #{BPL_NO} ,
+									  #{rsltIdx} ,
+									  #{RESPONSE}  
+						   		     )
+        	}
+			 
+	</update>
+	
+	
+	<select id="getEduRecoSystemValue" parameterType="java.util.HashMap" resultType="String">
+			SELECT 
+				JSON_CN 
+			FROM HRD_DGNS_BSISCNSL_AI_RECOMMEND
+			WHERE BPL_NO = #{BPL_NO}
+			 AND  RSLT_IDX = #{rsltIdx}		
+	</select>
+	
+	
+</mapper>            

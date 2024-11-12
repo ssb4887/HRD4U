@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rbs.modules.sojt.sojtMapper">
+	<select id="getApplyContent" parameterType="map" resultType="map">
+		SELECT
+			c.corp_name, b.repve_nm, substr(c.bpl_no,1,10) bizr_no, c.bpl_no, c.induty_cd, c.induty_name, c.corp_location, c.tot_work_cnt, c.instt_name, c.instt_idx
+			, c.pri_sup_cd PRI_SUP_TRGET_CORP_YN, to_char(sysdate, 'YYYY-MM-dd') last_date
+		FROM 
+			view_hrd_doctor a, hrdportal.thr_corp b, hrd_dgns_bsiscnsl c, hrd_com_instt d
+		WHERE a.corp_num = b.corp_num
+    		AND c.instt_idx = d.instt_idx
+    		AND a.member_idx = #{member_idx}
+    		AND c.bsiscnsl_idx = #{bsiscnsl_idx}
+	</select>
+	<select id="getAcceptContent" parameterType="map" resultType="map">
+		WITH CONFM as (
+			SELECT * FROM (
+				SELECT 
+					sojt_idx, CONFM_STATUS, CONFM_CN
+					, ROW_NUMBER() OVER(PARTITION BY sojt_idx ORDER BY confm_idx desc) rn 
+				FROM hrd_dgns_sojt_req_confm
+			) WHERE rn = 1
+		)
+		SELECT
+			bsc_idx, tr_oprtn_addr, recomend_instt_nm recommend_center, corp_pic_nm, corp_pic_ofcps, 
+			PKG_DGUARD.FN_DEC_TELNO(corp_pic_telno) AS corp_pic_telno,
+			corp_pic_email, bpl_no, bsiscnsl_idx
+			, a.confm_status, PRI_SUP_TRGET_CORP_YN, SPCSS_BPL_YN, SPORT_EXCL_INDUTY_YN, INDACMT_BPL_YN, WGDLY_NM_STG_OTHBC_BPL_YN
+			, to_char(last_modi_date, 'YYYY-MM-dd') last_date
+			, b.CONFM_CN, a.regi_idx
+			, PKG_DGUARD.FN_DEC_TELNO(a.doctor_telno) AS doctor_telno
+			, (select bpl_status_cd from hrd_bsk where bpl_no = #{bplNo}) as bpl_status_cd
+		FROM hrd_dgns_sojt_req a, CONFM b
+		WHERE
+			a.sojt_idx = b.sojt_idx
+			AND a.sojt_idx = #{sojt_idx}
+	</select>
+	<select id="getAcceptChecklist" parameterType="map" resultType="map">
+		SELECT 
+			INDACMT_YN INDACMT_BPL_YN, WGDLY_YN WGDLY_NM_STG_OTHBC_BPL_YN
+		FROM hrd_bsk_upload
+		WHERE BPL_NO = #{bpl_no}
+	</select>
+	<select id="getNextIdSojt" resultType="Integer">
+		SELECT
+			NVL(MAX(a.sojt_idx),0)+1
+		FROM
+			hrd_dgns_sojt_req a
+	</select>
+	<select id="getNextIdSojtConfm" parameterType="map" resultType="Integer">
+		SELECT
+			NVL(MAX(b.confm_idx),0)+1
+		FROM
+			hrd_dgns_sojt_req a, hrd_dgns_sojt_req_confm b
+		WHERE
+			a.sojt_idx = b.sojt_idx(+)
+			AND a.sojt_idx = #{sojt_idx}
+	</select>
+	<insert id="putINSERTsojtLog" parameterType="map">
+		INSERT INTO hrd_dgns_sojt_req_confm(SOJT_IDX, CONFM_IDX, CONFM_STATUS, CONFM_CN, REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES(#{sojt_idx}, #{confm_idx}, #{confm_status}, #{cn}, #{regi_idx}, #{regi_id}, #{regi_name}, sysdate, #{regi_ip})
+	</insert>
+	<select id="getPrvtcntrList" resultType="map">
+		SELECT
+			prvtcntr_idx, prvtcntr_name 
+		FROM hrd_com_prvtcntr 
+		WHERE
+			spnt_se = 1
+			and prvtcntr_idx != 34
+		ORDER BY prvtcntr_no
+	</select>
+	<insert id="putApply" parameterType="map">
+		INSERT INTO hrd_dgns_sojt_req(
+			SOJT_IDX, 
+			BSC_IDX, 
+			BPL_NO, 
+			TR_OPRTN_ADDR, 
+			RECOMEND_INSTT_NM, 
+			CORP_PIC_NM, 
+			CORP_PIC_OFCPS, 
+			CORP_PIC_TELNO, 
+			CORP_PIC_EMAIL, 
+			CONFM_STATUS, 
+			REGI_IDX, 
+			REGI_ID, 
+			REGI_NAME, 
+			REGI_DATE, 
+			REGI_IP,
+			INSTT_IDX, 
+			DOCTOR_TELNO,
+			BSISCNSL_IDX
+			)
+		VALUES
+			(
+				#{sojt_idx}, 
+				(SELECT b.bsc_idx FROM hrd_dgns_bsiscnsl a, hrd_dgns_qustnr_rslt b WHERE a.rslt_idx = b.rslt_idx and a.bsiscnsl_idx = #{bsiscnsl_idx}), 
+				#{bpl_no}, 
+				#{tr_addr}, 
+				#{recommend_name}, 
+				#{corp_name}, 
+				#{corp_ofcps}, 
+				PKG_DGUARD.FN_ENC_TELNO(#{corp_telno}), 
+				#{corp_email}, 
+				#{confm_status}, 
+				#{regi_idx}, 
+				#{regi_id}, 
+				#{regi_name}, 
+				sysdate, 
+				#{regi_ip}, 
+				#{insttIdx}, 
+				PKG_DGUARD.FN_ENC_TELNO(#{doctorTelno}),
+				#{bsiscnsl_idx}
+			)
+	</insert>
+	<update id="editApply" parameterType="map">
+		UPDATE hrd_dgns_sojt_req
+			SET
+			TR_OPRTN_ADDR = #{tr_addr}
+			, RECOMEND_INSTT_NM = #{recommend_name}
+			, CORP_PIC_NM = #{corp_name}
+			, CORP_PIC_OFCPS = #{corp_ofcps}
+			, CORP_PIC_TELNO = #{corp_telno}
+			, CORP_PIC_EMAIL = #{corp_email}
+			, CONFM_STATUS = #{confm_status}
+			, DOCTOR_TELNO = PKG_DGUARD.FN_ENC_TELNO(#{doctorTelno})
+			, LAST_MODI_IDX = #{regi_idx}
+			, LAST_MODI_ID = #{regi_id}
+			, LAST_MODI_NAME = #{regi_name}
+			, LAST_MODI_DATE = sysdate
+			, LAST_MODI_IP = #{regi_ip}
+			WHERE
+				SOJT_IDX = #{sojt_idx}
+	</update>
+	<select id="getUserList" parameterType="map" resultType="map">
+		SELECT * FROM (    
+    		SELECT
+				a.sojt_idx, b.corp_name, a.bpl_no, b.instt_name, to_char(a.regi_date, 'YYYY-MM-DD') regi_date, a.confm_status
+				, a.bsc_idx, b.INDUTY_CD, b.PRI_SUP_CD, a.recomend_instt_nm, b.bsiscnsl_idx
+      			, row_number() over(order by a.sojt_idx desc) as rn
+      			, count(*) over() as TOTAL_COUNT
+      			, CEIL((count(*) over())/10) as TOTAL_PAGE
+			FROM
+				HRD_DGNS_SOJT_REQ a, HRD_DGNS_BSISCNSL b
+			WHERE a.bsiscnsl_idx = b.bsiscnsl_idx
+        		AND a.bpl_no = #{bpl_no}
+        		<if test="instt != null and instt.trim().length() != 0">
+        			AND b.instt_name Like '%' || #{instt} || '%'
+        		</if>
+        			
+        		<if test="sdate != null and sdate.trim().length() != 0">
+        		AND TO_DATE(a.REGI_DATE) <![CDATA[>=]]> TO_DATE(#{sdate})
+        		</if>
+        		<if test="edate != null and edate.trim().length() != 0">
+        		AND TO_DATE(a.REGI_DATE) <![CDATA[<=]]> TO_DATE(#{edate})
+        		</if>
+        		)
+		WHERE 
+		rn between (#{page}-1)*10 and #{page}*10
+		<if test="bplNo != null and bplNo.trim().length() != 0">
+        	AND bpl_no = #{bplNo}
+        </if>
+        <if test="bplNm != null and bplNm.trim().length() != 0">
+        	AND corp_name Like '%' || #{bplNm} || '%'
+        </if>
+		
+
+	</select>
+	<select id="getApplyList4Instt" parameterType="map" resultType="map">
+		SELECT * FROM ( 
+			SELECT 
+				b.corp_name, a.bpl_no, b.instt_name, to_char(a.regi_date, 'YYYY-MM-DD') regi_date, a.confm_status
+				, a.bsc_idx, b.INDUTY_CD, b.PRI_SUP_CD, a.recomend_instt_nm, a.sojt_idx, b.bsiscnsl_idx
+				, row_number() over(order by b.bsiscnsl_idx desc) as rn 
+				, count(*) over() as total_count 
+				, CEIL((count(*) over())/10) as total_page 
+			FROM hrd_dgns_sojt_req a, hrd_dgns_bsiscnsl b, hrd_com_doctor  c 
+			WHERE 
+				c.instt_idx = b.instt_idx
+				AND a.bsiscnsl_idx = b.bsiscnsl_idx
+				AND a.confm_status in (10, 20)
+				AND c.member_idx = #{member_idx} 
+ 		
+        		<if test="instt != null and instt.trim().length() != 0">
+        			AND b.instt_name Like '%' || #{instt} || '%'
+        		</if>
+
+        		<if test="sdate != null and sdate.trim().length() != 0">
+        		AND TO_DATE(a.REGI_DATE) <![CDATA[>=]]> TO_DATE(#{sdate})
+        		</if>
+        		<if test="edate != null and edate.trim().length() != 0">
+        		AND TO_DATE(a.REGI_DATE) <![CDATA[<=]]> TO_DATE(#{edate})
+        		</if>
+        		) 
+		WHERE rn BETWEEN (#{page} - 1)*10 AND #{page}*10
+		<if test="bplNo != null and bplNo.trim().length() != 0">
+        	AND bpl_no = #{bplNo}
+        </if>
+        <if test="bplNm != null and bplNm.trim().length() != 0">
+        	AND corp_name Like '%' || #{bplNm} || '%'
+        </if>
+		
+	</select>
+	<select id="getApplyList4Head" parameterType="map" resultType="map">
+		SELECT * FROM ( 
+			SELECT 
+				b.corp_name, a.bpl_no, b.instt_name, to_char(a.regi_date, 'YYYY-MM-DD') regi_date, a.confm_status
+				, a.bsc_idx, b.INDUTY_CD, b.PRI_SUP_CD, a.recomend_instt_nm, a.sojt_idx, b.bsiscnsl_idx
+				, row_number() over(order by b.bsiscnsl_idx desc) as rn 
+				, count(*) over() as total_count 
+				, CEIL((count(*) over())/10) as total_page 
+			FROM hrd_dgns_sojt_req a, hrd_dgns_bsiscnsl b 
+			WHERE 
+				a.bsiscnsl_idx = b.bsiscnsl_idx
+				AND a.confm_status in (10, 20) 
+				<if test="instt != null and instt.trim().length() != 0">
+        			AND b.instt_name Like '%' || #{instt} || '%'
+        		</if>
+
+        		<if test="sdate != null and sdate.trim().length() != 0">
+        		AND TO_DATE(a.REGI_DATE) <![CDATA[>=]]> TO_DATE(#{sdate})
+        		</if>
+        		<if test="edate != null and edate.trim().length() != 0">
+        		AND TO_DATE(a.REGI_DATE) <![CDATA[<=]]> TO_DATE(#{edate})
+        		</if>
+			) 
+		WHERE rn BETWEEN (#{page} - 1)*10 AND #{page}*10
+		<if test="bplNo != null and bplNo.trim().length() != 0">
+        	AND bpl_no = #{bplNo}
+        </if>
+        <if test="bplNm != null and bplNm.trim().length() != 0">
+        	AND corp_name Like '%' || #{bplNm} || '%'
+        </if>
+	</select>
+	<select id="getAcceptList4Instt" parameterType="map" resultType="map">
+		SELECT * FROM ( 
+			SELECT 
+				b.corp_name, a.bpl_no, b.instt_name, to_char(a.regi_date, 'YYYY-MM-DD') regi_date, a.confm_status
+				, a.bsc_idx, b.INDUTY_CD, b.PRI_SUP_CD, a.recomend_instt_nm, a.sojt_idx, b.bsiscnsl_idx
+				, row_number() over(order by b.bsiscnsl_idx desc) as rn 
+				, count(*) over() as total_count 
+				, CEIL((count(*) over())/10) as total_page 
+			FROM hrd_dgns_sojt_req a, hrd_dgns_bsiscnsl b, hrd_com_doctor  c 
+			WHERE 
+				c.instt_idx = b.instt_idx
+				AND a.bsiscnsl_idx = b.bsiscnsl_idx
+				AND a.confm_status >= 30
+				AND c.member_idx = #{member_idx} 
+			) 
+		WHERE rn BETWEEN (#{page} - 1)*10 AND #{page}*10
+	</select>
+	<select id="getAcceptList4Head" parameterType="map" resultType="map">
+		SELECT * FROM ( 
+			SELECT 
+				b.corp_name, a.bpl_no, b.instt_name, to_char(a.regi_date, 'YYYY-MM-DD') regi_date, a.confm_status
+				, a.bsc_idx, b.INDUTY_CD, b.PRI_SUP_CD, a.recomend_instt_nm, a.sojt_idx, b.bsiscnsl_idx
+				, row_number() over(order by b.bsiscnsl_idx desc) as rn 
+				, count(*) over() as total_count 
+				, CEIL((count(*) over())/10) as total_page 
+			FROM hrd_dgns_sojt_req a, hrd_dgns_bsiscnsl b 
+			WHERE 
+				a.bsiscnsl_idx = b.bsiscnsl_idx
+				AND a.confm_status >= 30
+			) 
+		WHERE rn BETWEEN (#{page} - 1)*10 AND #{page}*10
+	</select>
+	<select id="getResultList4Instt" parameterType="map" resultType="map">
+		SELECT * FROM ( 
+			SELECT 
+				b.corp_name, a.bpl_no, b.instt_name, to_char(a.regi_date, 'YYYY-MM-DD') regi_date, a.confm_status
+				, a.bsc_idx, b.INDUTY_CD, b.PRI_SUP_CD, a.recomend_instt_nm, a.sojt_idx, b.bsiscnsl_idx
+				, row_number() over(order by b.bsiscnsl_idx desc) as rn 
+				, count(*) over() as total_count 
+				, CEIL((count(*) over())/10) as total_page 
+			FROM hrd_dgns_sojt_req a, hrd_dgns_bsiscnsl b, hrd_com_doctor  c 
+			WHERE 
+				c.instt_idx = b.instt_idx
+				AND a.bsiscnsl_idx = b.bsiscnsl_idx
+				AND a.confm_status >= 30
+				AND c.member_idx = #{member_idx} 
+				
+				<if test="instt != null and instt.trim().length() != 0">
+        			AND b.instt_name Like '%' || #{instt} || '%'
+        		</if>
+
+        		<if test="sdate != null and sdate.trim().length() != 0">
+        		AND TO_DATE(a.REGI_DATE) <![CDATA[>=]]> TO_DATE(#{sdate})
+        		</if>
+        		<if test="edate != null and edate.trim().length() != 0">
+        		AND TO_DATE(a.REGI_DATE) <![CDATA[<=]]> TO_DATE(#{edate})
+        		</if>
+			) 
+		WHERE rn BETWEEN (#{page} - 1)*10 AND #{page}*10
+		<if test="bplNo != null and bplNo.trim().length() != 0">
+        	AND bpl_no = #{bplNo}
+        </if>
+        <if test="bplNm != null and bplNm.trim().length() != 0">
+        	AND corp_name Like '%' || #{bplNm} || '%'
+        </if>
+	</select>
+	<select id="getResultList4Head" parameterType="map" resultType="map">
+		SELECT * FROM ( 
+			SELECT 
+				b.corp_name, a.bpl_no, b.instt_name, to_char(a.regi_date, 'YYYY-MM-DD') regi_date, a.confm_status
+				, a.bsc_idx, b.INDUTY_CD, b.PRI_SUP_CD, a.recomend_instt_nm, a.sojt_idx, b.bsiscnsl_idx
+				, row_number() over(order by b.bsiscnsl_idx desc) as rn 
+				, count(*) over() as total_count 
+				, CEIL((count(*) over())/10) as total_page 
+			FROM hrd_dgns_sojt_req a, hrd_dgns_bsiscnsl b 
+			WHERE 
+				a.bsiscnsl_idx = b.bsiscnsl_idx
+				AND a.confm_status >= 30
+				<if test="instt != null and instt.trim().length() != 0">
+        			AND b.instt_name Like '%' || #{instt} || '%'
+        		</if>
+
+        		<if test="sdate != null and sdate.trim().length() != 0">
+        		AND TO_DATE(a.REGI_DATE) <![CDATA[>=]]> TO_DATE(#{sdate})
+        		</if>
+        		<if test="edate != null and edate.trim().length() != 0">
+        		AND TO_DATE(a.REGI_DATE) <![CDATA[<=]]> TO_DATE(#{edate})
+        		</if>
+			) 
+		WHERE rn BETWEEN (#{page} - 1)*10 AND #{page}*10
+				<if test="bplNo != null and bplNo.trim().length() != 0">
+        	AND bpl_no = #{bplNo}
+        </if>
+        <if test="bplNm != null and bplNm.trim().length() != 0">
+        	AND corp_name Like '%' || #{bplNm} || '%'
+        </if>
+	</select>
+	<update id="updateStatus" parameterType="map">
+		UPDATE HRD_DGNS_SOJT_REQ
+		SET
+			CONFM_STATUS = #{confm_status}
+			
+			, LAST_MODI_IDX = #{regi_idx}
+			, LAST_MODI_ID = #{regi_id}
+			, LAST_MODI_NAME = #{regi_name}
+			, LAST_MODI_DATE = sysdate
+			, LAST_MODI_IP = #{regi_ip}
+		WHERE
+			SOJT_IDX = #{sojt_idx}
+	</update>
+	<select id="initList" parameterType="map" resultType="map">
+		SELECT * FROM (
+			SELECT
+	  			e.bsiscnsl_idx, e.issue_no, e.issue_date, e.corp_name, e.bpl_no
+	  			, row_number() over(order by e.bsiscnsl_idx desc) as rn
+	  			, count(*) over() as total_count
+	  			, CEIL((count(*) over())/10) as total_page
+			FROM
+	  			view_hrd_doctor a, hrd_dgns_bsiscnsl e
+			WHERE
+	  			a.bpl_no = e.bpl_no
+	  			AND a.member_idx = #{member_idx}
+	  	)
+	  	WHERE rn BETWEEN (#{page} - 1)*10 AND #{page}*10
+	</select>
+	<select id="amIapplying" parameterType="map" resultType="map">
+		SELECT
+  			c.corp_name, a.corp_pic_nm, to_char(a.regi_date, 'YYYY.mm.dd') regi_date, to_char(a.regi_date, 'YYYY') year, a.confm_status, a.sojt_idx, a.bsc_idx, c.bsiscnsl_idx
+		FROM hrd_dgns_sojt_req a, view_hrd_doctor b, hrd_dgns_bsiscnsl c
+		WHERE a.bpl_no = b.bpl_no
+			AND a.bsiscnsl_idx = c.bsiscnsl_idx
+			AND to_char(a.regi_date, 'YYYY') = to_char(sysdate,'YYYY')
+			AND b.member_idx = #{member_idx}
+	</select>
+	<update id="updateSOJTreq" parameterType="map" >
+		UPDATE hrd_dgns_sojt_req
+		SET
+			PRI_SUP_TRGET_CORP_YN = #{pri_sup_trget_corp_yn}
+			, SPCSS_BPL_YN = #{spcss_bpl_yn}
+			, WGDLY_NM_STG_OTHBC_BPL_YN = #{wgdly_nm_stg_othbc_bpl_yn}
+			, INDACMT_BPL_YN = #{indacmt_bpl_yn}
+			, SPORT_EXCL_INDUTY_YN = ${sport_excl_induty_yn}
+		WHERE
+			SOJT_IDX = #{sojt_idx}
+	</update>
+	<select id="checkValidity" parameterType="map" resultType="int">
+		WITH BASE as (
+			SELECT
+				SOJT_IDX, BSC_IDX, CONFM_STATUS, REGI_IDX, REGI_DATE, BSISCNSL_IDX
+			FROM (
+				select 
+					a.sojt_idx, a.bsc_idx, a.confm_status, b.regi_idx, b.regi_date, a.bsiscnsl_idx
+					, ROW_NUMBER() OVER(PARTITION BY b.sojt_idx ORDER BY CONFM_IDX desc) as rn
+				from hrd_dgns_sojt_req a, hrd_dgns_sojt_req_confm b 
+				where a.sojt_idx = b.sojt_idx)
+			WHERE rn = 1)
+		SELECT
+			count(*) cnt
+		FROM
+			BASE a, hrd_dgns_bsiscnsl b, hrd_com_doctor c
+		WHERE
+			a.bsiscnsl_idx = b.bsiscnsl_idx and b.instt_idx = c.instt_idx
+			and c.apply_yn = 'Y'
+			and a.sojt_idx = #{sojt_idx} and c.member_idx = #{member_idx}
+	</select>
+	
+	<select id="getBrffcCd" parameterType="String" resultType="hashMap">
+		SELECT
+			A.INSTT_IDX AS INSTT_IDX,
+    		(SELECT INSTT_NAME FROM HRD_COM_INSTT WHERE INSTT_IDX = A.INSTT_IDX) AS SB_NM
+		FROM
+			INF_ZIP_GROUP A
+		WHERE 
+			A.ZIP = #{brchAddrcd}
+	</select>
+	
+	<select id="getBrffcTel" parameterType="hashMap" resultType="String">
+		SELECT
+			PKG_DGUARD.FN_DEC_TELNO(TELNO) AS TELNO
+		FROM
+			HRD_COM_INSTT
+		WHERE 
+			INSTT_IDX = #{insttIdx}
+	</select>
+	
+	<select id="getRegiIdx" parameterType="map" resultType="String">
+		SELECT regi_idx FROM hrd_dgns_sojt_req WHERE sojt_idx = #{sojt_idx}
+	</select>
+	<select id="getSojtIdxFromWithdraw" parameterType="String" resultType="String">
+		SELECT sojt_idx FROM hrd_dgns_sojt_req WHERE confm_status = 20 and bsiscnsl_idx = #{bsiscnsl_idx}
+	</select>
+</mapper>

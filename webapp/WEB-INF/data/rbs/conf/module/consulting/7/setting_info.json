@@ -1,0 +1,19 @@
+{
+   "setting_info":{
+      "list_title":"컨설팅 수행일지(사용자)",
+      "input_title":"컨설팅 수행일지(사용자)",
+      "deleteList_title":"컨설팅 수행일지(사용자)",
+      "dset_input_npname": "IDX_VIEW",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "cnsl_name":"cnslIdx",
+      "cnsl_column":"CNSL_IDX",
+      "diary_name":"diaryIdx",
+      "diary_column":"DIARY_IDX",
+      "design":"center",
+      "use_file":1,
+      "use_new":1
+   }
+}

@@ -1,0 +1,17 @@
+{
+   "setting_info":{
+      "list_title":"컨설턴트 평가 목록",
+      "input_title":"컨설턴트 평가 등록",
+      "deleteList_title":"컨설턴트 평가 삭제목록",
+      "dset_input_npname": "IDX_VIEW",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "diary_name":"evlIdx",
+      "diary_column":"EVL_IDX",
+      "design":"web",
+      "use_file":1,
+      "use_new":1
+   }
+}

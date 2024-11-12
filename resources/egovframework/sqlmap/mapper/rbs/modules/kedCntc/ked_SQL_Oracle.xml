@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. IDX, <include refid="INSTT_TABLE_NAME"/>, [목록에 사용할 컬럼], [기본정렬쿼리], 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+<mapper namespace="rbs.modules.kedCntc.KedCntcMapper">
+	<!-- 테이블명 -->
+	<sql id="CNTC_TABLE_NAME">HRD_COM_CNTC_SERVER</sql>
+	<sql id="CNTC_FILE_TABLE_NAME">HRD_COM_CNTC_FILE</sql>
+	
+	<!-- 작업로그 기록 -->
+	<select id="execPKG_BATCH_LOG" statementType="CALLABLE" parameterType="rbs.modules.kedCntc.vo.batchLogVO">
+		{ call PKG_BATCH_LOG.P_LOG_JAVA( #{OPERT_IDX, mode=INOUT, jdbcType=BIGINT} ,
+		                                 #{OPERT_PROGRM_NM, mode=INOUT, jdbcType=VARCHAR},
+		                                 #{OPERT_DC, mode=INOUT, jdbcType=VARCHAR},
+		                                 #{OPERT_PARAMTR, mode=INOUT, jdbcType=VARCHAR},
+		                                 #{OPERT_CO, mode=INOUT, jdbcType=INTEGER},
+		                                 #{OPERT_RESULT, mode=INOUT, jdbcType=VARCHAR},
+		                                 #{RESULT_MSSAGE, mode=INOUT, jdbcType=VARCHAR},
+		                                 #{OPERT_START_DT, mode=INOUT, jdbcType=TIMESTAMP},
+		                                 #{OPERT_END_DT, mode=INOUT, jdbcType=TIMESTAMP} 
+		                                )
+        }
+	</select>
+	
+	<!-- KEY가 INT인 경우 -->
+	<select id="nextId" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT <trim><include refid="rbs.commonDBMSMapper.nullFn"/>(MAX(SERVER_IDX), 0)</trim> + 1 MAXID
+		FROM 
+		<include refid="CNTC_TABLE_NAME"/> A
+	</select>
+	
+	
+	<select id="selectList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+			SELECT PKG_DGUARD.FN_DEC_DATA(SERVER_IP) AS SERVER_IP
+			      , SERVER_PORT
+			      , PKG_DGUARD.FN_DEC_DATA(USER_ID) AS USER_ID
+			      , PKG_DGUARD.FN_DEC_DATA(PASSWORD) AS PASSWORD		
+			FROM 
+			<include refid="CNTC_TABLE_NAME"/> A 
+			WHERE SERVER_IDX = #{SERVER_IDX}
+	</select>
+	
+	<select id="selectACNTCDList"  resultType="java.util.HashMap">
+			SELECT ACNT_FULL_CD 
+			FROM HRD_BSK_KED_ACNT_CODE 
+			WHERE  USE_YN='Y'
+	</select>
+
+	<select id="selectDoneList" resultType="java.lang.String">
+			SELECT OPERT_RESULT
+			FROM HRD_COM_BATCH_LOG
+			WHERE OPERT_IDX = (	SELECT MAX(OPERT_IDX)
+								FROM HRD_COM_BATCH_LOG
+								WHERE OPERT_PROGRM_NM = 'uploadFile'
+  								  AND OPERT_PARAMTR LIKE '%'||TO_CHAR(SYSDATE,'YYYYMMDD')||'%' )
+	</select>
+	
+	<update id="insIFS_KED_CORP" parameterType="java.util.HashMap">
+		MERGE INTO IFS_KED_CORP A USING DUAL ON (A.KED_CD = #{KED_CD} )
+		WHEN MATCHED THEN
+			UPDATE SET
+				ENP_NM                 = #{ENP_NM},
+				ENP_NM_TRD             = #{ENP_NM_TRD},
+				ENP_NM_ENG             = #{ENP_NM_ENG},
+				ENP_TYP                = #{ENP_TYP},
+				ENP_SZE                = #{ENP_SZE},
+				GRDT_PLN_DT            = #{GRDT_PLN_DT},
+				ENP_FCD                = #{ENP_FCD},
+				ESTB_FCD               = #{ESTB_FCD},
+				ENP_SCD                = #{ENP_SCD},
+				ENP_SCD_CHG_DT         = #{ENP_SCD_CHG_DT},
+				PUBI_FCD               = #{PUBI_FCD},
+				VENP_YN                = #{VENP_YN},
+				ENP_FORM_FR            = #{ENP_FORM_FR} ,
+				BZC_CD                 = #{BZC_CD},
+				FS_BZC_CD              = #{FS_BZC_CD},
+				GRP_CD                 = #{GRP_CD},
+				GRP_NM                 = #{GRP_NM},
+				CONO_PID               = #{CONO_PID},
+				ESTB_DT                = #{ESTB_DT},
+				IPO_CD                 = #{IPO_CD},
+				TRDBZ_RPT_NO           = #{TRDBZ_RPT_NO},
+				LIST_DT                = #{LIST_DT},
+				DLIST_DT               = #{DLIST_DT},
+				MTX_BNK_CD             = #{MTX_BNK_CD},
+				MTX_BNK_NM             = #{MTX_BNK_NM},
+				OVD_TX_BNK_CD          = #{OVD_TX_BNK_CD},
+				OVD_TX_BNK_NM          = #{OVD_TX_BNK_NM},
+				ACCT_EDDT              = #{ACCT_EDDT},
+				HPAGE_URL              = #{HPAGE_URL},
+				EMAIL                  = #{EMAIL},
+				STD_DT                 = #{STD_DT},
+				BZNO                   = #{BZNO},
+				LOC_ZIP                = #{LOC_ZIP},
+				LOC_ADDRA              = #{LOC_ADDRA},
+				LOC_ADDRB              = #{LOC_ADDRB},
+				TEL_NO                 = #{TEL_NO},
+				FAX_NO                 = #{FAX_NO},
+				LABORER_SUM            = #{LABORER_SUM} ,
+				PD_NM                  = #{PD_NM},
+				KSIC9_BZC_CD           = #{KSIC9_BZC_CD},
+				REL_KEDCD              = #{REL_KEDCD},
+				REL_ESTB_DT            = #{REL_ESTB_DT},
+				LOC_RDNM_ZIP           = #{LOC_RDNM_ZIP},
+				LOC_RDNM_ADDRA         = #{LOC_RDNM_ADDRA},
+				LOC_RDNM_ADDRB         = #{LOC_RDNM_ADDRB},
+				LOC_RDNM_ADDRB_CONF_YN = #{LOC_RDNM_ADDRB_CONF_YN},
+				LOC_ADDRB_CONF_YN      = #{LOC_ADDRB_CONF_YN},
+				REGI_DATE              = SYSDATE ,
+				REFLCT_YN              = 'N'
+		WHEN NOT MATCHED THEN
+			INSERT 
+			(KED_CD        , ENP_NM                , ENP_NM_TRD       , ENP_NM_ENG , ENP_TYP,
+			 ENP_SZE       , GRDT_PLN_DT           , ENP_FCD          , ESTB_FCD   , ENP_SCD,
+			 ENP_SCD_CHG_DT, PUBI_FCD              , VENP_YN          , ENP_FORM_FR, BZC_CD ,
+			 FS_BZC_CD     , GRP_CD                , GRP_NM           , CONO_PID   , ESTB_DT,
+			 IPO_CD        , TRDBZ_RPT_NO          , LIST_DT          , DLIST_DT   , MTX_BNK_CD,
+			 MTX_BNK_NM    , OVD_TX_BNK_CD         , OVD_TX_BNK_NM    , ACCT_EDDT  , HPAGE_URL ,
+			 EMAIL         , STD_DT                , BZNO             , LOC_ZIP    , LOC_ADDRA ,
+			 LOC_ADDRB     , TEL_NO                , FAX_NO           , LABORER_SUM , PD_NM      ,
+			 KSIC9_BZC_CD  , REL_KEDCD             , REL_ESTB_DT      , LOC_RDNM_ZIP, LOC_RDNM_ADDRA,
+			 LOC_RDNM_ADDRB, LOC_RDNM_ADDRB_CONF_YN, LOC_ADDRB_CONF_YN, REGI_DATE )
+			VALUES
+			 (#{KED_CD}        , #{ENP_NM}                , #{ENP_NM_TRD}       , #{ENP_NM_ENG}  , #{ENP_TYP}       ,
+			  #{ENP_SZE}       , #{GRDT_PLN_DT}           , #{ENP_FCD}          , #{ESTB_FCD}    , #{ENP_SCD}       ,
+			  #{ENP_SCD_CHG_DT}, #{PUBI_FCD}              , #{VENP_YN}          , #{ENP_FORM_FR} , #{BZC_CD}        ,
+			  #{FS_BZC_CD}     , #{GRP_CD}                , #{GRP_NM}           , #{CONO_PID}    , #{ESTB_DT}       ,
+			  #{IPO_CD}        , #{TRDBZ_RPT_NO}          , #{LIST_DT}          , #{DLIST_DT}    , #{MTX_BNK_CD}    ,
+			  #{MTX_BNK_NM}    , #{OVD_TX_BNK_CD}         , #{OVD_TX_BNK_NM}    , #{ACCT_EDDT}   , #{HPAGE_URL}     ,
+			  #{EMAIL}         , #{STD_DT}                , #{BZNO}             , #{LOC_ZIP}     , #{LOC_ADDRA}     ,
+			  #{LOC_ADDRB}     , #{TEL_NO}                , #{FAX_NO}           , #{LABORER_SUM} , #{PD_NM}         ,
+			  #{KSIC9_BZC_CD}  , #{REL_KEDCD}             , #{REL_ESTB_DT}      , #{LOC_RDNM_ZIP}, #{LOC_RDNM_ADDRA},
+			  #{LOC_RDNM_ADDRB}, #{LOC_RDNM_ADDRB_CONF_YN}, #{LOC_ADDRB_CONF_YN}, SYSDATE )				  
+	</update>
+	
+	<select id="execP_KED_CORP" statementType="CALLABLE" parameterType="java.util.HashMap">
+		{ call PKG_IFS_KED.P_KED_CORP( #{P_WRT_DATE, mode=IN, jdbcType=VARCHAR} ) }
+	</select>
+	
+	<update id="insIFS_KED_CRE" parameterType="java.util.HashMap">
+		MERGE INTO IFS_KED_CRE A USING DUAL ON (A.KED_CD = #{KED_CD} AND REG_DT = #{REG_DT} )
+		WHEN MATCHED THEN
+			UPDATE SET
+				EVL_DT        = #{EVL_DT},
+				STTL_BASE_DD  = #{STTL_BASE_DD},
+				GRD_CLS       = #{GRD_CLS},
+				CR_GRD        = #{CR_GRD}, 
+				MODL_EVL_DT   = #{MODL_EVL_DT},
+				IVG_MTD_CLS   = #{IVG_MTD_CLS},
+				GRD_SV_ST_DD  = #{GRD_SV_ST_DD},
+				GRD_SV_EDDT   = #{GRD_SV_EDDT},
+				REGI_DATE     = SYSDATE       ,
+				REFLCT_YN     = 'N'
+		WHEN NOT MATCHED THEN
+			INSERT 
+			(KED_CD    , REG_DT     , EVL_DT     , STTL_BASE_DD, GRD_CLS    ,
+			 CR_GRD    , MODL_EVL_DT, IVG_MTD_CLS, GRD_SV_ST_DD, GRD_SV_EDDT,
+			 REGI_DATE )
+			VALUES
+			 (#{KED_CD}, #{REG_DT}     , #{EVL_DT}     , #{STTL_BASE_DD}, #{GRD_CLS}    ,
+			  #{CR_GRD}, #{MODL_EVL_DT}, #{IVG_MTD_CLS}, #{GRD_SV_ST_DD}, #{GRD_SV_EDDT},
+			  SYSDATE )				  
+	</update>
+	
+	<select id="execP_KED_CRE" statementType="CALLABLE" parameterType="java.util.HashMap">
+		{ call PKG_IFS_KED.P_KED_CRE( #{P_WRT_DATE, mode=IN, jdbcType=VARCHAR} ) }
+	</select>
+	
+	<update id="insIFS_KED_EMP" parameterType="java.util.HashMap">
+		MERGE INTO IFS_KED_EMP A USING DUAL ON (A.KED_CD = #{KED_CD} AND STD_DT = #{STD_DT} AND TTL_CD = #{TTL_CD} )
+		WHEN MATCHED THEN
+			UPDATE SET
+				ORDN_MEM        = #{ORDN_MEM}       ,
+				ORDN_FEM        = #{ORDN_FEM}       ,
+				ORDN_EM         = #{ORDN_EM}        ,
+				T_YSLRY_MEM     = #{T_YSLRY_MEM}    ,
+				T_YSLRY_FM      = #{T_YSLRY_FM}     ,
+				T_YSLRY         = #{T_YSLRY}        ,
+				AVG_SLRY_PE_MEM = #{AVG_SLRY_PE_MEM},
+				AVG_SLRY_PE_FE  = #{AVG_SLRY_PE_FE} ,
+				AVG_SLRY_PE     = #{AVG_SLRY_PE}    ,
+				AVG_WK_PRD_MEM  = #{AVG_WK_PRD_MEM} ,
+				AVG_WK_PRD_FM   = #{AVG_WK_PRD_FM}  ,
+				AVG_WK_PRD      = #{AVG_WK_PRD}     ,
+				REGI_DATE       = SYSDATE           ,
+				REFLCT_YN       = 'N'
+		WHEN NOT MATCHED THEN
+			INSERT 
+			(KED_CD         , STD_DT         , TTL_CD         , ORDN_MEM       , 
+			 ORDN_FEM       , ORDN_EM        , T_YSLRY_MEM    , T_YSLRY_FM     , 
+			 T_YSLRY        , AVG_SLRY_PE_MEM, AVG_SLRY_PE_FE , AVG_SLRY_PE    , 
+			 AVG_WK_PRD_MEM , AVG_WK_PRD_FM  , AVG_WK_PRD     , REGI_DATE      )
+			VALUES
+			(#{KED_CD}         , #{STD_DT}         , #{TTL_CD}         , #{ORDN_MEM}       , 
+			 #{ORDN_FEM}       , #{ORDN_EM}        , #{T_YSLRY_MEM}    , #{T_YSLRY_FM}     , 
+			 #{T_YSLRY}        , #{AVG_SLRY_PE_MEM}, #{AVG_SLRY_PE_FE} , #{AVG_SLRY_PE}    , 
+			 #{AVG_WK_PRD_MEM} , #{AVG_WK_PRD_FM}  , #{AVG_WK_PRD}     , SYSDATE      )
+	</update>
+	
+	<select id="execP_KED_EMP" statementType="CALLABLE" parameterType="java.util.HashMap">
+		{ call PKG_IFS_KED.P_KED_EMP( #{P_WRT_DATE, mode=IN, jdbcType=VARCHAR} ) }
+	</select>
+	
+	<update id="insIFS_KED_ANAL" parameterType="java.util.HashMap">
+		MERGE INTO IFS_KED_ANAL A USING DUAL 
+		   ON (A.KED_CD = #{KED_CD} AND ACCT_DT = #{ACCT_DT} AND FS_CCD = #{FS_CCD} AND ACCT_CCD = #{ACCT_CCD} AND ACC_CD_FULL = #{ACC_CD_FULL})
+		WHEN MATCHED THEN
+			UPDATE SET
+				VAL         = #{VAL},
+				RT          = #{RT},
+				REGI_DATE   = SYSDATE,
+				REFLCT_YN   = 'N'
+		WHEN NOT MATCHED THEN
+			INSERT 
+			(KED_CD     , ACCT_DT, FS_CCD, ACCT_CCD ,
+			 ACC_CD_FULL, VAL    , RT    , REGI_DATE )
+			VALUES
+			(#{KED_CD}     , #{ACCT_DT}, #{FS_CCD}, #{ACCT_CCD},
+			 #{ACC_CD_FULL}, #{VAL}    , #{RT}    , SYSDATE    )
+	</update>
+	
+	<select id="execP_KED_ANAL" statementType="CALLABLE" parameterType="java.util.HashMap">
+		{ call PKG_IFS_KED.P_KED_ANAL( #{P_WRT_DATE, mode=IN, jdbcType=VARCHAR} ) }
+	</select>
+	
+	<update id="insIFS_KED_FNC" parameterType="java.util.HashMap">
+		MERGE INTO IFS_KED_FNC A USING DUAL ON (A.KED_CD = #{KED_CD} AND ACCT_DT = #{ACCT_DT} )
+		WHEN MATCHED THEN
+			UPDATE SET
+				SUMASSET      = #{SUMASSET},
+				PAYMENTFUND   = #{PAYMENTFUND},
+				FUNDTOTAL     = #{FUNDTOTAL},
+				SALES         = #{SALES},
+				PROFIT        = #{PROFIT},
+				TERMNETPROFIT = #{TERMNETPROFIT},
+				REGI_DATE     = SYSDATE ,
+				REFLCT_YN     = 'N'
+		WHEN NOT MATCHED THEN
+			INSERT 
+			(KED_CD       , ACCT_DT      , SUMASSET     , PAYMENTFUND  ,
+			 FUNDTOTAL    , SALES        , PROFIT       , TERMNETPROFIT,
+			 REGI_DATE )
+			VALUES
+			(#{KED_CD}       , #{ACCT_DT}      , #{SUMASSET}     , #{PAYMENTFUND}  ,
+			 #{FUNDTOTAL}    , #{SALES}        , #{PROFIT}       , #{TERMNETPROFIT},
+			 SYSDATE )
+	</update>
+	
+	<select id="execP_KED_FNC" statementType="CALLABLE" parameterType="java.util.HashMap">
+		{ call PKG_IFS_KED.P_KED_FNC( #{P_WRT_DATE, mode=IN, jdbcType=VARCHAR} ) }
+	</select>
+	
+	<update id="insIFS_KED_SPCSS" parameterType="java.util.HashMap">
+		MERGE INTO IFS_KED_SPCSS A USING DUAL ON (A.BZNO = #{BZNO} AND LT_IQ_DT = #{LT_IQ_DT} )
+		WHEN MATCHED THEN
+			UPDATE SET
+				BASE_DT    = #{BASE_DT},
+				LQDT_CLS   = #{LQDT_CLS},
+				LQDT_DT    = #{LQDT_DT},
+				REGI_DATE  = SYSDATE ,
+				REFLCT_YN  = 'N'
+		WHEN NOT MATCHED THEN
+			INSERT 
+			(BZNO   , LT_IQ_DT, BASE_DT, LQDT_CLS, LQDT_DT , REGI_DATE )
+			VALUES
+			(#{BZNO}, #{LT_IQ_DT} , #{BASE_DT}, #{LQDT_CLS}, #{LQDT_DT},  SYSDATE )
+	</update>
+	
+	<select id="execP_KED_SPCSS" statementType="CALLABLE" parameterType="java.util.HashMap">
+		{ call PKG_IFS_KED.P_KED_SPCSS( #{P_WRT_DATE, mode=IN, jdbcType=VARCHAR} ) }
+	</select>
+	
+</mapper>            

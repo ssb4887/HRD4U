@@ -1,0 +1,32 @@
+{
+   "setting_info":{
+      "list_title":"지부지사관리 목록",
+      "input_title":"지부지사관리 등록",
+      "deleteList_title":"지부지사관리 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":10,
+      "dset_input_npname": "IDX_VIEW",
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"insttIdx",
+      "idx_column":"INSTT_IDX",
+      "design":"default",
+      "use_file":1,
+      "use_new":1
+   },
+   "insttSearch_setting_info":{
+      "list_title":"지부지사검색 목록",
+      "input_title":"지부지사검색 등록",
+      "deleteList_title":"지부지사검색 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":10,
+      "dset_input_npname": "IDX_VIEW",
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"insttIdx",
+      "idx_column":"INSTT_IDX",
+      "design":"default",
+      "use_file":1,
+      "use_new":1
+   }
+}

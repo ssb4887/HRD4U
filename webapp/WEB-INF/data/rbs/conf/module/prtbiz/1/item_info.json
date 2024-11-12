@@ -1,0 +1,142 @@
+{
+	"item_info":{
+		"items":{
+		    "prtbizName":{
+				"column_id":"PRTBIZ_NAME"
+				, "item_name":"참여가능사업이름"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "intro":{
+				"column_id":"INTRO"
+				, "item_name":"사업소개"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "content_type":2
+				, "editor":1
+				, "editor_utype":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "consider":{
+				"column_id":"CONSIDER"
+				, "item_name":"고려사항"
+				, "required_write":1
+				, "required_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "content_type":2
+				, "editor":1
+				, "editor_utype":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}, "ncsSclsCode":{
+				"column_id":"NCS_SCLAS_CD"
+				, "item_name":"NCS 분류"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":22
+				, "master_code":"NCS_CODE"
+				, "item_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_view": 1
+			},"url":{
+				"column_id":"URL"
+				, "item_name":"URL"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			}
+			
+		}, "list_order":[
+			"prtbizName"
+		]
+		, "view_order":[
+			"prtbizName"
+			, "intro"
+			, "consider"
+			, "ncsSclsCode"
+			, "url"
+		]
+		, "write_order":[
+		    "prtbizName"
+			, "intro"
+			, "consider"
+			, "url"
+		]
+		, "writeproc_order":[
+			"prtbizName"
+			, "intro"
+			, "consider"
+			, "url"
+		]
+		, "modify_order":[
+			"prtbizName"
+			, "intro"
+			, "consider"
+			, "url"
+		]
+		, "modifyproc_order":[
+		    "prtbizName"
+			, "intro"
+			, "consider"
+			, "url"
+		]
+		, "list_search":{
+			"key":{
+				"items":{
+					"prtbizName":{
+						"column_id":"PRTBIZ_NAME"
+						, "item_name":"사업명"
+						, "format_type":0
+						, "object_type":0
+					}, "trainingName":{
+						"column_id":"TP_NAME"
+						, "item_name":"훈련과정명"
+						, "format_type":0
+						, "object_type":0
+					}
+				}
+			}, "searchForm_order":[
+				"prtbizName"
+				, "trainingName"
+			], "search_order":[
+				"prtbizName"
+			], "searchAddOptn_order":[
+				"trainingName"
+			]
+		}
+	}
+}

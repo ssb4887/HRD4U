@@ -1,0 +1,24 @@
+{
+   "setting_info":{
+      "list_title":"기업HRD이음컨설팅 이력",
+      "input_title":"기업HRD이음컨설팅 이력",
+      "deleteList_title":"기업HRD이음컨설팅 이력 목록",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"idx",
+      "idx_column":"IDX",
+      "bsc_idx_name" : "bsc",
+      "bsc_idx_column" : "BSC_IDX",
+      "rslt_idx_name" : "rslt",
+      "rslt_idx_column" : "RSLT_IDX",
+      "qustnr_idx_name" : "qustnrIdx",
+      "qustnr_idx_column" : "QUSTNR_IDX",
+      "bsis_idx_name" : "bsis",
+      "bsis_idx_column" : "BSISCNSL_IDX",
+      "design":"default",
+      "use_file":1,
+      "use_new":1
+   }
+}

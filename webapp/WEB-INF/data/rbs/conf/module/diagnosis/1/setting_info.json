@@ -1,0 +1,17 @@
+{
+   "setting_info":{
+      "list_title":"HRD기초진단관리 목록",
+      "input_title":"HRD기초진단관리 등록",
+      "popup_title":"HRD기초진단 실행",
+      "deleteList_title":"HRD기초진단관리 삭제목록",
+      "dset_list_block":10,
+      "dset_list_count":10,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"idx",
+      "idx_column":"BSC_IDX",
+      "design":"default",
+      "use_file":1,
+      "use_new":1
+   }
+}

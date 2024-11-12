@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="rbs.modules.ntwrk.ntwrkCmptinstMapper">
+	<sql id="NTWRK_CMPTINST">HRD_NTWRK_CMPTINST</sql>
+	<sql id="NTWRK_CMPTINST_FILE">HRD_NTWRK_CMPTINST_FILE</sql>
+	<sql id="NTWRK_CMPTINST_AGREM_CORP">HRD_NTWRK_CMPTINST_AGREM_CORP</sql>
+	<sql id="COM_INSTT">HRD_COM_INSTT</sql>
+	
+	<sql id="COUNT_TOP">
+		<trim>SELECT COUNT(rn) FROM( SELECT rownum rn, TB.* FROM (</trim>
+	</sql>
+	
+	<sql id="COUNT_BOTTOM">
+		<trim>) TB )</trim>
+	</sql>
+
+	<insert id="insertCmptinstData" parameterType="map" useGeneratedKeys="true" keyProperty="cmptinstIdx">
+		<selectKey keyProperty="cmptinstIdx" resultType="java.lang.Integer" order="BEFORE">
+			SELECT NVL(MAX(CMPTINST_IDX), 0) + 1 FROM <include refid="NTWRK_CMPTINST" />
+		</selectKey>
+		INSERT INTO <include refid="NTWRK_CMPTINST" />
+		(CMPTINST_IDX, INSTT_IDX, CMPTINST_NAME, CMPTINST_REPER_NM, CMPTINST_TYPE, 
+		CMPTINST_PIC_NAME, CMPTINST_PIC_TELNO, CMPTINST_PIC_EMAIL, 
+		ZIP, ADDR, ADDR_DTL, REMARKS, USE_YN, 
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP) 
+		VALUES 
+		(#{cmptinstIdx}, #{insttIdx}, #{cmptinstName}, #{cmptinstReperNm}, #{cmptinstType},
+		#{cmptinstPicName}, PKG_DGUARD.FN_ENC_TELNO(#{cmptinstPicTelno}), #{cmptinstPicEmail},
+		#{zip}, #{addr}, #{addrDtl}, #{remarks}, 'Y', 
+		#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, SYSDATE, #{REGI_IP})
+	</insert>
+	
+	<update id="updateCmptinstData" parameterType="map">
+		UPDATE <include refid="NTWRK_CMPTINST" /> 
+		SET INSTT_IDX=#{insttIdx}, CMPTINST_NAME=#{cmptinstName}, CMPTINST_REPER_NM=#{cmptinstReperNm}, CMPTINST_TYPE=#{cmptinstType}, 
+		CMPTINST_PIC_NAME=#{cmptinstPicName}, CMPTINST_PIC_TELNO=PKG_DGUARD.FN_ENC_TELNO(#{cmptinstPicTelno}), CMPTINST_PIC_EMAIL=#{cmptinstPicEmail},
+		ZIP=#{zip}, ADDR=#{addr}, ADDR_DTL=#{addrDtl}, REMARKS=#{remarks}, USE_YN='Y',
+		LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE = SYSDATE, LAST_MODI_IP=#{LAST_MODI_IP} 
+		<where>
+			CMPTINST_IDX=#{cmptinstIdx}
+		</where>
+	</update>
+	
+	<select id="selectUserInsttIdx" parameterType="map" resultType="map">
+		SELECT * FROM HRD_COM_INSTT WHERE BRFFC_CD=#{regiCode}
+	</select>
+	
+	<select id="selectCmptinstList" parameterType="java.util.HashMap" resultType="dataMap">
+		<include refid="rbs.commonDBMSMapper.PAGING_TOP" />
+			SELECT 
+				A.CMPTINST_IDX, A.INSTT_IDX, A.CMPTINST_NAME, A.CMPTINST_REPER_NM, A.CMPTINST_TYPE, A.CMPTINST_PIC_NAME, PKG_DGUARD.FN_DEC_TELNO(A.CMPTINST_PIC_TELNO) AS CMPTINST_PIC_TELNO, A.CMPTINST_PIC_EMAIL, A.ZIP, A.ADDR, A.ADDR_DTL, A.REMARKS,
+				A.USE_YN, A.ISDELETE, A.REGI_IDX, A.REGI_ID, A.REGI_NAME, 
+				B.INSTT_NAME 
+			FROM <include refid="NTWRK_CMPTINST" /> A 
+			LEFT JOIN <include refid="COM_INSTT" /> B 
+			ON A.INSTT_IDX = B.INSTT_IDX 
+			<where>
+				<foreach collection="searchList" item="searchItem" index="i">
+					<choose>
+						<when test="searchItem.columnId == 'INSTT_IDX'">
+							AND A.${searchItem.columnId} = #{searchItem.columnValue}
+						</when>
+						<otherwise>
+							AND A.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</otherwise>
+					</choose>
+				</foreach>
+
+				<if test="REGI_CODE != null">
+					AND A.INSTT_IDX = (SELECT INSTT_IDX FROM HRD_COM_INSTT WHERE BRFFC_CD=#{REGI_CODE})
+				</if>
+				
+				<if test="INSTT != null">
+					AND A.INSTT_IDX = #{INSTT} 
+				</if>
+
+				<if test="TYPE != null">
+					AND A.CMPTINST_TYPE = #{TYPE} 
+				</if>
+				
+				AND A.USE_YN='Y' AND A.ISDELETE != 1 
+			</where>
+			ORDER BY 
+				CASE 
+					WHEN A.LAST_MODI_DATE IS NOT NULL THEN A.LAST_MODI_DATE 
+					ELSE A.REGI_DATE 
+				END DESC 
+		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM" />
+	</select>
+
+	<select id="selectCmptinstTotalCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		<include refid="COUNT_TOP" />
+			SELECT A.*, B.INSTT_NAME 
+			FROM <include refid="NTWRK_CMPTINST" /> A 
+			LEFT JOIN <include refid="COM_INSTT" /> B 
+			ON A.INSTT_IDX = B.INSTT_IDX 
+			<where>
+				<foreach collection="searchList" item="searchItem" index="i">
+					<choose>
+						<when test="searchItem.columnId == 'INSTT_IDX'">
+							AND A.${searchItem.columnId} = #{searchItem.columnValue}
+						</when>
+						<otherwise>
+							AND A.${searchItem.columnId} ${searchItem.columnVFlag} #{searchItem.columnValue}
+						</otherwise>
+					</choose>
+				</foreach>
+
+				<if test="REGI_CODE != null">
+					AND A.INSTT_IDX = (SELECT INSTT_IDX FROM HRD_COM_INSTT WHERE BRFFC_CD=#{REGI_CODE})
+				</if>
+				
+				<if test="INSTT != null">
+					AND A.INSTT_IDX = #{INSTT} 
+				</if>
+
+				<if test="TYPE != null">
+					AND A.CMPTINST_TYPE = #{TYPE} 
+				</if>
+				AND A.USE_YN='Y' AND A.ISDELETE != 1 
+			</where>
+			ORDER BY 
+				CASE 
+					WHEN A.LAST_MODI_DATE IS NOT NULL THEN A.LAST_MODI_DATE 
+					ELSE A.REGI_DATE 
+				END DESC 
+		<include refid="COUNT_BOTTOM" />
+	</select>
+
+	<update id="deleteCmptinst" parameterType="map">
+		UPDATE <include refid="NTWRK_CMPTINST" />
+		SET ISDELETE = 1, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=SYSDATE, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE CMPTINST_IDX IN 
+		<foreach collection="cmptinstIdxs" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="selectCmptinstOne" parameterType="map" resultType="map">
+		SELECT A.*, B.INSTT_NAME 
+		FROM <include refid="NTWRK_CMPTINST" /> A 
+		LEFT JOIN <include refid="COM_INSTT" /> B 
+		ON A.INSTT_IDX = B.INSTT_IDX 
+		<where>
+			A.USE_YN = 'Y' AND A.ISDELETE != 1 AND A.CMPTINST_TYPE = #{type} 
+			AND A.CMPTINST_IDX = #{cmptinstIdx}
+		</where>
+		FETCH FIRST ROW ONLY
+	</select>
+	
+	<insert id="ntwrkDataFileInsert" parameterType="map">
+		<selectKey keyProperty="fleIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_UPLOAD_FILE.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO <include refid="NTWRK_CMPTINST_FILE" /> 
+		(CMPTINST_IDX, FLE_IDX, ITEM_ID, FILE_SAVED_NAME, FILE_ORIGIN_NAME, FILE_SIZE, REPLC_TEXT) 
+		VALUES 
+		(#{cmptinstIdx}, #{fleIdx}, #{itemId}, #{fileSavedName}, #{fileOriginName}, #{fileSize}, #{replcText})
+	</insert>
+	
+	<insert id="insertAgremCorpData" parameterType="map" useGeneratedKeys="true" keyProperty="agremCorpIdx">
+		<selectKey keyProperty="agremCorpIdx" resultType="Integer" order="BEFORE">
+			SELECT SEQ_NTWRK_AGREM_CORP_IDX.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO <include refid="NTWRK_CMPTINST_AGREM_CORP" />
+		(AGREM_CORP_IDX, CMPTINST_IDX, AGREM_NO, BPL_NO, CMPNY_NM, AGREM_YEAR, MBER_ID, AGREM_YN, AGREM_SE, BIZR_NO, AGREM_CNCLS_DE, INSTT_IDX,
+		REGI_IDX, REGI_ID, REGI_NAME, REGI_DATE, REGI_IP)
+		VALUES
+		(#{agremCorpIdx}, #{cmptinstIdx}, #{agremNo}, #{bplNo}, #{cmpnyNm}, #{agremYear}, #{mberId}, #{agremYn}, #{agremSe}, #{bizrNo}, #{agremCnclsDe}, #{insttIdx},
+		#{REGI_IDX}, #{REGI_ID}, #{REGI_NAME}, SYSDATE, #{REGI_IP})
+	</insert>
+	
+	<select id="selectAgremCorpList" parameterType="map" resultType="dataMap">
+		SELECT A.*, B.INSTT_NAME 
+		FROM <include refid="NTWRK_CMPTINST_AGREM_CORP" /> A 
+		LEFT JOIN <include refid="COM_INSTT" /> B 
+		ON A.INSTT_IDX = B.INSTT_IDX  
+		<where>
+			A.CMPTINST_IDX=#{cmptinstIdx} 
+			AND A.ISDELETE != 1 
+		</where>
+	</select>
+	
+	<update id="deleteAgremCorps" parameterType="map">
+		UPDATE <include refid="NTWRK_CMPTINST_AGREM_CORP" />
+		SET ISDELETE = 1, LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=SYSDATE, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE AGREM_CORP_IDX IN 
+		<foreach collection="agremCorpIdxs" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateAgremCorpData" parameterType="map">
+		UPDATE <include refid="NTWRK_CMPTINST_AGREM_CORP" />
+		SET AGREM_NO=#{agremNo}, BPL_NO=#{bplNo}, CMPNY_NM=#{cmpnyNm}, AGREM_YEAR=#{agremYear}, MBER_ID=#{mberId}, AGREM_YN=#{agremYn}, AGREM_SE=#{agremSe}, BIZR_NO=#{bizrNo}, AGREM_CNCLS_DE=#{agremCnclsDe}, INSTT_IDX=#{insttIdx},
+		LAST_MODI_IDX=#{LAST_MODI_IDX}, LAST_MODI_ID=#{LAST_MODI_ID}, LAST_MODI_NAME=#{LAST_MODI_NAME}, LAST_MODI_DATE=SYSDATE, LAST_MODI_IP=#{LAST_MODI_IP} 
+		WHERE AGREM_CORP_IDX=#{agremCorpIdx}
+	</update>
+</mapper>            

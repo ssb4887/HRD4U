@@ -1,0 +1,162 @@
+{
+	"item_info":{
+		"items":{
+		    "name":{
+				"column_id":"REGI_NAME"
+				, "item_name":"작성자"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "agrem_no":{
+				"column_id":"AGREM_NO"
+				, "item_name":"협약번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},  "cncls_date":{
+				"column_id":"CNCLS_DATE"
+				, "item_name":"체결일자"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "maximum":200
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bpl_no":{
+				"column_id":"BPL_NO"
+				, "item_name":"고용보험 관리번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "editor":1
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "status": {
+				"column_id": "STATUS"
+				, "item_name":"상태"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "editor":1
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "bpl_nm": {
+				"column_id": "BPL_NM"
+				, "item_name":"사업장명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "editor":1
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "year": {
+				"column_id": "YEAR"
+				, "item_name":"사업연도"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "editor":1
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "instt_name": {
+				"column_id": "INSTT_NAME"
+				, "item_name":"소속기관"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "editor":1
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}, "end_date": {
+				"column_id": "END_DATE"
+				, "item_name":"완료일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "editor":1
+				, "maximum":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			}
+		}, "list_order":[
+			"agrem_no"
+			, "name"
+			, "bpl_no"
+		]
+		, "view_order":[
+			"name"
+			, "agrem_no"
+			, "bpl_no"
+		]
+		, "write_order":[
+		    "name"
+			, "bpl_no"
+		]
+		, "writeproc_order":[
+			"name"
+			, "bpl_no"
+		]
+		, "modify_order":[
+			"name"
+			, "bpl_no"
+		]
+		, "modifyproc_order":[
+		    "name"
+			, "subject"
+			, "bpl_no"
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "subject":{
+						"column_id":"BPL_NO"
+						, "item_name":"사업장관리번호"
+					},
+					 "contents":{
+						"column_id":"CNCLS_DATE"
+						, "item_name":"체결일자"
+					}
+				}, "select_order":[
+				    "subject"
+					, "cncls_date"
+					, "status"
+				]
+			}, "searchForm_order":[
+				 "keyField"
+			], "search_order":[
+				 "keyField"
+			]
+		}
+	}
+}

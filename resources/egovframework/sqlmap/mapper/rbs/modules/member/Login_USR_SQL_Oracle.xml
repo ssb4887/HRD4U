@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rbs.usr.modules.member.loginMapper">
+
+	<resultMap id="loginVO" type="rbs.egovframework.LoginVO" >
+		<id property="memberIdx" column="MEMBER_IDX" />	
+		<id property="memberId" column="MEMBER_ID"/>
+		<id property="memberPwd" column="MEMBER_PWD"/>
+		<id property="memberName" column="MEMBER_NAME"/>
+		<id property="memberEmail" column="MEMBER_EMAIL"/>
+		<id property="corpNum" column="CORP_NUM"/>
+		<id property="usertypeIdx" column="USERTYPE_IDX"/>
+		<id property="departIdx" column="DEPART_IDX"/>
+		<id property="departIdxs" column="DEPART_IDXS"/>
+		<id property="pwdModiIntv" column="PWD_MODI_INTV"/>
+		<id property="pwdModiIntv2" column="PWD_MODI_INTV2"/>
+		<id property="pwdModiType" column="PWD_MODI_TYPE"/>
+		<id property="loginFail" column="LOGIN_FAIL"/>
+		<id property="clsfCd" column="CLSF_CD"/>
+		<id property="doctorIdx" column="DOCTOR_IDX"/>
+	</resultMap>
+	
+	<select id="login" parameterType="java.util.HashMap" resultMap="loginVO">
+			SELECT * FROM 
+			<include refid="rbs.modules.member.memberTotMapper.VIEW_MEMBER_TABLE_NAME"/> A
+			WHERE A.ISDELETE = '0'
+			AND A.MEMBER_ID = #{memberId}
+			<if test="@com.woowonsoft.egovframework.util.MybatisUtil@isNotEmpty(memberPwd)">
+			AND A.MEMBER_PWD = #{memberPwd}
+			</if>
+			<include refid="rbs.commonMapper.COM_LK_WHERE"/>
+	</select>
+	
+	<!-- <select id="login" parameterType="java.util.HashMap" resultMap="loginVO">
+			SELECT 
+			A.USERID AS MEMBER_IDX
+			, A.LOGINID AS MEMBER_ID
+			, A.PASSWD AS MEMBER_PWD
+			, A.HNAME AS MEMBER_NAME
+			, A.EMAIL AS MEMBER_EMAIL
+			, A.PASS_CNT AS LOGIN_FAIL
+			, (CASE WHEN B.USERID IS NOT NULL AND A.SB_CD = '1000000001' THEN '40' 							 본부 
+				 WHEN B.USERID IS NOT NULL AND A.SB_CD != '1000000001' AND B.EDU_AUTH_GR_CD = 'BR' THEN '30' 소속 기관 													
+				 WHEN C.CORP_NUM IS NOT NULL AND A.EMPNO IS NOT NULL AND E.CENTER_YN = '1' THEN '20'  		 민간센터 
+			     WHEN D.HRP_ID IS NOT NULL THEN '10' 														 컨설턴트
+      			 WHEN A.CORP_NUM != '9999999999' AND A.EMPNO IS NOT NULL AND C.IND_LOCATIONNUM IS NOT NULL THEN '5'	  기업회원
+      			 WHEN A.CORP_NUM != '9999999999' AND A.EMPNO IS NOT NULL THEN '1'	 기업회원(사업장관리번호X)
+			     ELSE '1' END) AS USERTYPE_IDX 																
+			FROM 
+			<include refid="rbs.modules.member.memberTotMapper.HRD4U_MEMBER_TABLE_NAME"/> A
+			LEFT OUTER JOIN 
+			<include refid="rbs.modules.member.memberTotMapper.HRD4U_MEMBERAUTH_TABLE_NAME"/> B
+			ON A.USERID = B.USERID
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.member.memberTotMapper.HRD4U_CORP_TABLE_NAME"/> C
+			ON A.CORP_NUM = C.CORP_NUM
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.member.memberTotMapper.HRD4U_CONSULTANT_TABLE_NAME"/> D
+			ON A.USERID = D.HRP_ID
+			LEFT OUTER JOIN
+			<include refid="rbs.modules.member.memberTotMapper.HRD4U_CENTER_TABLE_NAME"/> E
+			ON A.USERID = E.USERID
+			WHERE A.USEFLAG = 'Y'
+			AND A.LOGINID = #{memberId}
+			<if test="@com.woowonsoft.egovframework.util.MybatisUtil@isNotEmpty(memberPwd)">
+			AND A.PASSWD = #{memberPwd}
+			</if>
+			<include refid="rbs.commonMapper.COM_LK_WHERE"/>
+	</select> -->
+	
+	<!-- <select id="login" parameterType="java.util.HashMap" resultMap="loginVO">
+			SELECT 
+			A.MEMBER_IDX
+			, A.MEMBER_ID
+			, A.MEMBER_PWD
+			, A.MEMBER_NAME
+			, A.MEMBER_EMAIL
+			, A.USERTYPE_IDX
+			, A.DEPART_IDX
+			, FN_RBS_DEPART_DN_PATH_IDXS(',', A.DEPART_IDX) DEPART_IDXS
+			, MONTHS_BETWEEN(ADD_MONTHS(SYSDATE, -3), A.PWD_MODI_DATE) PWD_MODI_INTV
+			, MONTHS_BETWEEN(ADD_MONTHS(SYSDATE, -1), A.PWD_MODI_DATE2) PWD_MODI_INTV2
+			, PWD_MODI_TYPE
+			, LOGIN_FAIL
+			FROM 
+			<include refid="rbs.modules.member.memberTotMapper.MEMBER_TABLE_NAME"/> A 
+			WHERE A.ISDELETE = '0'
+			AND A.MEMBER_STATE = '1' 
+			AND A.MEMBER_ID = #{memberId}
+			<if test="@com.woowonsoft.egovframework.util.MybatisUtil@isNotEmpty(memberPwd)">
+			AND A.MEMBER_PWD = #{memberPwd}
+			</if>
+			<include refid="rbs.commonMapper.COM_LK_WHERE"/>
+	</select> -->
+	
+	<!-- <select id="groupList" parameterType="java.util.HashMap" resultType="java.lang.String">
+			SELECT 
+			A.GROUP_CODE
+			FROM 
+			<include refid="rbs.modules.member.memberTotMapper.MEMBER_GROUP_TABLE_NAME"/> A 
+			WHERE A.MEMBER_IDX = #{memberIdx}
+			<include refid="rbs.commonMapper.COM_LK_WHERE"/>
+	</select> -->
+	
+	<select id="groupList" parameterType="java.util.HashMap" resultType="java.lang.String">
+			SELECT 
+			A.GROUP_CODES
+			FROM 
+			<include refid="rbs.modules.member.memberTotMapper.VIEW_MEMBER_TABLE_NAME"/> A 
+			WHERE A.MEMBER_IDX = #{memberIdx}
+			<include refid="rbs.commonMapper.COM_LK_WHERE"/>
+	</select>
+	
+	<update id="loginUpdate" parameterType="java.util.HashMap">
+		UPDATE <include refid="rbs.modules.member.memberTotMapper.MEMBER_TABLE_NAME"/> SET LOGIN_FAIL = 0, LAST_LOGIN_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	
+	<update id="loginFail" parameterType="java.util.HashMap">
+		UPDATE <include refid="rbs.modules.member.memberTotMapper.MEMBER_TABLE_NAME"/> SET LOGIN_FAIL = LOGIN_FAIL + 1, LAST_LOGIN_FAIL_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>
+		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
+	<select id="getRefreshToken" parameterType="java.lang.String" resultType="map">
+		SELECT userid, token, login_dt
+		FROM hrdportal.thr_logintoken
+		WHERE userid = #{id}
+	</select>
+	<select id="loginSSO" parameterType="java.util.HashMap" resultMap="loginVO">
+			SELECT * FROM 
+			<include refid="rbs.modules.member.memberTotMapper.VIEW_MEMBER_TABLE_NAME"/> A
+			WHERE A.ISDELETE = '0'
+			AND A.MEMBER_ID = #{memberId}
+			<include refid="rbs.commonMapper.COM_LK_WHERE"/>
+	</select>
+	<insert id="setRefreshToken" parameterType="map">
+		MERGE INTO HRDPORTAL.THR_LOGINTOKEN a
+		USING dual
+		ON (a.userid = #{user_id})
+		WHEN MATCHED THEN
+			UPDATE SET TOKEN = #{token}, LOGIN_DT = sysdate
+		WHEN NOT MATCHED THEN
+			INSERT(USERID, TOKEN, LOGIN_DT) 
+			VALUES(#{user_id}, #{token}, sysdate)
+	</insert>
+	
+	<select id="selectRbsAuthMember" parameterType="String" resultType="String">
+		SELECT USERTYPE_IDX
+		FROM RBS_AUTH
+		WHERE 
+        AUTH_IDX = (    
+        SELECT AUTH_IDX 
+        FROM RBS_AUTH_MEMBER 
+        WHERE MEMBER_IDX = #{memberIdx}
+        		AND APPLY_YN = 'Y'
+                AND ISDELETE = 0
+                ORDER BY REGI_DATE DESC FETCH FIRST 1 ROW ONLY
+        )
+	</select>
+	
+	<select id="checkAgree" parameterType="String" resultType="String">
+		SELECT INDVDLINFO_PRVAGR_YN
+		FROM HRD_COM_MEMBER_INDVDLINFO
+		WHERE 
+        MEMBER_IDX = #{memberIdx}
+        AND ISDELETE = 0
+	</select>
+	
+	<select id="checkSabun" parameterType="String" resultType="java.lang.Integer">
+		SELECT COUNT(1) CNT
+		FROM VIEW_HRD_DOCTOR
+		WHERE 
+        MEMBER_IDX = #{memberIdx}
+        AND USERTYPE_IDX = '30'
+	</select>
+	
+	<insert id="agreeInsert" parameterType="java.util.HashMap">
+		 MERGE INTO HRD_COM_MEMBER_INDVDLINFO A
+			USING DUAL
+			ON (A.MEMBER_IDX = #{MEMBER_IDX})
+			WHEN MATCHED THEN
+				UPDATE SET 
+					REGI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/>,
+					ISDELETE = '0'
+					<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
+			WHEN NOT MATCHED THEN
+				INSERT (
+					<include refid="rbs.commonMapper.INSERT_COLUMNS"/>, REGI_DATE, MEMBER_IDX
+				) VALUES (
+					<include refid="rbs.commonMapper.INSERT_VALUES"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>, #{MEMBER_IDX}
+				)
+	</insert>
+</mapper>            

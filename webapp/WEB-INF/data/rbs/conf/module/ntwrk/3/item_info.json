@@ -1,0 +1,259 @@
+{
+	"item_info": {
+		"items": {
+			"cmptinstIdx": {
+				"column_id": "CMPTINST_IDX",
+				"item_name": "관할기관식별색인",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"insttIdx": {
+				"column_id": "INSTT_IDX",
+				"item_name": "기관식별색인",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"cmptinstName": {
+				"column_id": "CMPTINST_NAME",
+				"item_name": "기관명",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"cmptinstType": {
+				"column_id": "CMPTINST_TYPE",
+				"item_name": "관할기관 타입",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"cmptinstReperNm": {
+				"column_id": "CMPTINST_REPER_NM",
+				"item_name": "대표자명",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"cmptinstPicName": {
+				"column_id": "CMPTINST_PIC_NAME",
+				"item_name": "담당자명",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"cmptinstPicTelno": {
+				"column_id": "CMPTINST_PIC_TELNO",
+				"item_name": "담당자 전화번호",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"cmptinstPicEmail": {
+				"column_id": "CMPTINST_PIC_EMAIL",
+				"item_name": "관할기관 담당자 이메일",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"zip": {
+				"column_id": "ZIP",
+				"item_name": "우편번호",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"addr": {
+				"column_id": "ADDR",
+				"item_name": "소재지",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"addrDtl": {
+				"column_id": "ADDR_DTL",
+				"item_name": "상세주소",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"useYn": {
+				"column_id": "USE_YN",
+				"item_name": "사용여부",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"remarks": {
+				"column_id": "REMARKS",
+				"item_name": "우편번호",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"isdelete": {
+				"column_id": "ISDELETE",
+				"item_name": "삭제가부",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			},
+			"insttName": {
+				"column_id": "INSTT_NAME",
+				"item_name": "소속기관",
+				"required_write": 1,
+				"required_modify": 1,
+				"format_type": 0,
+				"object_type": 0,
+				"option_type": 0,
+				"write_type": 0,
+				"modify_type": 0,
+				"default_item": 1
+			}
+		},
+		"list_order": [
+			"cmptinstName",
+			"cmptinstPicName",
+			"cmptinstPicTelno",
+			"addr",
+			"insttName"
+		],
+		"view_order": [
+			"cmptinstName",
+			"cmptinstPicName",
+			"cmptinstPicTelno",
+			"addr",
+			"insttName"
+		],
+		"write_order": [
+			"cmptinstName",
+			"cmptinstPicName",
+			"cmptinstPicTelno",
+			"addr",
+			"insttName"
+		],
+		"writeproc_order": [
+			"cmptinstName",
+			"cmptinstPicName",
+			"cmptinstPicTelno",
+			"addr",
+			"insttName"
+		],
+		"modify_order": [
+			"cmptinstName",
+			"cmptinstPicName",
+			"cmptinstPicTelno",
+			"addr",
+			"insttName"
+		],
+		"modifyproc_order": [
+			"cmptinstName",
+			"cmptinstPicName",
+			"cmptinstPicTelno",
+			"addr",
+			"insttName"
+		],
+		"list_search":{
+			"key" : {
+				"items": {
+					"cmptinstName": {
+						"item_name":"기관명"
+						,"column_id":"CMPTINST_NAME"
+					},
+					"cmptinstPicName": {
+						"item_name":"담당자명"
+						,"column_id":"CMPTINST_PIC_NAME"
+					},
+					"insttIdx": {
+						"item_name":"소속기관"
+						,"column_id":"INSTT_IDX"
+						, "format_type":0
+						, "object_type":2
+						, "option_type":0
+						, "master_code":"ORG_CODE"
+						, "default_item":1
+					}
+				}
+			}, "searchForm_order":[
+				 "cmptinstName",
+				 "cmptinstPicName",
+				 "insttIdx"
+			], "search_order":[
+				 "cmptinstName",
+				 "cmptinstPicName",
+				 "insttIdx"
+			]
+		}
+	}
+}

@@ -1,0 +1,1427 @@
+{
+	"item_info":{
+		"items":{
+		    "bplNo":{
+				"column_id":"BPL_NO"
+				, "item_name":"사업장관리번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			 "prtbizIdx":{
+				"column_id":"PRTBIZ_IDX"
+				, "item_name":"참여가능사업식별색인"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	
+		    "tpDevlopSe":{
+				"column_id":"TP_DEVLOP_SE"
+				, "item_name":"훈련과정개발구분"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "bscIdx":{
+				"column_id":"BSC_IDX"
+				, "item_name":"기초진단지식별색인"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "bscType":{
+				"column_id":"BSC_TYPE"
+				, "item_name":"기초진단지타입"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "trOprtnCtprvnCd":{
+				"column_id":"TR_OPRTN_CTPRVN_CD"
+				, "item_name":"훈련실시시도코드"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"trinsttNm":{
+				"column_id":"TRINSTT_NM"
+				, "item_name":"훈련기관명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	
+		    "sido":{
+				"column_id":"TR_OPRTN_GUGUN_CD"
+				, "item_name":"훈련실시 주소"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":22
+				, "item_type":1
+				, "master_code":"SIDO_SIGUNGU"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			 "tpNm":{
+				"column_id":"TP_NM"
+				, "item_name":"훈련과정명"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"ncsApplyYn":{
+				"column_id":"NCS_APPLY_YN"
+				, "item_name":"NCS적용여부"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 
+ 			"ncsSclasCode":{
+				"column_id":"NCS_SCLAS_CD"
+				, "item_name":"NCS 분류"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":22
+				, "master_code":"NCS_CODE"
+				, "item_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			},			
+		    "tpPicName":{
+				"column_id":"TP_PIC_NAME"
+				, "item_name":"과정담당자명"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 	
+ 			"tpPicTelNo":{
+				"column_id":"TP_PIC_TELNO"
+				, "item_name":"과정담당자 전화번호"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 			 			 			 			 			 			 			 			
+		    "tpPicFaxNo":{
+				"column_id":"TP_PIC_FAX_NO"
+				, "item_name":"과정담당자 팩스번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "tpPicMoblPhon":{
+				"column_id":"TP_PIC_MOBLPHON"
+				, "item_name":"과정담당자 휴대폰"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "tpPicEmail":{
+				"column_id":"TP_PIC_EMAIL"
+				, "item_name":"과정담당자이메일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trBiz":{
+				"column_id":"TR_BIZ"
+				, "item_name":"훈련사업"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trType":{
+				"column_id":"TR_TYPE"
+				, "item_name":"훈련유형"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trMth":{
+				"column_id":"TR_MTH"
+				, "item_name":"훈련방법"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trTrget":{
+				"column_id":"TR_TRGET"
+				, "item_name":"훈련대상"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "legalTrType":{
+				"column_id":"LEGAL_TR_TYPE"
+				, "item_name":"법정훈련타입"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "hghExprtNtcnqCrseType":{
+				"column_id":"HGH_EXPRT_NTCNQ_CRSE_TYPE"
+				, "item_name":"고숙련신기술과정타입"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"trDayCnt":{
+				"column_id":"TR_DAYCNT"
+				, "item_name":"훈련일수"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trTm":{
+				"column_id":"TRTM"
+				, "item_name":"훈련시간"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":0
+				, "required_approve_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			
+		    "clasNmpr":{
+				"column_id":"CLAS_NMPR"
+				, "item_name":"학급정원"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "clasCnt":{
+				"column_id":"CLAS_CNT"
+				, "item_name":"학급수"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"trneeAtabManageMth":{
+				"column_id":"TRNEE_ATAB_MANAGE_MTH"
+				, "item_name":"훈련생출결관리방법"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	
+ 			"trGoal":{
+				"column_id":"TR_GOAL"
+				, "item_name":"훈련목표"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "content_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trSfe":{
+				"column_id":"TR_SFE"
+				, "item_name":"주요 훈련내용"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "content_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+ 			}, 		 			 			 			 			 			 			 			 			
+		    "trnReqm":{
+				"column_id":"TRNREQM"
+				, "item_name":"훈련대상요건"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "content_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+ 			}, 	 		 			 			 			 			 			 			 			
+		    "corpOpinion":{
+				"column_id":"CORP_OPINION"
+				, "item_name":"기업의견"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			 			
+		    "doctorOpinion":{
+				"column_id":"DOCTOR_OPINION"
+				, "item_name":"주치의의견"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			 			
+			  "file":{
+				"column_id":"FILE"
+				, "item_name":"파일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}, "confmStatus":{
+				"column_id":"CONFM_STATUS"
+				, "item_name":"신청상태"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"CONFM_STATUS"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},  
+			"insttIdx":{
+				"column_id":"BRFFC_CD"
+				, "item_name":"지부지사"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"helpSido":{
+				"column_id":"TR_OPRTN_GUGUN_CD"
+				, "item_name":"주소"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":22
+				, "item_type":1
+				, "master_code":"SIDO_SIGUNGU"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "trOprtnBrffcCd":{
+				"column_id":"TR_OPRTN_BRFFC_CD"
+				, "item_name":"훈련실시지부지사코드"
+				, "required_write":1
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "trDty":{
+				"column_id":"TR_DTY"
+				, "item_name":"훈련직무"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":22
+				, "master_code":"NCS_CODE"
+				, "item_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "is_exist":1
+ 			},
+		    "etcDemandMatter":{
+				"column_id":"ETC_DEMAND_MATTER"
+				, "item_name":"기타요구사항"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}
+			
+		}
+		, "list_order":[
+			"helpSido",
+			"trDty"
+		]
+		, "develop_info_column_order":[
+			"helpSido",
+			"trDty"
+		]
+		, "develop_help_insert_column_order":[
+			"helpSido",
+			"trDty"
+		]
+		, "develop_form_column_order":[
+			"tpDevlopSe",
+			"sido",
+			"helpSido",
+			"trDty",
+			"ncsSclasCode",
+			"trSfe",
+			"trGoal",
+			"trnReqm"
+		]
+		, "develop_modify_form_column_order":[
+			"tpDevlopSe",
+			"sido",
+			"helpSido",
+			"ncsSclasCode",
+			"trSfe",
+			"trGoal",
+			"trnReqm",
+			"trDty"
+		]
+		, "develop_insert_column_order":[
+		    "bplNo"
+		]
+		, "develop_write_order":[	 			 			 			 			 			 			
+			"sido",
+			"insttIdx",
+			"tpNm",
+		    "ncsSclasCode",			
+			"tpPicName", 	 			 			 			 			 			 			 			 			
+			"tpPicTelNo", 	 			 			 			 			 			 			 			 			
+			"trDayCnt", 	 			 			 			 			 			 			 			 			
+			"trTm", 	
+			"clasNmpr", 	 			 			 			 			 			 			 			 			
+			"clasCnt", 	 			 			 			 			 			 			 			 			
+			"trGoal", 	 			 			 			 			 			 			 			 			
+			"trSfe", 	 			 			 			 			 			 			 			 			
+			"trnReqm"			 			 			 			 			 			 			 			
+		]
+		, "develop_tp_insert_column_order":[	 			 			 			 			 			 			
+			"prtbizIdx", 			 			 			 			 			 			 			 			
+			"trinsttNm", 
+			"sido",
+			"insttIdx",
+			"tpNm",
+			"ncsApplyYn", 	 			 			 			 			 			 			 			 			
+		    "ncsSclasCode",			
+			"tpPicName", 	 			 			 			 			 			 			 			 			
+			"trBiz", 	 			 			 			 			 			 			 			 			
+			"trType", 	 			 			 			 			 			 			 			 			
+			"trMth", 	 			 			 			 			 			 			 			 			
+			"trTrget", 	 			 			 			 			 			 			 			 			
+			"legalTrType", 	 			 			 			 			 			 			 			 			
+			"hghExprtNtcnqCrseType", 	 			 			 			 			 			 			 			 			
+			"trDayCnt", 	 			 			 			 			 			 			 			 			
+			"trTm", 	
+			"clasNmpr", 	 			 			 			 			 			 			 			 			
+			"clasCnt", 	 			 			 			 			 			 			 			 			
+			"trneeAtabManageMth", 	 			 			 			 			 			 			 			 			
+			"trGoal", 	 			 			 			 			 			 			 			 			
+			"trSfe", 	 			 			 			 			 			 			 			 			
+			"trnReqm"			 			 			 			 			 			 			 			
+		]
+		, "devlop_tp_update_column_order":[
+		    "prtbizIdx", 			 			 			 			 			 			 			 			
+			"trinsttNm", 
+			"sido",
+			"insttIdx",
+			"tpNm",
+			"ncsApplyYn", 	 			 			 			 			 			 			 			 			
+		    "ncsSclasCode",			
+			"tpPicName", 	 			 			 			 			 			 			 			 			
+			"trBiz", 	 			 			 			 			 			 			 			 			
+			"trType", 	 			 			 			 			 			 			 			 			
+			"trMth", 	 			 			 			 			 			 			 			 			
+			"trTrget", 	 			 			 			 			 			 			 			 			
+			"legalTrType", 	 			 			 			 			 			 			 			 			
+			"hghExprtNtcnqCrseType", 	 			 			 			 			 			 			 			 			
+			"trDayCnt", 	 			 			 			 			 			 			 			 			
+			"trTm", 	
+			"clasNmpr", 	 			 			 			 			 			 			 			 			
+			"clasCnt", 	 			 			 			 			 			 			 			 			
+			"trneeAtabManageMth", 	 			 			 			 			 			 			 			 			
+			"trGoal", 	 			 			 			 			 			 			 			 			
+			"trSfe", 	 			 			 			 			 			 			 			 			
+			"trnReqm"	
+		]
+	
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "subject":{
+						"column_id":"SUBJECT"
+						, "item_name":"제목"
+					},
+					 "contents":{
+						"column_id":"CONTENTS"
+						, "item_name":"내용"
+					}
+				}, "select_order":[
+				    "subject"
+					, "contents"
+				]
+			}, "searchForm_order":[
+				 "keyField"
+			], "search_order":[
+				 "keyField"
+			]
+		}
+		, "training_list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "trainingType":{
+						"column_id":"A.TRAINING_TYPE"
+						, "item_name":"훈련방식"
+					}, 
+				 "tpNm":{
+					"column_id":"A.TP_NAME"
+					, "item_name":"훈련명"
+					}
+				}, "select_order":[
+					 "tpNm"
+					, "trainingType"
+				]
+			}, "key":{
+				"items":{
+					"prtbiz":{
+						"column_id":"A.PRTBIZ_IDX"
+						, "item_name":"사업 유형"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"PRTBIZ"
+					}
+					, "ncsLclasCd":{
+						"column_id":"A.NCS_LCLAS_CD"
+						, "item_name":"NCS 대분류"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"NCS_LCLAS_CODE"
+					}, "trtm":{
+						"column_id":"A.TRTM"
+						, "item_name":"훈련시간"
+						, "format_type":50
+						, "object_type":0
+						, "style_width":100
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "prtbiz"
+				 , "ncsLclasCd"
+				 , "trtm"
+			], "search_order":[
+				 "keyField"
+				 , "prtbiz"
+				 , "ncsLclasCd"
+				 , "trtm"
+			]
+		}
+	}, 
+	
+	
+	"developDct_item_info":{
+		"items":{
+		     "bplNo":{
+				"column_id":"BPL_NO"
+				, "item_name":"사업장관리번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			 "prtbizIdx":{
+				"column_id":"PRTBIZ_IDX"
+				, "item_name":"참여가능사업식별색인"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	
+		    "tpDevlopSe":{
+				"column_id":"TP_DEVLOP_SE"
+				, "item_name":"훈련과정개발구분"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "bscIdx":{
+				"column_id":"BSC_IDX"
+				, "item_name":"기초진단지식별색인"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "bscType":{
+				"column_id":"BSC_TYPE"
+				, "item_name":"기초진단지타입"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "trOprtnCtprvnCd":{
+				"column_id":"TR_OPRTN_CTPRVN_CD"
+				, "item_name":"훈련실시시도코드"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"trinsttNm":{
+				"column_id":"TRINSTT_NM"
+				, "item_name":"훈련기관명"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	
+		    "sido":{
+				"column_id":"TR_OPRTN_GUGUN_CD"
+				, "item_name":"훈련실시 주소"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":22
+				, "item_type":1
+				, "master_code":"SIDO_SIGUNGU"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			 "tpNm":{
+				"column_id":"TP_NM"
+				, "item_name":"훈련과정명"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"ncsApplyYn":{
+				"column_id":"NCS_APPLY_YN"
+				, "item_name":"NCS적용여부"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 
+ 			"ncsSclasCode":{
+				"column_id":"NCS_SCLAS_CD"
+				, "item_name":"NCS 분류"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":22
+				, "master_code":"NCS_CODE"
+				, "item_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+			},			
+		    "tpPicName":{
+				"column_id":"TP_PIC_NAME"
+				, "item_name":"과정담당자명"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 	
+ 			"tpPicTelNo":{
+				"column_id":"TP_PIC_TELNO"
+				, "item_name":"과정담당자 전화번호"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 			 			 			 			 			 			 			 			
+		    "tpPicFaxNo":{
+				"column_id":"TP_PIC_FAX_NO"
+				, "item_name":"과정담당자 팩스번호"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "tpPicMoblPhon":{
+				"column_id":"TP_PIC_MOBLPHON"
+				, "item_name":"과정담당자 휴대폰"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "tpPicEmail":{
+				"column_id":"TP_PIC_EMAIL"
+				, "item_name":"과정담당자이메일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trBiz":{
+				"column_id":"TR_BIZ"
+				, "item_name":"훈련사업"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trType":{
+				"column_id":"TR_TYPE"
+				, "item_name":"훈련유형"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trMth":{
+				"column_id":"TR_MTH"
+				, "item_name":"훈련방법"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trTrget":{
+				"column_id":"TR_TRGET"
+				, "item_name":"훈련대상"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "legalTrType":{
+				"column_id":"LEGAL_TR_TYPE"
+				, "item_name":"법정훈련타입"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "hghExprtNtcnqCrseType":{
+				"column_id":"HGH_EXPRT_NTCNQ_CRSE_TYPE"
+				, "item_name":"고숙련신기술과정타입"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"trDayCnt":{
+				"column_id":"TR_DAYCNT"
+				, "item_name":"훈련일수"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trTm":{
+				"column_id":"TRTM"
+				, "item_name":"훈련시간"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":0
+				, "required_approve_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			
+		    "clasNmpr":{
+				"column_id":"CLAS_NMPR"
+				, "item_name":"학급인원"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "clasCnt":{
+				"column_id":"CLAS_CNT"
+				, "item_name":"학급수"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+ 			"trneeAtabManageMth":{
+				"column_id":"TRNEE_ATAB_MANAGE_MTH"
+				, "item_name":"훈련생출결관리방법"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	
+ 			"trGoal":{
+				"column_id":"TR_GOAL"
+				, "item_name":"훈련목표"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "content_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+ 			}, 	 			 			 			 			 			 			 			 			
+		    "trSfe":{
+				"column_id":"TR_SFE"
+				, "item_name":"주요 훈련내용"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "content_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+ 			}, 		 			 			 			 			 			 			 			 			
+		    "trnReqm":{
+				"column_id":"TRNREQM"
+				, "item_name":"훈련대상요건"
+				, "required_write":0
+				, "required_modify":0
+				, "required_approve_write":1
+				, "required_approve_modify":1
+				, "format_type":0
+				, "object_type":1
+				, "content_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "use_list": 1
+				, "use_view": 1
+				, "use_write": 1
+				, "use_modify": 1
+ 			}, 	 		 			 			 			 			 			 			 			
+		    "corpOpinion":{
+				"column_id":"CORP_OPINION"
+				, "item_name":"기업의견"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			 			
+		    "doctorOpinion":{
+				"column_id":"DOCTOR_OPINION"
+				, "item_name":"주치의의견"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}, 	 			 			 			 			 			 			 			 			 			
+			  "file":{
+				"column_id":"FILE"
+				, "item_name":"파일"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":9
+				, "write_type":0
+				, "modify_type":0
+				,"use_setting_id":"use_file"
+				, "default_item":1
+			}, "confmStatus":{
+				"column_id":"CONFM_STATUS"
+				, "item_name":"신청상태"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "master_code":"CONFM_STATUS"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},  
+			"insttIdx":{
+				"column_id":"BRFFC_CD"
+				, "item_name":"지부지사"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":2
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+			},
+			"helpSido":{
+				"column_id":"TR_OPRTN_GUGUN_CD"
+				, "item_name":"주소"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":22
+				, "item_type":1
+				, "master_code":"SIDO_SIGUNGU"
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "trOprtnBrffcCd":{
+				"column_id":"TR_OPRTN_BRFFC_CD"
+				, "item_name":"훈련실시지부지사코드"
+				, "required_write":1
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":0
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			},
+		    "trDty":{
+				"column_id":"TR_DTY"
+				, "item_name":"훈련직무"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":22
+				, "master_code":"NCS_CODE"
+				, "item_type":1
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+				, "is_exist":1
+ 			},
+		    "etcDemandMatter":{
+				"column_id":"ETC_DEMAND_MATTER"
+				, "item_name":"기타요구사항"
+				, "required_write":0
+				, "required_modify":0
+				, "format_type":0
+				, "object_type":1
+				, "option_type":0
+				, "write_type":0
+				, "modify_type":0
+				, "default_item":1
+ 			}
+			
+		}
+		, "list_order":[
+			"sido"
+			, "doctorOpinion"
+		]
+		, "develop_form_column_order":[
+			"tpDevlopSe",
+			"sido",
+			"trDty",
+			"ncsSclasCode",
+			"trSfe",
+			"trGoal",
+			"trnReqm",
+			"doctorOpinion"
+		]
+		, "develop_insert_column_order":[
+		    "bplNo"
+		]
+		, "develop_write_order":[	 			 			 			 			 			 			
+			"sido",
+			"insttIdx",
+			"tpNm",
+		    "ncsSclasCode",			
+			"tpPicName", 	 			 			 			 			 			 			 			 			
+			"tpPicTelNo", 	 			 			 			 			 			 			 			 			
+			"trDayCnt", 	 			 			 			 			 			 			 			 			
+			"trTm", 	
+			"clasNmpr", 	 			 			 			 			 			 			 			 			
+			"clasCnt", 	 			 			 			 			 			 			 			 			
+			"trGoal", 	 			 			 			 			 			 			 			 			
+			"trSfe", 	 			 			 			 			 			 			 			 			
+			"trnReqm"			 			 			 			 			 			 			 			
+		]
+		, "develop_tp_insert_column_order":[	 			 			 			 			 			 			
+			"prtbizIdx", 			 			 			 			 			 			 			 			
+			"trinsttNm", 
+			"sido",
+			"insttIdx",
+			"tpNm",
+			"ncsApplyYn", 	 			 			 			 			 			 			 			 			
+		    "ncsSclasCode",			
+			"tpPicName", 	 			 			 			 			 			 			 			 			
+			"trBiz", 	 			 			 			 			 			 			 			 			
+			"trType", 	 			 			 			 			 			 			 			 			
+			"trMth", 	 			 			 			 			 			 			 			 			
+			"trTrget", 	 			 			 			 			 			 			 			 			
+			"legalTrType", 	 			 			 			 			 			 			 			 			
+			"hghExprtNtcnqCrseType", 	 			 			 			 			 			 			 			 			
+			"trDayCnt", 	 			 			 			 			 			 			 			 			
+			"trTm", 	
+			"clasNmpr", 	 			 			 			 			 			 			 			 			
+			"clasCnt", 	 			 			 			 			 			 			 			 			
+			"trneeAtabManageMth", 	 			 			 			 			 			 			 			 			
+			"trGoal", 	 			 			 			 			 			 			 			 			
+			"trSfe", 	 			 			 			 			 			 			 			 			
+			"trnReqm"		 			 			 			 			 			 			 			
+		]
+		, "devlop_update_column_order":[
+		    "trOprtnCtprvnCd",
+			"sido",
+			"trOprtnBrffcCd",
+			"trDty",
+			"etcDemandMatter"
+		]
+		, "develop_modify_form_column_order":[
+			"tpDevlopSe",
+			"sido",
+			"ncsSclasCode",
+			"trSfe",
+			"trGoal",
+			"trnReqm",
+			"trDty"
+		]
+		, "devlop_tp_update_column_order":[
+		    "prtbizIdx", 			 			 			 			 			 			 			 			
+			"trinsttNm", 
+			"sido",
+			"insttIdx",
+			"tpNm",
+			"ncsApplyYn", 	 			 			 			 			 			 			 			 			
+		    "ncsSclasCode",			
+			"tpPicName", 	 			 			 			 			 			 			 			 			
+			"trBiz", 	 			 			 			 			 			 			 			 			
+			"trType", 	 			 			 			 			 			 			 			 			
+			"trMth", 	 			 			 			 			 			 			 			 			
+			"trTrget", 	 			 			 			 			 			 			 			 			
+			"legalTrType", 	 			 			 			 			 			 			 			 			
+			"hghExprtNtcnqCrseType", 	 			 			 			 			 			 			 			 			
+			"trDayCnt", 	 			 			 			 			 			 			 			 			
+			"trTm", 	
+			"clasNmpr", 	 			 			 			 			 			 			 			 			
+			"clasCnt", 	 			 			 			 			 			 			 			 			
+			"trneeAtabManageMth", 	 			 			 			 			 			 			 			 			
+			"trGoal", 	 			 			 			 			 			 			 			 			
+			"trSfe", 	 			 			 			 			 			 			 			 			
+			"trnReqm"		
+		]
+		, "list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "bplNo":{
+						"column_id":"A.BPL_NO"
+						, "item_name":"사업장관리번호"
+						, "use_full_value":1 
+					}, 
+				 "bplNm":{
+						"column_id":"(SELECT BPL_NM FROM HRD_BSK WHERE BPL_NO = A.BPL_NO)"
+						, "item_name":"기업명"
+					},
+				 "tpNm":{
+					"column_id":"B.TP_NM"
+					, "item_name":"훈련명"
+					}
+				}, "select_order":[
+				    "bplNo"
+					, "bplNm"
+					, "tpNm"
+				]
+			}, "key":{
+				"items":{
+					"prtbiz":{
+						"column_id":"B.PRTBIZ_IDX"
+						, "item_name":"사업 유형"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"PRTBIZ"
+					}
+					, "ncsLclasCd":{
+						"column_id":"(SELECT CLASS_IDX FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = (SELECT GROUP_CLASS_IDX FROM RBS_ICLASS_INFO WHERE MASTER_CODE = 'NCS_CODE' AND CLASS_IDX = B.NCS_SCLAS_CD))"
+						, "item_name":"NCS 대분류"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"NCS_LCLAS_CODE"
+					}
+					, "confmStatus":{
+						"column_id":"A.CONFM_STATUS"
+						, "item_name":"상태"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"CONFM_STATUS"
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "prtbiz"
+				 , "ncsLclasCd"
+				 , "confmStatus"
+			], "search_order":[
+				 "keyField"
+				 , "prtbiz"
+				 , "ncsLclasCd"
+				 , "confmStatus"
+			]
+		}
+		, "training_list_search":{
+			"keyField":{
+				"query_name":"key"
+				, "select_name":"keyField"
+				, "items":{
+				 "trainingType":{
+						"column_id":"A.TRAINING_TYPE"
+						, "item_name":"훈련방식"
+					}, 
+				 "tpNm":{
+					"column_id":"A.TP_NAME"
+					, "item_name":"훈련명"
+					}
+				}, "select_order":[
+					 "tpNm"
+					, "trainingType"
+				]
+			}, "key":{
+				"items":{
+					"prtbiz":{
+						"column_id":"A.PRTBIZ_IDX"
+						, "item_name":"사업 유형"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"PRTBIZ"
+					}
+					, "ncsLclasCd":{
+						"column_id":"A.NCS_LCLAS_CD"
+						, "item_name":"NCS 대분류"
+						, "format_type":0
+						, "object_type":2
+						, "style_width":100
+						, "master_code":"NCS_LCLAS_CODE"
+					}
+					, "trtm":{
+						"column_id":"A.TRTM"
+						, "item_name":"훈련시간"
+						, "format_type":50
+						, "object_type":0
+						, "style_width":100
+					}
+				}
+			}, "searchForm_order":[
+				 "keyField"
+				 , "prtbiz"
+				 , "ncsLclasCd"
+				 , "trtm"
+			], "search_order":[
+				 "keyField"
+				 , "prtbiz"
+				 , "ncsLclasCd"
+				 , "trtm"
+			]
+		}
+
+	}
+	
+}

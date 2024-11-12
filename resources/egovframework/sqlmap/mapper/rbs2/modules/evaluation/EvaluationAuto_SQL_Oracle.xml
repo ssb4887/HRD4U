@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rbs.modules.evaluation.evaluationAutoMapper">
+	<!-- 테이블명 -->
+	<sql id="CONF_TABLE_NAME">
+		<trim>TB_EXPL_CONF</trim>
+	</sql>
+	<sql id="BUSIN_TABLE_NAME">
+		<trim>THR_BUSIN_MANAGER</trim>
+	</sql>
+	<sql id="HRP_TABLE_NAME">
+		<trim>TB_HRP</trim>
+	</sql>
+	<sql id="ENTRST_TABLE_NAME">
+		<trim>TB_HRP_ENTRST_ROLE</trim>
+	</sql>
+	
+	<insert id="insertExpert" parameterType="java.util.HashMap">
+		INSERT INTO TB_EXPL_CONF (
+			YYYY, TITLE, CHRGR_NM, CHRGR_TEL, DEL_YN, FIRST_ID, IND_NM, IND_SEL, IND_CHKER, 
+			BIZ_CODE, DEPT, CONT_SEQ ,BIZ_SECRET, FIRST_DTM, EXPL_CONT, CERT_HRP_CHK
+		) VALUES(
+			#{yyyy}, #{title}, #{chrgrNm}, #{chrgrTel}, #{delYn}, #{firstId}, #{indNm}, #{indSel}, #{indChker}, 
+			#{bizCode}, #{dept}, 
+			<![CDATA[
+			(SELECT NVL(MAX(CONT_SEQ),0)+1 FROM TB_EXPL_CONF), 
+			]]>
+			#{bizSecret}, SYSDATE, #{explCont}, #{certHrpChk}
+		)
+	</insert>
+	
+	<insert id="insertBusin" parameterType="java.util.HashMap">
+		INSERT INTO THR_BUSIN_MANAGER (
+			POST_SEQ,
+			YYYY,
+			TITLE, 
+			CHRGR_NM,
+			RECEIPT_SDATE,
+			RECEIPT_EDATE,
+			CONTENTS,
+			IND_NM,
+			IND_SEL,
+			IND_CHKER,
+			EX_TIME_1,
+			EX_TIME_2,
+			BIZ_CODE,
+			BIZ_DEPT,
+			DELYN, 
+			FIRST_ID,
+			FIRST_DTM,
+			AUDIT_ID,
+			AUDIT_DTM,
+			CHRGR_TEL,
+			BIZ_LOCATION,
+			BIZ_SECRET,
+			CONT_SEQ
+		) VALUES (
+		<![CDATA[
+			(SELECT NVL(MAX(POST_SEQ),0)+1 FROM THR_BUSIN_MANAGER),
+		]]>
+			#{yyyy},
+			#{title},
+			#{chrgrNm},
+			#{receiptSdate},
+			#{receiptEdate},
+			#{contents},
+			#{indNm},
+			#{indSel},
+			#{indChker},
+			#{exTime1},
+			#{exTime2},
+			#{bizCode},
+			#{dept},
+			#{delYn},
+			#{firstId},
+			SYSDATE,
+			#{firstId},
+			SYSDATE,
+			#{chrgrTel},
+			#{bizLocation},
+			#{bizSecret},
+		<![CDATA[
+			(SELECT NVL(MAX(CONT_SEQ),0) FROM THR_BUSIN_MANAGER)
+		]]>
+		)
+	</insert>
+	
+	<insert id="insertEntrst" parameterType="java.util.HashMap">
+		INSERT INTO TB_HRP_ENTRST_ROLE (
+			HRP_ID,
+			ENTRST_ROLE_CD,
+			SORT_SN, 
+			REGIST_DT,
+			REGTR_ID,
+			REGIST_IP,
+			POST_SEQ,
+			ENTRST_ROLE_STTUS_CD,
+			FROM_DATE,
+			TO_DATE,
+			FROM_TIME,
+			TO_TIME,
+			IND_NM,
+			BIZ_DEPT,
+			CHRGR_NM,
+			HRP_RESPONE,
+			HRP_OJT,
+			HRP_POOLDIV,
+			IND_SUB
+		) VALUES (
+			#{hrpId},
+			#{entrstRoleCd},
+			#{sortSn},
+			SYSDATE,
+			#{firstId},
+			#{registIp},
+			<![CDATA[
+				(SELECT NVL(MAX(POST_SEQ),0) FROM THR_BUSIN_MANAGER),
+			]]>
+			#{entrstRoleSttusCd},
+			#{receiptSdate},
+			#{receiptEdate},
+			#{exTime1},
+			#{exTime2},
+			#{bizCode},
+			#{dept},
+			#{chrgrNm},
+			#{hrpRespone},
+			#{hrpOjt},
+			#{hrpPooldiv},
+			#{indSub}
+		)
+	</insert>
+	
+	<update id="update4uEntrst" parameterType="java.util.HashMap">
+		UPDATE TB_HRP_ENTRST_ROLE
+			SET
+			ROLE_CD = #{actRoleCd},
+			ACTIVE_DAY = #{actDaycnt},
+			ACTIVE_DATE = #{actDe},
+			REG_RATE_DT = SYSDATE,
+			RATE_1 = #{evlItem1},
+			RATE_2 = #{evlItem2},
+			RATE_3 = #{evlItem3},
+			RATE_4 = #{evlItem4},
+			RATE_5 = #{evlItem5},
+			TOTAL_RATE = #{evlTotPoint},
+			GRAGE = #{evlGrad},
+			GRADE_ETC = #{gnrlzOpinion},
+			SUDANG = #{allwnc}
+			WHERE POST_SEQ = #{postSeq}
+	</update>
+	
+</mapper>            

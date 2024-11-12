@@ -1,0 +1,16 @@
+{
+   "setting_info":{
+      "list_title":"네트워크 이력 목록",
+      "input_title":"네트워크 이력 추가",
+      "deleteList_title":"네트워크 이력 삭제",
+      "dset_list_block":10,
+      "dset_list_count":20,
+      "use_paging":1,
+      "page_name":"page",
+      "idx_name":"ntwrkIdx",
+      "idx_column":"NTWRK_IDX",
+      "design":"network",
+      "use_file":1,
+      "use_new":1
+   }
+}
